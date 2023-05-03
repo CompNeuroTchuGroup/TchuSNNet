@@ -171,13 +171,13 @@ void HeteroCurrentSynapse::SaveParameters(std::ofstream * stream, std::string id
 
     *stream << id_str << "target_branch\t\t\t\t\t";
     if (this->synapseTargeting.randomTargetBranch){
-        *stream<<"random\n"; //Missing comments on what this is supposed to do
+        *stream<<"random"; //Missing comments on what this is supposed to do
     } else if(this->synapseTargeting.setTargetBranch){
         *stream<<std::to_string(this->synapseTargeting.targetBranch)<<"\n";//Missing comments on what this is supposed to do
     }else if(this->synapseTargeting.orderedTargetBranch){
-       *stream<<"ordered\n";
+       *stream<<"ordered";
     } else {
-        *stream<<"none\n";//Missing comments on what this is supposed to do
+        *stream<<"none";//Missing comments on what this is supposed to do
     }
     *stream << "#\t\tYou can target branches in an 'ordered' manner (0,1,2...), 'random', or set (if you input a number). Put none if the HS does not used branched morphology\n";
     

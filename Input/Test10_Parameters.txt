@@ -25,6 +25,21 @@ neurons_generalNeuronSeed             0
 #generalNeuronSeed = -1: seeds are defined at individual population level.
 #generalNeuronSeed >= 0: general seed overrides individual seeds.
 #***********************************************
+neurons_1_noNeurons                       80
+neurons_1_type                            PoissonNeuron
+neurons_1_seedPoisson				312331233
+neurons_1_tauM                            0.020000 seconds #This is the time constant of decay of the membrane potential
+neurons_1_vReset                          10.000000 mV     #This is the voltage that is set for the neuron after an AP
+neurons_1_vThresh                         20.000000 mV     #Potential necessary for a spike
+neurons_1_refractoryTime                  0.002000 seconds #Time of no firing, but because of implementation, membrane potential is also frozen (no decay, no input)
+neurons_1_seedInitialPotentials           978382936
+neurons_1_seedInitialPrevSpike            2029044002
+#		Note: Resting potential is 0 by definition.
+neurons_1_resetType                   0
+#		LIF neuron: dV/dt = -V/tau_m + RI/tau_m 
+#		resetType 0: v = v_reset
+#		resetType 1: v = v_reset + (v - v_thresh) 
+#***********************************************
 neurons_0_noNeurons                       1
 neurons_0_type                            HeteroLIFNeuron
 neurons_0_morphology_type				MonoDendriteSTDPBiWindow
@@ -56,22 +71,6 @@ neurons_0_beta_ltd                        2.5		     #used in aLTD, multiplied in
 neurons_0_pre_factor_ltd			??		     #Base factor that is multiplied by the spatio-temporal effects in LTD. If set to zero, LTD will be zero
 neurons_0_base_ltd				1.0		     #Default increase per check
 neurons_0_decr_ltd				1.0		     #Base that multiplies sth
-#***********************************************
-neurons_1_noNeurons                       80
-neurons_1_type                            PoissonNeuron
-neurons_1_seedPoisson				312331233
-neurons_1_tauM                            0.020000 seconds #This is the time constant of decay of the membrane potential
-neurons_1_vReset                          10.000000 mV     #This is the voltage that is set for the neuron after an AP
-neurons_1_vThresh                         20.000000 mV     #Potential necessary for a spike
-neurons_1_refractoryTime                  0.002000 seconds #Time of no firing, but because of implementation, membrane potential is also frozen (no decay, no input)
-neurons_1_seedInitialPotentials           978382936
-neurons_1_seedInitialPrevSpike            2029044002
-#		Note: Resting potential is 0 by definition.
-neurons_1_resetType                   0
-#		LIF neuron: dV/dt = -V/tau_m + RI/tau_m 
-#		resetType 0: v = v_reset
-#		resetType 1: v = v_reset + (v - v_thresh) 
-
 #**************************************************
 #************** Stimulus Parameters ***************
 #**************************************************
@@ -145,9 +144,9 @@ synapses_1_1_connectivity_ConnectionProba	1.000000
 synapses_1_1_connectivity_seed				978382936
 #		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
 
-iterate_1 neurons_0_pre_factor_ltd 0.2 0.235 0.275 0.305 0.325
-iterate_2 neurons_0_alpha_ltp 0.1 1.0
-iterate_2 neurons_0_beta_ltd 0.25 2.5
+iterate_2 neurons_0_pre_factor_ltd 0.2 0.235 0.275 0.305 0.325
+iterate_1 neurons_0_alpha_ltp 0.1 1.0
+iterate_1 neurons_0_beta_ltd 0.25 2.5
 #*****************************************************************
 #Comp. finalized: Wed Oct 14 12:12:46 2020
 #Comp. time: 181.1 secs.
