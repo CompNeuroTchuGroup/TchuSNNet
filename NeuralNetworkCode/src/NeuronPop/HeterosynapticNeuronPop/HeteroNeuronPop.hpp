@@ -57,7 +57,7 @@ public:
     bool HasHeterosynapticPlasticity() override {return true;}
     bool IsBranchedBool() override {return isBranched;}
 
-
+    unsigned long GetNumberOfSynapses() const override {return morphology.size();}
     // Testing, check the purpose of this
     //friend std::vector<unsigned long> getSpikedSynapses(const HeteroNeuronPop&, unsigned long neuronId); //currently not in use
 

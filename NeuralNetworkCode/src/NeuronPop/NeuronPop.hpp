@@ -90,6 +90,7 @@ public:
     //Dyn_casting optimization methods
     virtual bool HasHeterosynapticPlasticity(){return false;}
     virtual bool IsBranchedBool() {return false;}
+    virtual unsigned long GetNumberOfSynapses() const {return 0;}// This is purely for virtualization reasons
     //All of the following functions throw to ease the virtualization, but it is a bad coding practice
 
     virtual void RecordExcitatorySynapticSpike(unsigned long neuronId, unsigned long synapseId);

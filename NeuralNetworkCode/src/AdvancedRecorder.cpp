@@ -180,6 +180,9 @@ void AdvancedRecorder::SetNoRasterplotNeurons(std::vector<std::string> *values){
 void AdvancedRecorder::SetNoTrackHeteroSynapseProfilesPerTrackedNeuronPerPop(std::vector<std::string> *values) {
     int P = static_cast<int>(neurons->GetTotalPopulations());
     for(int i = 0; i < min_(P,static_cast<int>(values->size()));i++){//min() only makes sense if you remove the hash
+        if((noTrackHeteroSynapsePerTrackedNeuron[i]  > neurons->GetPop(i)->GetNumberOfSynapses()) || (noTrackHeteroSynapsePerTrackedNeuron[i] < 0)){
+                noTrackHeteroSynapsePerTrackedNeuron[i]=neurons->GetPop(i)->GetNumberOfSynapses();
+        }
         noTrackHeteroSynapsePerTrackedNeuron[i] = std::stoi(values->at(i));
     }
     if (values->size() > P) {//This requires an extra number to record??
@@ -187,7 +190,7 @@ void AdvancedRecorder::SetNoTrackHeteroSynapseProfilesPerTrackedNeuronPerPop(std
             this->heteroRecordingPerSteps = std::stoul(values->at(P));
         } catch (...) {
         }
-    }
+    } //else heteroRecordingPerSteps is 1
 }
 
 
