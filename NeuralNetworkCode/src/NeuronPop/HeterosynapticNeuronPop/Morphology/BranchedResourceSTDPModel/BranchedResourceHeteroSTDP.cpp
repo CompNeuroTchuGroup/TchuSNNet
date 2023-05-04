@@ -322,7 +322,7 @@ void BranchedResourceHeteroSTDP::RecalcAlphaSums(RBranchPtr& branch)
 {
     RecalcAlphas(branch);
     branch->alphaTotalSum=std::accumulate(branch->resouceBranchSynapseData.begin(), branch->resouceBranchSynapseData.end(), 0.0,//UNRESOLVED, does this give intended output?
-        [](double acc, const ResourceSpinePtr& synapse) {if (synapse != nullptr) { return acc + synapse->GetAlphaResources(); }});
+        [](double acc, const ResourceSpinePtr& synapse) {if (synapse != nullptr) { return acc + synapse->GetAlphaResources(); } else {return acc;}});
     return;
 }
 void BranchedResourceHeteroSTDP::DeleteEffects()
