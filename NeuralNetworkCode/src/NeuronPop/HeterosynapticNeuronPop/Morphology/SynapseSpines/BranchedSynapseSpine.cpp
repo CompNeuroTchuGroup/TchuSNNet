@@ -19,7 +19,7 @@ std::string BranchedSynapseSpine::GetIndividualSynapticProfileHeaderInfo() const
     return std::string("{<dist to branch node>, <branch ID>, <weight>, <last spike>}");
 }
 
-bool BranchIDCompare(const BranchedSpinePtr &spine1, const BranchedSpinePtr &spine2)
-{
-    return (spine1->branchPositionId<spine2->branchPositionId);
-}
+// bool BranchIDCompare(const BranchedSpinePtr &spine1, const BranchedSpinePtr &spine2)
+// {
+//     return (spine1->branchPositionId<spine2->branchPositionId);
+// }

@@ -274,6 +274,6 @@ void BranchedMorphology::PostConnectSetUp()
     //Here we do all the function calls that could not be done in the constructor/LP. 
     //This is done to adapt to the fact that synapses do not exist until ConnectNeurons() is called in the NeuralNetwork::Simulate() function.
     for (BranchPtr branch: branches){
-        branch->postConnectSetUp(branchedSynapseData);
+        branch->PostConnectSetUp(branchedSynapseData);
     }
 }

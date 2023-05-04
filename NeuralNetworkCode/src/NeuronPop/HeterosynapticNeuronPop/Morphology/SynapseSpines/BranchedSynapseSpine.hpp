@@ -32,9 +32,9 @@ class BranchedSynapseSpine : public BaseSynapseSpine {
     std::valarray<double> GetIndividualSynapticProfile() const override;
     std::string GetIndividualSynapticProfileHeaderInfo() const override;
     //Friend functions
-    friend bool BranchIDCompare (const BranchedSpinePtr& spine1, const BranchedSpinePtr& spine2);
+    //friend bool BranchIDCompare (const BranchedSpinePtr& spine1, const BranchedSpinePtr& spine2);
 };
 
-bool BranchIDCompare (const BranchedSpinePtr& spine1, const BranchedSpinePtr& spine2);
+//bool BranchIDCompare (const BranchedSpinePtr& spine1, const BranchedSpinePtr& spine2);
 
 #endif

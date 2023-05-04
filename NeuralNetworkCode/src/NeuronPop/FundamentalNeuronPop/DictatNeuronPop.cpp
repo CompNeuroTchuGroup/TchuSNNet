@@ -101,11 +101,16 @@ void DictatNeuronPop::ReadInstructionsFromFile()
             delete[] entry;
             entry = new char[2048];
             continue;
-        } else if (entry[0] == '>'){
-            FileEntry s_entry {std::move(stringToFileEntry(std::move(static_cast<std::string>(entry))))};
-            inputInstructions.at(std::stoi(s_entry.values.at(0))).emplace_back(Instruction(std::stoi(s_entry.values.at(0)),std::stod(s_entry.values.at(1)), std::stod(s_entry.values.at(2)), std::stod(s_entry.values.at(3)), info->dt));
+        }
+        else if (entry[0] == '>') {
+            FileEntry s_entry{ std::move(stringToFileEntry(std::move(static_cast<std::string>(entry)))) };
+            inputInstructions.at(std::stoi(s_entry.values.at(0))).emplace_back(Instruction(std::stoi(s_entry.values.at(0)), std::stod(s_entry.values.at(1)), std::stod(s_entry.values.at(2)), std::stod(s_entry.values.at(3)), info->dt));
             delete[] entry;
             entry = new char[2048];
+        } else if (entry[0] == ' ' || entry[0] == '\n') {
+            delete[] entry;
+            entry = new char[2048];
+            continue;
         } else {
             std::cout<<"Reading error. The unexpected read input was: "<< entry <<"\n";
             throw;

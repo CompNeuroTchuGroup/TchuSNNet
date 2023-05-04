@@ -155,7 +155,7 @@ void HeteroCurrentSynapse::LoadParameters(std::vector<std::string> *input){
             }else if (values.at(0).find("ordered") != std::string::npos){
                 this->synapseTargeting.orderedTargetBranch=true;
             } else {
-            this->synapseTargeting.targetBranch = std::stoi(values.at(1));
+            this->synapseTargeting.targetBranch = std::stoi(values.at(0));
             this->synapseTargeting.setTargetBranch=true;
             //Missing exception management for when the input is not an integer.
             }

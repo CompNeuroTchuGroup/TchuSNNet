@@ -45,6 +45,9 @@ void ResourceSynapseSpine::AddTempResourcesToSpine(double alphaStimmulusInput)
 
 bool ResourceSynapseSpine::ApplyAllTemporaryEffectsOnPostspike(const DHashMap& STDPdecayMap)
 {
+    if (this == nullptr) {
+        return false;
+    }
     // kStimmulus=std::accumulate(kStimmulusTempEffect.begin(), kStimmulusTempEffect.end(), kStimmulus, [PotentiationDepressionRatio](double accumulator, double kStemp){return accumulator + kStemp*PotentiationDepressionRatio;});
     // nStimmulus=std::accumulate(nStimmulusTempEffect.begin(), nStimmulusTempEffect.end(), nStimmulus, [PotentiationDepressionRatio](double accumulator, double nStemp){return accumulator + nStemp*PotentiationDepressionRatio;});
     // kStimmulusTempEffect.clear();
@@ -72,6 +75,9 @@ bool ResourceSynapseSpine::ApplyAllTemporaryEffectsOnPostspike(const DHashMap& S
 
 bool ResourceSynapseSpine::ApplyAllTemporaryEffectsOnDepression(double expDecayFactor)
 {
+    if (this == nullptr) {
+        return false;
+    }
     //This is because depression updates instantly, so there is no need to source the decayHashMap for the factor as it will be identical for all changes 
     alphaStimmulus=std::accumulate(depressionAlphaTempAndCount.begin(), depressionAlphaTempAndCount.end(), alphaStimmulus, [expDecayFactor](double accumulator, double alphaStemp){return accumulator - alphaStemp*expDecayFactor;});
     //This is to avoid transition into negative weights through LTD. Also, for a single time-step the weight will be zero.

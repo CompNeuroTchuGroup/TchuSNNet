@@ -152,7 +152,7 @@ void BranchedResourceHeteroSTDP::ApplyEffects() //Called after pairings
         
         for (RBranchPtr& branch : resourceBranches){
             for (ResourceSpinePtr& synapse : branch->resouceBranchSynapseData){
-                if(synapse->ApplyAllTempEffectsOnPostspike(DecayHashTableSTDP)){
+                if(synapse->ApplyAllTemporaryEffectsOnPostspike(DecayHashTableSTDP)){
                     branch->IncreasePotentiationCount();
                     totalPlasticityEvents++;
                     totalLTPEvents++;
@@ -172,7 +172,7 @@ void BranchedResourceHeteroSTDP::ApplyEffects() //Called after pairings
                     //Decay STDP but expressed as a negative number
                 if (synapse->GetUpdatedFlag()){
                     continue;
-                } else if (synapse->ApplyAllTempEffectsOnDepression(expDecayFactorSTDP)){
+                } else if (synapse->ApplyAllTemporaryEffectsOnDepression(expDecayFactorSTDP)){
                     branch->IncreaseDepressionCount();
                     totalPlasticityEvents++;
                     totalLTDEvents++;
@@ -224,10 +224,17 @@ void BranchedResourceHeteroSTDP::SpaceTimeKernel(int branchSynapseID, int branch
         alphaStimmulusEffect = baseAlphaStimmulusBump;
         if (synapsePositionIndexInBranch<0){//Condition to aboid illegal indexing (correct me if you dare)
             continue;
-        } else if (synapsePositionIndexInBranch>=branchSlots){//Condition to aboid illegal indexing (correct me if you dare)
+        } else if (synapsePositionIndexInBranch >= branchSlots) {//Condition to aboid illegal indexing (correct me if you dare)
             break;
+        } else if (synapsePositionIndexInBranch == branchSynapseID){
+            centralSynapseSpine->AddTempResourcesToSpine(alphaStimmulusEffect);
+            updatedAlphaEffects.push_back(branchSynapseID);
+            continue;//This essentially avoids homo-STDP
         } else {
             ResourceSpinePtr& candidateSynapseSpine = currentBranch->resouceBranchSynapseData.at(synapsePositionIndexInBranch);
+            if (candidateSynapseSpine == nullptr) {
+                continue;
+            }
             absDistance = std::abs(gapIndex);
             timeStepDifference=currentBranch->triggerCount.at(synapsePositionIndexInBranch);
             //timeStepDifference == triggerCount of first spine
@@ -291,8 +298,10 @@ void BranchedResourceHeteroSTDP::Reset()
 void BranchedResourceHeteroSTDP::RecalcAlphas(RBranchPtr& branch)
 {
     //Here we just need to apply all delta alphas, decay them (before makes more sense, the bump has delta t zero.), sum the result to stationary alpha, then update alpha sums? Yes
-    for (ResourceSpinePtr& synapse : branch->resouceBranchSynapseData){
-        synapse->RecalculateAlphaResources();
+    for (ResourceSpinePtr& synapse : branch->resouceBranchSynapseData) {
+        if (synapse != nullptr) {
+            synapse->RecalculateAlphaResources();
+        }
     }
     return;
 }
@@ -302,7 +311,9 @@ void BranchedResourceHeteroSTDP::RecalcWeights(RBranchPtr& branch) //This one is
     RecalcAlphaSums(branch);
     branch->weightResourceFactor=betaResourcePool/(omegaPassiveResourceOffset+branch->alphaTotalSum);//IMPORTANT, if we make beta non-constant, beta must be referenced from the branch
     for (ResourceSpinePtr& synapse : branch->resouceBranchSynapseData){
-        synapse->RecalcWeight(branch->weightResourceFactor);
+        if (synapse != nullptr) {
+            synapse->RecalcWeight(branch->weightResourceFactor);
+        }
     }
     return;
 }
@@ -311,7 +322,7 @@ void BranchedResourceHeteroSTDP::RecalcAlphaSums(RBranchPtr& branch)
 {
     RecalcAlphas(branch);
     branch->alphaTotalSum=std::accumulate(branch->resouceBranchSynapseData.begin(), branch->resouceBranchSynapseData.end(), 0.0,//UNRESOLVED, does this give intended output?
-                                       [] (double acc, const ResourceSpinePtr& synapse) {return acc + synapse->GetAlphaResources();});
+        [](double acc, const ResourceSpinePtr& synapse) {if (synapse != nullptr) { return acc + synapse->GetAlphaResources(); }});
     return;
 }
 void BranchedResourceHeteroSTDP::DeleteEffects()

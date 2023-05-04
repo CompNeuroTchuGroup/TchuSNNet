@@ -52,7 +52,7 @@ struct Branch{
     //Methods
     //Branch()=default;
     Branch(double gap, double branchLength, std::vector<int> anteriorBranches, int branchId);
-    virtual void postConnectSetUp(std::vector<BranchedSpinePtr> synapseData);
+    virtual void PostConnectSetUp(std::vector<BranchedSpinePtr> synapseData);
     //virtual void IncreasePlasticityCounter(){plasticityBranchEventsTotal++;}
     void IncreasePotentiationCount(){LTPevents++;}
     void IncreaseDepressionCount(){LTDevents++;}
@@ -85,7 +85,7 @@ struct ResourceBranch : public Branch {
         //Here we could create a false history of plasticity events
     //Methods
     ResourceBranch(double gap, double branchLength, std::vector<int>anteriorBranches, int branchId, int triggerMaxCount);
-    void postConnectSetUp(std::vector<BranchedSpinePtr> synapseData) override;
+    void PostConnectSetUp(std::vector<BranchedSpinePtr> synapseData) override;
     void SetUpSynapseData(std::vector<BranchedSpinePtr> synapseData);
         //Count related functions
     void TickAllCounts();//Use ternary operator. Called in Reset()

@@ -12,7 +12,7 @@ Branch::Branch(double gap, double branchLength, std::vector<int> anteriorBranche
     //Constructor
 }
 
-void Branch::postConnectSetUp(std::vector<BranchedSpinePtr> SynapseData)
+void Branch::PostConnectSetUp(std::vector<BranchedSpinePtr> SynapseData)
 {
     //Here we do all the function calls that could not be done in the constructor. 
     //This is done to adapt to the fact that synapses do not exist until ConnectNeurons() is called in the NeuralNetwork::Simulate() function.
@@ -23,8 +23,9 @@ ResourceBranch::ResourceBranch(double gap, double branchLength, std::vector<int>
 Branch(gap, branchLength, anteriorBranches, branchId), triggerCount(branchSlots, triggerMaxCount)//, potentiationCountSTDP(branchSlots, 10)//, maxCountSTDPPotentiation{branchMaxCountSTDPPotentiation}//, maxCountTrigger{branchMaxCountTrigger}//, plasticityEventsPerTimestepWindow(betaEventsWindowSize)
 {
     //Constructor
+    resouceBranchSynapseData= std::vector<ResourceSpinePtr>(branchSlots, nullptr);
 }
-void ResourceBranch::postConnectSetUp(std::vector<BranchedSpinePtr> synapseData)
+void ResourceBranch::PostConnectSetUp(std::vector<BranchedSpinePtr> synapseData)
 {
     //Here we do all the function calls that could not be done in the constructor. 
     //This is done to adapt to the fact that synapses do not exist until ConnectNeurons() is called in the NeuralNetwork::Simulate() function.
@@ -35,10 +36,10 @@ void ResourceBranch::SetUpSynapseData(std::vector<BranchedSpinePtr> synapseData)
     //This function sets up the spine pointers in the branch, something not possible until ConnectNeurons() runs, thus its execution from PostConnectSetUp()
     for (BranchedSpinePtr synapse :synapseData){
         if (synapse->GetBranchId()==branchId){
-            resouceBranchSynapseData.push_back(std::dynamic_pointer_cast<ResourceSynapseSpine>(synapse));
+            resouceBranchSynapseData.at(synapse->GetBranchPositionId())=std::dynamic_pointer_cast<ResourceSynapseSpine>(synapse);
         }
     }
-    std::sort(resouceBranchSynapseData.begin(), resouceBranchSynapseData.end(), BranchIDCompare); //This allows to do indexing of the synapse data using the branch ID
+    //std::sort(resouceBranchSynapseData.begin(), resouceBranchSynapseData.end(), BranchIDCompare); //This allows to do indexing of the synapse data using the branch ID
 }
 
 void ResourceBranch::TickAllCounts()
