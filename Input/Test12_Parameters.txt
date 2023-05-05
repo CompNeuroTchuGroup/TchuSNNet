@@ -1,5 +1,5 @@
 #*****************************************************************
-# Time and Title: 2023_5_4_18-32-44 -- Test12
+# Time and Title: 2023_5_5_17-16-53 -- Test12
 #*****************************************************************
 Title                       Test12
 #*****************************************************************
@@ -142,7 +142,6 @@ synapses_0_2_connectivity_seed				1618772598
 synapses_0_2_connectivity_ConnectionProba			0.000000
 #		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
 #*************************************************
-synapses_1_0_target_branch					0#		You can target branches in an 'ordered' manner (0,1,2...), 'random', or set (if you input a number). Put none if the HS does not used branched morphology
 synapses_1_0_type							HeteroCurrentSynapse
 synapses_1_0_connected						true
 synapses_1_0_D_min						0.005000 seconds
@@ -155,6 +154,7 @@ synapses_1_0_connectivity_type				HeteroRandomConnectivity
 synapses_1_0_connectivity_seed				183427039
 synapses_1_0_connectivity_ConnectionProba			1.000000
 #		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
+synapses_1_0_target_branch					0	#You can target branches in an 'ordered' manner (0,1,2...), 'random', or set (if you input a number). Put none if the HS does not used branched morphology
 #*************************************************
 synapses_1_1_type							CurrentSynapse
 synapses_1_1_connected						true
@@ -169,7 +169,6 @@ synapses_1_1_connectivity_seed				921206234
 synapses_1_1_connectivity_ConnectionProba			0.000000
 #		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
 #*************************************************
-synapses_1_2_target_branch					1#		You can target branches in an 'ordered' manner (0,1,2...), 'random', or set (if you input a number). Put none if the HS does not used branched morphology
 synapses_1_2_type							HeteroCurrentSynapse
 synapses_1_2_connected						true
 synapses_1_2_D_min						0.005000 seconds
@@ -182,6 +181,7 @@ synapses_1_2_connectivity_type				HeteroRandomConnectivity
 synapses_1_2_connectivity_seed				183427039
 synapses_1_2_connectivity_ConnectionProba			1.000000
 #		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
+synapses_1_2_target_branch					1	#You can target branches in an 'ordered' manner (0,1,2...), 'random', or set (if you input a number). Put none if the HS does not used branched morphology
 #*************************************************
 synapses_2_0_type							CurrentSynapse
 synapses_2_0_connected						false
@@ -223,5 +223,5 @@ synapses_2_2_connectivity_ConnectionProba			0.000000
 #		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
 
 #*****************************************************************
-#Comp. finalized: Thu May  4 18:33:00 2023
-#Comp. time: 16.014 secs.
+#Comp. finalized: Fri May  5 17:17:14 2023
+#Comp. time: 20.01 secs.

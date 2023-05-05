@@ -2,9 +2,9 @@
 
 As the simulation runs, data will be written in multiple Output files. These Files are contained in the output folder, according to the argument that was provided upon execution of the simulation. In the minimal case, there will only be one output file: the Datafile. If more Recording options were selected in the parameter file, more files can be created to record more precisely specific aspects of the system.
 
-**The DataFile**
+**The Data File**
 
-The Datafile contains different averages of the system over time. The averages are computed over a time period defined as the binSize (provided in the parameter file). These values.
+The Data file contains different averages of the system over time. The averages are computed over a time period defined as the binSize (provided in the parameter file). These values.
 In this file, every line is a time bin and every column is the population average of some quantity : average membrane potential, average firing rate, average incoming external and recurrent current and average total incoming current. The final columns of the file are the quenched fluctuations (variability of the total input within the population) and the temporal fluctuations (variability of the population averaged total input within the time bin).
 The header of the file comes with a definition of what each column is.
 
@@ -49,3 +49,20 @@ The content of the file is clarified by its header.
 The parameter Heatmap is used for networks that have a spatial structure. If it is set to a non zero integer, a HeatmapRate file will be created for every population. 
 If the simulation is run in 1 dimension, the linear dimension of the system is binned into n spatial bins, where n is the parameter Heatmap (provided in the parameter file). In each time bin, the average firing rate in each spatial bin is written in the file.
 If the simulation is run in 2 dimensions, the system is split in n^2 spatial bins, and each line of the Heatmap file contains the n^2 firing rates.
+
+**NeuronProfiles**
+
+The parameter notrackNeuronProfiles has N entries (one per population) and determines the number of neurons from each population which are going to get recorded. If any neuron is recorded from, two files are created: Potential and Current. The Potential file records the membrane potential (in mV) of neurons at every time step; the Current file records the input that neurons receive (in mV/s). The neurons which are recorded are the first x_i neuron of each population, where x_i the _i_th parameter entry of notrackNeuronProfiles.
+
+**HeteroSynapses**
+
+The parameter notrackHeteroSynapseProfiles has N+1 entries where N is the number of populations. Each entry will determine how many synapses from each of the neurons tracked in NeuronProfiles are tracked. The file is structured as following: one time column and one column per synapse, with its ID on the top. Depending on the model, the output will differ for each datapoint, which will normally be structured as a tuple of numbers. The contents of this tuple will be written in one of the commented lines of the file at the top.
+
+**OverallHS**
+
+For every neuron that has at least one tracked synapse, the average weight, number of plasticity events and total presynaptic spikes and postsynaptic spikes will be inside a tuple for each datapoint.
+
+**ParsedDataFiles**
+
+For some files, their contents might be too large to store or work with, so when turning parsing ON vs OFF, at the end of the simulation the datafile parser will create a file (for every implemented parsing) that contains the same information but more compact. These files will also contain important metadata, like the number of neurons per population, mangitude of dt in the simulation, number of total timesteps run, population IDs and the simulated time in seconds. To manipulate these files there are special python notebooks in the ./Test_results/AnalyseCode/ folder.
+

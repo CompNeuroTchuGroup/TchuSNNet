@@ -169,6 +169,7 @@ void HeteroCurrentSynapse::LoadParameters(std::vector<std::string> *input){
 
 void HeteroCurrentSynapse::SaveParameters(std::ofstream * stream, std::string id_str){
 
+    Synapse::SaveParameters(stream,id_str);
     *stream << id_str << "target_branch\t\t\t\t\t";
     if (this->synapseTargeting.randomTargetBranch){
         *stream<<"random"; //Missing comments on what this is supposed to do
@@ -179,12 +180,11 @@ void HeteroCurrentSynapse::SaveParameters(std::ofstream * stream, std::string id
     } else {
         *stream<<"none";//Missing comments on what this is supposed to do
     }
-    *stream << "#\t\tYou can target branches in an 'ordered' manner (0,1,2...), 'random', or set (if you input a number). Put none if the HS does not used branched morphology\n";
+    *stream << "\t#You can target branches in an 'ordered' manner (0,1,2...), 'random', or set (if you input a number). Put none if the HS does not used branched morphology\n";
     
     // *stream << id_str << "subregion\t\t\t\t\t\t" << (this->synapseTargeting.DendriticSubRegion) << "\n";
     // *stream << "#\t\tThis is currently under development, but will allow you to determine DendriticSubRegions and target DendriticSubRegions of the dendritic tree.\n";
     //Missing comments on what this is supposed to do and check if char goes out properly
-    Synapse::SaveParameters(stream,id_str);
 }
 
 unsigned long HeteroCurrentSynapse::allocateSynapse(unsigned long preId, unsigned long postId) {

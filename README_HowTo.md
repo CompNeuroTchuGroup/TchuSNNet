@@ -27,6 +27,7 @@ From the location of the code, type "make" in a command line.
 ## Step 3: Set parameters
 
 All the parameters of a simulation are contained in a parameter file. The parameter file is a txt file with a specific format that will be read by the simulation code. For a sample parameter file and details, see the [Parameter file wiki](Documents/Parameter file).
+In case of usage of AdjacencyMatrixConnectivity or DictatNeuronPop it will be required to include their required files (Connectivity matrixes or spiker files) in the same folder. Examples of this are in Test1 and Test11.
 
 ## Step 4: Run simulation
 Once the code has been compiled and the parameter file is ready, the code is ready to be run. 

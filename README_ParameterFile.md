@@ -23,6 +23,15 @@ As an example, here is what the example parameter file defines:
 - vThresh: the firing threshold, at which neurons fire. Here it is set to 1mV in both populations.
 - refractoryTime: the refractory period after firing during which the neuron does not integrate its input and cannot fire. Here it is set to 0s in both populations.
 - resetType: this parameter determines whether the excess depolarization after spiking is stored. If set to 0 ,there is a "hard reset" to vReset. If set to 1, the overshoot in membrane potential will be added to the reset potential. Here, both populations are of reset type 0 (hard reset).
+### Morphology parameters
+If you want to use a plasticity model (which for now requires the usage of neuron_type HeteroLIFNeuron or the poisson equivalent, synapse_type HeteroCurrentSynapse and connectivity_type HeteroConnectivity), you will need to specify extra parameters in the neuron section (These can be seen in tests 10 and 12). These parameters determine the morphology/physiology of the neuron population in relation to synaptic weights only.
+- morphology_type: Plasticity model that is used. Depending on the model (shown in the [complete guide]), extra parameters will need to be specified.
+- dendritic_length/morphology_branch_length: Determines of the theoretical dendrite or length of each branch for each neuron in micrometers. Its ratio with synaptic_gap defines the total spaces or slots available for synapse allocation. Trying to allocate more synapses than available slots will result in a runtime exception.
+- synaptic_gap: Determines the space between synapse slots.
+### BranchedMorphology parameters
+In case the morphology model used works on branched dendrites, the following parameters will apply:
+- dendrite_branchings: Number of branchings in the dendritic tree. The generated tree is a binary one, so the number of branches will be equal to $2^{branchings}$.
+- synapse_allocation: It can be either 'random' or 'ordered'. It corresponds to the order in which available synapse slots are allocated when the connectivity class connects a presynaptic population. **If connectivity is randomized, the resulting allocation will be randomized no matter what option you select**
 
 ## Stimulus Parameters
 - type: The type of stimulus which is fed in the network. Here, it is set to WhiteNoiseStimulus. This stimulus is the most standard one, and neurons are fed a white noise input. This input type has two parameters: meanCurrent and sigmaCurrent. Each of these can be defined as a succession of steps in time. 
@@ -30,16 +39,20 @@ As an example, here is what the example parameter file defines:
 - sigmaCurrent: the standard deviation of the external input. Here, there is only one step for the whole simulation and the standard deviation is 1mV/s for both populations.
 
 ## Recorder Parameters
-Each line is a type of output file that can be generated from the simulation. More information is available in the Output Files Wiki. In the default case, all values are set to 0, so only the default Data file is created. The parameter binSize determines the size of the bins with which time is binned. Here, the value is 10 ms, so the Data file will report averages over 10ms of various states of the system.
+Each line is a type of output file that can be generated from the simulation. More information is available in [Output Files](README_OutputFiles.md). In the default case, all values are set to 0, so only the default Data file is created. The parameter binSize determines the size of the bins with which time is binned. Here, the value is 10 ms, so the Data file will report averages over 10ms of various states of the system.
 
 ## Synaptic Parameters
 Every pair of population has its own Synapse object. Here, we have the four: 0<-0, 1<-0, 0<-1 and 1<-1 (first number is postsynaptic population, second presynaptic). Each of them is defined separately.
 
 - type: the model used for the synapse. Here, all four are set to Current Synapse, which is the simplest case: current-based synapses, without plasticity and the PSP is applied at a single time point.
+- connected: either 'true' or 'false'. Allows you to skip a certain Synapse between two populations, and avoid its required computations during the simulation.
 - D_min and D_max: these parameters define the range of synaptic delays. Each synapse has its own synaptic delay D which is randomly generated at the start of the simulation. D is randomly distributed between D_min and D_max. Here, D_min and D_max are both set to 0 for all synapses, so the PSP is applied at the same time step as the presynaptic spike in all synapses. 
 - J: the synaptic strength. This is the value of the PSP (the change in potential on the postsynaptic neuron upon presynaptic spike). Note that this is the only point at which we define which population is excitatory and which is inhibitory. Here, the population 0 is E and the population 1 is I: we set all EPSPs to 0.001 mV and IPSPs to -0.005mV.
 - Jpot and Ppot: Some synapses can be potentiated. With a probability of Ppot, synapses have a Synaptic strength of Jpot instead of J. Here, Ppot is set to 0 in all synapses, so no synapse is potentiated.
-- connectivity type: the rule for neuron connections. Here, it is set to RandomConnectivity in all synapses. This connectivity rule ensures that each neuron gets the same number of connections, which is determined from the probability of connection and the number of neurons in the presynaptic population: C=p*N. For each presynaptic neuron, its presynaptic connections are randomly drawn from the presynaptic population. Here, the connection probability (ConnectProba) is set to 5% in all synapse.
-
+- connectivity type: the rule for neuron connections. Here, it is set to RandomConnectivity in all synapses. This connectivity rule ensures that each neuron gets the same number of connections, which is determined from the probability of connection and the number of neurons in the presynaptic population: $C=p*N$. For each presynaptic neuron, its presynaptic connections are randomly drawn from the presynaptic population. Here, the connection probability (ConnectProba) is set to 5% in all synapse.
+### Branched parameters
+In case the morphology model used works on branched dendrites, the following parameters will apply:
+- target_branch: It can be either 'ordered' (starts allocation at branch 0), 'random', or a specific branch ID (from zero onwards). In the future, subregion implementation will allow to target multiple branches. 
 
 The ParameterOption file is a catalogue of existing classes and can be used to check the other available classes for Stimulus, Neuron, Synapse and connectivity. It also shows the parameters which must be defined for each, and the recognized syntax.
+
