@@ -63,7 +63,7 @@ void AdvancedRecorder::SaveParameters(std::ofstream * stream){
     Recorder::SaveParameters(stream);
 
     double  dt = info->dt;
-    *stream << "recorder_binSize\t\t\t\t\t" << std::to_string(GetAveragingSteps()*dt)  << " seconds \t#Bin size over which data saved in main recording data file is average over\n";
+    *stream << "recorder_binSize\t\t\t\t\t" << std::to_string(GetAveragingSteps()*dt)  << " #seconds \t#Bin size over which data saved in main recording data file is average over\n";
     *stream << "recorder_noRasterPlotNeurons\t\t\t";
     for(unsigned i = 0; i < noRasterPlotNeurons.size();i++) {
 		*stream << std::to_string(noRasterPlotNeurons[i]) << " \t";
