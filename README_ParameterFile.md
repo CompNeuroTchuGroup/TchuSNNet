@@ -57,5 +57,25 @@ Every pair of population has its own Synapse object. Here, we have the four: 0<-
 In case the morphology model used works on branched dendrites, the following parameters will apply:
 - target_branch: It can be either 'ordered' (starts allocation at branch 0), 'random', or a specific branch ID (from zero onwards). In the future, subregion implementation will allow to target multiple branches. 
 
+##Iterative parameters
+In every Parameters.txt file you have the option of including the iterate_1 and iterate_2 parameters (recommended to add at the end for consensus). Its usage can be seen in Test10_Parameters.txt, but because of how the programme iterates over these parameters, they will not be visible in the reconstituted copy of the parameter file in the output folder. Instead, it can only be recovered in the input_copy_parameters.txt, which is an identical copy of the original file.
+###Syntax example
+->iterate_1 neuron_0_noNeurons 50 100 200 400
+->iterate_1 synapses_1_0_J 0.05 0.025 0.0125 0.00625
+->iterate_2 neuron_1_noNeurons 400 200 100
+
+**Iterate parameters of the same number (1 or 2) must have the same number of entries/columns** 
+Not following this recommendation will result in undefined behaviour or crashes. 
+
+Iterate parameters of the same number will be combined by column or number of entry. In this example, 50 neurons will be paired with 0.05 dmV/s, and the next time parameters change, the pair will be 100 neurons with 0.025 dmV/s.
+
+**The original entry in the parameter that is substituted by the iterate_n entries will be ignored**
+###Functionality
+From the example above, once you run the programme, it will start a simulation with the first column of parameters for the specified parameters. Once it's done, it will start a new simulation with the first column of all iterate_1 parameters and the second column of iterate_2. Once all entries of iterate_2 have been an input in a simulation, the iterate_1 parameters will jump to the second entry, an start anew with the iterate_2 parameter entries. 
+The execution will finish once all possible combinations between columns of iterate_1 and iterate_2 have been run. The output writing is independent in each individual simulation, so in the case of crash or abort the comnpleted simulations will have intact data (including total runtime in seconds).
+
+This parameteris extremely effective in case it is necessary to perform a grid search of certain parameters. This implementation is limited to iterate_1 and iterate_2 because of the extreme length resulting from a single run. 
+
+##ParameterOptions
 The ParameterOption file is a catalogue of existing classes and can be used to check the other available classes for Stimulus, Neuron, Synapse and connectivity. It also shows the parameters which must be defined for each, and the recognized syntax.
 
