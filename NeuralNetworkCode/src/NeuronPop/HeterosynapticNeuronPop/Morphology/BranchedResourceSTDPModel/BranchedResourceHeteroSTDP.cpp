@@ -185,7 +185,7 @@ void BranchedResourceHeteroSTDP::ApplyEffects() //Called after pairings
         }
     } else {
         return;
-        }
+    }
     //Remember to call the branch plasticity counter for every event!!!
     //if this postSpike bool
 }
@@ -229,11 +229,11 @@ void BranchedResourceHeteroSTDP::SpaceTimeKernel(int branchSynapseID, int branch
         } else if (synapsePositionIndexInBranch == branchSynapseID){
             centralSynapseSpine->AddTempResourcesToSpine(alphaStimmulusEffect);
             updatedAlphaEffects.push_back(branchSynapseID);
-            continue;//This essentially avoids homo-STDP
+            continue;//This essentially does regular STDP
         } else {
             ResourceSpinePtr& candidateSynapseSpine = currentBranch->resouceBranchSynapseData.at(synapsePositionIndexInBranch);
             if (candidateSynapseSpine == nullptr) {
-                continue;
+                continue; //To jump empty synapse slots
             }
             absDistance = std::abs(gapIndex);
             timeStepDifference=currentBranch->triggerCount.at(synapsePositionIndexInBranch);

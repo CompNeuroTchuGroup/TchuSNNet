@@ -23,11 +23,14 @@ As an example, here is what the example parameter file defines:
 - vThresh: the firing threshold, at which neurons fire. Here it is set to 1mV in both populations.
 - refractoryTime: the refractory period after firing during which the neuron does not integrate its input and cannot fire. Here it is set to 0s in both populations.
 - resetType: this parameter determines whether the excess depolarization after spiking is stored. If set to 0 ,there is a "hard reset" to vReset. If set to 1, the overshoot in membrane potential will be added to the reset potential. Here, both populations are of reset type 0 (hard reset).
+
 ### Morphology parameters
 If you want to use a plasticity model (which for now requires the usage of neuron_type HeteroLIFNeuron or the poisson equivalent, synapse_type HeteroCurrentSynapse and connectivity_type HeteroConnectivity), you will need to specify extra parameters in the neuron section (These can be seen in tests 10 and 12). These parameters determine the morphology/physiology of the neuron population in relation to synaptic weights only.
 - morphology_type: Plasticity model that is used. Depending on the model (shown in the [complete guide]), extra parameters will need to be specified.
 - dendritic_length/morphology_branch_length: Determines of the theoretical dendrite or length of each branch for each neuron in micrometers. Its ratio with synaptic_gap defines the total spaces or slots available for synapse allocation. Trying to allocate more synapses than available slots will result in a runtime exception.
 - synaptic_gap: Determines the space between synapse slots.
+Implemented model only work in excitatory populations/synapses. Usage in inhibitory populations will ignore the plasticity framework and the weights will remain constant or the weights will vary but be positive depending on the model unless the opposite is explicitly stated.
+
 ### BranchedMorphology parameters
 In case the morphology model used works on branched dendrites, the following parameters will apply:
 - dendrite_branchings: Number of branchings in the dendritic tree. The generated tree is a binary one, so the number of branches will be equal to $2^{branchings}$.

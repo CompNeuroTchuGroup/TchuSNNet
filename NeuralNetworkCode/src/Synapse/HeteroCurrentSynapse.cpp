@@ -13,8 +13,9 @@ HeteroCurrentSynapse::HeteroCurrentSynapse(NeuronPop* postNeurons, NeuronPop* pr
     }
 }
 
-void HeteroCurrentSynapse::advect(std::vector<double> * synaptic_dV) {
-
+void HeteroCurrentSynapse::advect(std::vector<double> * synaptic_dV) 
+{
+    //Alternate between using the synaptic weight as the appropiate coupling strength or as a multiplier to the coupling strength.
     if (ignoreCouplingStrengthBool){
         advectSpineCouplingStrength(synaptic_dV);
     } else {
@@ -24,6 +25,7 @@ void HeteroCurrentSynapse::advect(std::vector<double> * synaptic_dV) {
 
 void HeteroCurrentSynapse::advectDefinedCouplingStrength(std::vector<double> *synaptic_dV)
 {
+    //Classic advect, working the same way as the initial implementation (and similar to CurrentSynapse), uses the synaptic weight only as a multiplier
     resetcumulatedDV();
 
     std::vector<double> currents{};
@@ -52,6 +54,7 @@ void HeteroCurrentSynapse::advectDefinedCouplingStrength(std::vector<double> *sy
 
 void HeteroCurrentSynapse::advectSpineCouplingStrength(std::vector<double> *synaptic_dV)
 {
+    //Alternative advect, uses the synaptic weight as the coupling strength
     resetcumulatedDV();
 
     std::vector<double> currents{};
@@ -79,6 +82,7 @@ void HeteroCurrentSynapse::advectSpineCouplingStrength(std::vector<double> *syna
 }
 
 void HeteroCurrentSynapse::advectSpikers(std::vector<double>& currents, long spiker) {
+    //Classic advectSpikers
     const std::vector<std::pair<unsigned long, unsigned long>>& targetList{this->geometry->getSynapticTargets(spiker)}; 
     //OPTIMIZATION, targetList could be passed as a const reference to the previous copy (not doable currently, as this function overrides a virtual function with set arguments)
     //Overloaded function? Not necessary in others, as others use pointer. We cannot because the targetList is built differently (for now)
