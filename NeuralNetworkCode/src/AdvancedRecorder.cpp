@@ -63,13 +63,13 @@ void AdvancedRecorder::SaveParameters(std::ofstream * stream){
     Recorder::SaveParameters(stream);
 
     double  dt = info->dt;
-    *stream << "recorder_binSize\t\t\t\t\t" << std::to_string(GetAveragingSteps()*dt)  << " seconds \t#Bin size over which data saved in main recording data file is average over\n";
+    *stream << "recorder_binSize\t\t\t\t\t" << std::to_string(GetAveragingSteps()*dt)  << " #seconds \t#Bin size over which data saved in main recording data file is average over\n";
     *stream << "recorder_noRasterPlotNeurons\t\t\t";
     for(unsigned i = 0; i < noRasterPlotNeurons.size();i++) {
 		*stream << std::to_string(noRasterPlotNeurons[i]) << " \t";
 	}
 	*stream << std::to_string((static_cast<double>(raster_t_0))*info->dt) << "\t";
-    *stream << "#Record spike times of x neurons for (i-th column is x for the i-th population). The i+1-th column sets the initial recording time. If negative, records all neurons of pop\n";
+    *stream << "\t#Record spike times of x neurons for (i-th column is x for the i-th population). The i+1-th column sets the initial recording time. If negative, records all neurons of pop\n";
 
     *stream << "recorder_notrackNeuronProfiles\t\t";
     for(unsigned i = 0; i < notrackNeuronPotentials.size();i++)
@@ -81,7 +81,7 @@ void AdvancedRecorder::SaveParameters(std::ofstream * stream){
 	for (unsigned i = 0; i < CurrentContributions.size();i++)
 		*stream << std::to_string(CurrentContributions[i])<<"\t";
 	*stream << std::to_string((static_cast<double>(current_t_0))*info->dt) << "\t";
-	*stream << "#Record the sources of input current to x neurons. (i-th column is x for the i-th population). The i+1-th column sets the initial recording time\n";
+	*stream << "\t#Record the sources of input current to x neurons. (i-th column is x for the i-th population). The i+1-th column sets the initial recording time\n";
 
     *stream <<  "recorder_trackSynapses\t\t\t\t" << std::to_string(trackSynapses)  << "\t\t\t\t\t#Set = 1 to track averaged data from synapes, Set = 0 to ignore.\n";
 	*stream <<  "recorder_Heatmap\t\t\t\t\t" << std::to_string(Heatmap) << "\t\t\t\t\t#Number of bins used to represent each dimension of the spatial domain in the firing rates Heatmap\n";
@@ -121,7 +121,7 @@ void AdvancedRecorder::LoadParameters(std::vector<std::string> *input){
             Heatmap = std::stoi(values.at(0));
 		} else if (name.find("recorder_CurrentContributions") != std::string::npos) {
             SetNoCurrentContribution(&values);
-        } else if (name.find("recorder_notrackHeteroSynapseProfiles") != std::string::npos) {
+        } else if (name.find("recorder_notrackHeteroSynProfiles") != std::string::npos) {
             SetNoTrackHeteroSynapseProfilesPerTrackedNeuronPerPop(&values);
 		} else if (name.find("recorder_parsing") != std::string::npos){
             if (values.at(0).find("ON") != std::string::npos){

@@ -39,6 +39,9 @@ protected:
     double        SigmaJ;
     double        J_pot;
     double        P_pot;
+    //Scaling exponentials
+    double globalScalingFactor{1.0};
+    double localScalingFactor{1.0};
 	//Synaptic delay
     int                 D_min;
     int                 D_max;

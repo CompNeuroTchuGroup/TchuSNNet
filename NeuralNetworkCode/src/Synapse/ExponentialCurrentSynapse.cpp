@@ -80,6 +80,6 @@ void ExponentialCurrentSynapse::LoadParameters(std::vector<std::string> *input){
 void ExponentialCurrentSynapse::SaveParameters(std::ofstream * stream,std::string id_str){
     Synapse::SaveParameters(stream,id_str);
 
-    *stream << id_str << "exponential_tau\t\t\t\t" << std::to_string(Tau) << " seconds\n";
+    *stream << id_str << "exponential_tau\t\t\t\t\t" << std::to_string(Tau) << " seconds\n";
     *stream << "#\t\tThe Post Synaptic Potential decays exponentially through time. The AUC is determined by J and does not depend on tau\n";
 }

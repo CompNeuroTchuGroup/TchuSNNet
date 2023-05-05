@@ -21,8 +21,7 @@ void HeteroPoissonNeuronPop::advect(std::vector<double> * synaptic_dV)
     {
         // set target rate
         if (inputDependant){
-            r_target = synaptic_dV->at(i);
-            lambda = r_target;
+            lambda = synaptic_dV->at(i);
         }
 
         //check spiking
@@ -85,7 +84,7 @@ void HeteroPoissonNeuronPop::SaveParameters(std::ofstream * stream){
         *stream <<  id + "_r_target                   " << std::to_string(r_target)  << "\n";
     }
     *stream <<  "#\t\tHeteroPoisson neuron: produces Poisson spiking with rate r_target (defined under stimulus) \n";
-
+    *stream <<  "#\t\tIf r_target not set in parameters, the neurons will fire with probability equal to the membrane potential. If Vm > 1mV, p=1 \n";
 }
 
 std::string HeteroPoissonNeuronPop::GetType() {

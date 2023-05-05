@@ -222,6 +222,8 @@ void Synapse::ConnectNeurons(){
     } else {
         std::cout<< "Connection skipped." <<"\n";
     }
+    localScalingFactor=pow(geometry->GetNumberAverageSourceNeurons(),info->networkScaling_synStrength);
+    globalScalingFactor=pow(info->N,info->networkScaling_synStrength);
 }
 
 /*double Synapse::GetCouplingStrength(){
@@ -236,11 +238,11 @@ void Synapse::ConnectNeurons(){
 double Synapse::GetCouplingStrength(unsigned long preNeuronId, unsigned long postNeuronId){ // For distribution of Js
     J = *geometry->GetDistributionJ(preNeuronId,postNeuronId);
     if(info->networkScaling_extern == 0){
-        return (J*pow(geometry->GetNumberAverageSourceNeurons(),info->networkScaling_synStrength));}
+        return (J*localScalingFactor);}
     else if(info->networkScaling_extern == 1)
-        return (J*pow(info->N,info->networkScaling_synStrength));
+        {return (J*globalScalingFactor);}
     else
-        throw "error in Synapse::GetCouplingStrength";
+        {throw "error in Synapse::GetCouplingStrength";}
 }
 
 void Synapse::SetDistributionD(){
