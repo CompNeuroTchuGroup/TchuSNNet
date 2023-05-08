@@ -56,7 +56,7 @@ The parameter notrackNeuronProfiles has N entries (one per population) and deter
 
 **HeteroSynapses**
 
-The parameter notrackHeteroSynapseProfiles has N+1 entries where N is the number of populations. Each entry will determine how many synapses from each of the neurons tracked in NeuronProfiles are tracked. The file is structured as following: one time column and one column per synapse, with its ID on the top. Depending on the model, the output will differ for each datapoint, which will normally be structured as a tuple of numbers. The contents of this tuple will be written in one of the commented lines of the file at the top.
+The parameter notrackHeteroSynapticProfiles has N+1 entries where N is the number of populations. Each entry will determine how many synapses from each of the neurons tracked in NeuronProfiles are tracked. The file is structured as following: one time column and one column per synapse, with its ID on the top. Depending on the model, the output will differ for each datapoint, which will normally be structured as a tuple of numbers. The contents of this tuple will be written in one of the commented lines of the file at the top.
 
 **OverallHS**
 

@@ -86,7 +86,7 @@ void AdvancedRecorder::SaveParameters(std::ofstream * stream){
     *stream <<  "recorder_trackSynapses\t\t\t\t" << std::to_string(trackSynapses)  << "\t\t\t\t\t#Set = 1 to track averaged data from synapes, Set = 0 to ignore.\n";
 	*stream <<  "recorder_Heatmap\t\t\t\t\t" << std::to_string(Heatmap) << "\t\t\t\t\t#Number of bins used to represent each dimension of the spatial domain in the firing rates Heatmap\n";
  
-    *stream <<  "recorder_notrackHeteroSynapseProfiles\t";
+    *stream <<  "recorder_notrackHeteroSynapticProfiles\t";
     for (unsigned i = 0; i < noTrackHeteroSynapsePerTrackedNeuron.size();i++)
         *stream << std::to_string(noTrackHeteroSynapsePerTrackedNeuron[i])<< "\t";
     *stream <<std::to_string(heteroRecordingPerSteps)<< "\t\t#Number of synapses per neuron in recorder_notrackNeuronProfiles to record (per pop) and last number is the timesteps for each record call\n";
@@ -122,7 +122,7 @@ void AdvancedRecorder::LoadParameters(std::vector<std::string> *input){
 		} else if (name.find("recorder_CurrentContributions") != std::string::npos) {
             SetNoCurrentContribution(&values);
         } else if (name.find("recorder_notrackHeteroSynapticProfiles") != std::string::npos) {
-            SetNoTrackHeteroSynapseProfilesPerTrackedNeuronPerPop(&values);
+            SetNoTrackHeteroSynapticProfilesPerTrackedNeuronPerPop(&values);
 		} else if (name.find("recorder_parsing") != std::string::npos){
             if (values.at(0).find("ON") != std::string::npos){
                 parserEnabled=true;
@@ -177,7 +177,7 @@ void AdvancedRecorder::SetNoRasterplotNeurons(std::vector<std::string> *values){
 }
 
 
-void AdvancedRecorder::SetNoTrackHeteroSynapseProfilesPerTrackedNeuronPerPop(std::vector<std::string> *values) {
+void AdvancedRecorder::SetNoTrackHeteroSynapticProfilesPerTrackedNeuronPerPop(std::vector<std::string> *values) {
     int P = static_cast<int>(neurons->GetTotalPopulations());
     for(int i = 0; i < min_(P,static_cast<int>(values->size()));i++){//min() only makes sense if you remove the hash
         if((noTrackHeteroSynapsePerTrackedNeuron[i]  > neurons->GetPop(i)->GetNumberOfSynapses()) || (noTrackHeteroSynapsePerTrackedNeuron[i] < 0)){

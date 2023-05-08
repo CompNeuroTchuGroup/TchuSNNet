@@ -94,7 +94,7 @@ protected:
     void SetNoRasterplotNeurons(std::vector<std::string> *values);
     void SetNoTrackNeuronPotentials(std::vector<std::string> *values);
 	void SetNoCurrentContribution(std::vector<std::string> *values);
-    void SetNoTrackHeteroSynapseProfilesPerTrackedNeuronPerPop(std::vector<std::string> *values);
+    void SetNoTrackHeteroSynapticProfilesPerTrackedNeuronPerPop(std::vector<std::string> *values);
 
 
 public:
