@@ -121,7 +121,7 @@ void AdvancedRecorder::LoadParameters(std::vector<std::string> *input){
             Heatmap = std::stoi(values.at(0));
 		} else if (name.find("recorder_CurrentContributions") != std::string::npos) {
             SetNoCurrentContribution(&values);
-        } else if (name.find("recorder_notrackHeteroSynProfiles") != std::string::npos) {
+        } else if (name.find("recorder_notrackHeteroSynapticProfiles") != std::string::npos) {
             SetNoTrackHeteroSynapseProfilesPerTrackedNeuronPerPop(&values);
 		} else if (name.find("recorder_parsing") != std::string::npos){
             if (values.at(0).find("ON") != std::string::npos){
