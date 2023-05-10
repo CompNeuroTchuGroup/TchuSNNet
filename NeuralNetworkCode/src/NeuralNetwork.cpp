@@ -242,7 +242,8 @@ void NeuralNetwork::SaveParameterOptions(){// This function should have stuff mo
     tazden.SaveParameters(&stream,"neurons_0");
 
     stream <<  "#*************  Branched dendrites **************************************************************\n";
-
+    BranchedResourceHeteroSTDP brhSTDP(&mockInfo);
+    brhSTDP.SaveParameters(&stream,"neurons_0");
 //Instead of LIF, heteroLIF, put morphology options from Tazerart and HCS and HCP
 
     stream << std::endl;
