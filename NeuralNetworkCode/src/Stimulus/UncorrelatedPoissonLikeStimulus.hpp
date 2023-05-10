@@ -43,7 +43,7 @@ private:
     std::vector<double> next_stimulus_time_step;
     std::vector<double>        next_stimulus_step;
 
-    std::default_random_engine generator;
+    std::mt19937 generator;
     std::uniform_int_distribution<int> distribution;
 
     inline void UpdatePoissonTable();                // fills the signal_array
@@ -79,7 +79,7 @@ public:
     //*******************
     // Set-Functions
     //*******************
-    void SetSeed(int seed){this->seed = seed; generator = std::default_random_engine(seed);};
+    void SetSeed(int seed){this->seed = seed; generator = std::mt19937(seed);};
     void SetTableEntries();
     void AddStimulusStep(int ts,double sS);
 

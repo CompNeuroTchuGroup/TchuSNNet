@@ -21,8 +21,6 @@ void HeteroNeuronPop::LoadParameters(std::vector<std::string> *input) {
     std::string name;
     std::vector<std::string> values;
 
-    // checks for correct initialization
-    bool morphologyFound = false;
 
     for (auto & it : *input) {
         SplitString(&it,&name,&values);
@@ -33,66 +31,76 @@ void HeteroNeuronPop::LoadParameters(std::vector<std::string> *input) {
                     this->morphology.push_back(std::make_unique<MonoDendriteSTDPTazerart>(this->info));
                     this->morphology.back()->LoadParameters(input);
                 }
-                morphologyFound = true;
             } else if (values.at(0) == str_MonoDendriteSTDPBiWindow) {
                 for (unsigned long i = 0; i < this->noNeurons; i++) {
                     this->morphology.push_back(std::make_unique<MonoDendriteSTDPBiWindow>(this->info));
                     this->morphology.back()->LoadParameters(input);
                 }
-                morphologyFound = true;
             } else if (values.at(0) == str_MonoDendriteSTDPTazerartRelative) {
                 for (unsigned long i = 0; i < this->noNeurons; i++) {
                     this->morphology.push_back(std::make_unique<MonoDendriteSTDPTazerartRelative>(this->info));
                     this->morphology.back()->LoadParameters(input);
                 }
-                morphologyFound = true;
-            } else if (values.at(0) == str_SimplePlasticityOnlyBranches) {
+            } else if (values.at(0) == str_BranchedResourceHeteroSTDP) {
                 for (unsigned long i = 0; i < this->noNeurons; i++) {
-                    this->morphology.push_back(std::make_unique<SimplePlasticityOnlyBranch>(this->info));
+                    this->morphology.push_back(std::make_unique<BranchedResourceHeteroSTDP>(this->info)); //Remove, will not  be used
                     this->morphology.back()->LoadParameters(input);
                 }
-                morphologyFound = true;
+            } else {
+                throw;
             }
         }
     }
 
-    if (this->morphology.at(0)->isBranchedBool()){
+    if (this->morphology.at(0)->IsBranchedBool()){
         this->SetBranchedTrue();
     }
+}
 
-    if (!morphologyFound){
-        throw;
+void HeteroNeuronPop::PostConnectSetUp()
+{
+    for (std::unique_ptr<Morphology>& singleMorphology : morphology){
+        singleMorphology->PostConnectSetUp();
     }
 }
 
-std::shared_ptr<SynapseSpine> HeteroNeuronPop::allocateNewSynapse(unsigned long neuronId, HeteroCurrentSynapse &synapse)
+BaseSpinePtr HeteroNeuronPop::AllocateNewSynapse(unsigned long neuronId, HeteroCurrentSynapse &synapse)
 {
-    return this->morphology[neuronId]->allocateNewSynapse(synapse);
+    return this->morphology[neuronId]->AllocateNewSynapse(synapse);
 }
 
-void HeteroNeuronPop::recordExcitatorySynapticSpike(unsigned long neuronId, unsigned long synapseId)
+void HeteroNeuronPop::RecordExcitatorySynapticSpike(unsigned long neuronId, unsigned long synapseId)
 {
-    this->morphology[neuronId]->recordExcitatoryPreSpike(synapseId);
+        //This function is NOT DELAY COMPATIBLE
+    this->morphology[neuronId]->RecordExcitatoryPreSpike(synapseId);
 }
 
 // std::vector<unsigned long> getSpikedSynapses(const HeteroNeuronPop& pop, unsigned long neuronId) {
 //     return getSpikedSynapsesFromMorphology(*pop.morphology[neuronId].get());
 // }
 
-unsigned long HeteroNeuronPop::getSynapseCount(unsigned long neuronId) {
-    return this->morphology.at(neuronId)->getSynapseCount();
+unsigned long HeteroNeuronPop::GetSynapseCount(unsigned long neuronId) {
+    return this->morphology.at(neuronId)->GetSynapseCount();
 }
 
-double HeteroNeuronPop::getWeight(unsigned long neuronId, unsigned long synapseId) {
-    return this->morphology.at(neuronId)->getWeight(synapseId);
+double HeteroNeuronPop::GetWeight(unsigned long neuronId, unsigned long synapseId) {
+    return this->morphology.at(neuronId)->GetWeight(synapseId);
 }
 
-std::valarray<double> HeteroNeuronPop::getIndividualSynapticProfile(unsigned long neuronId, unsigned long synapseId) {
-    return this->morphology.at(neuronId)->getIndividualSynapticProfile(synapseId);
+std::valarray<double> HeteroNeuronPop::GetIndividualSynapticProfile(unsigned long neuronId, unsigned long synapseId) {
+    return this->morphology.at(neuronId)->GetIndividualSynapticProfile(synapseId);
 }
 
-std::valarray<double> HeteroNeuronPop::getOverallSynapticProfile(unsigned long neuronId) {
-    return this->morphology.at(neuronId)->getOverallSynapticProfile();
+std::valarray<double> HeteroNeuronPop::GetOverallSynapticProfile(unsigned long neuronId) {
+    return this->morphology.at(neuronId)->GetOverallSynapticProfile();
+}
+std::string HeteroNeuronPop::GetIndividualSynapticProfileHeaderInfo() const
+{
+    return morphology.at(0)->GetIndividualSynapticProfileHeaderInfo();
+}
+std::string HeteroNeuronPop::GetOverallSynapticProfileHeaderInfo() const
+{
+    return morphology.at(0)->GetOverallSynapticProfileHeaderInfo();
 }
 // STDP Analysis
 // void HeteroNeuronPop::triggerStatOut(std::string dirPath) {

@@ -19,8 +19,8 @@ protected:
     double aLTP(double theta) const override;
     double aLTD(double theta) const override;
 
-    double getDistanceEffects(const SynapseSpine* synA, const SynapseSpine* synB) const override;
-    double getTimingEffects(const SynapseSpine* synA, const SynapseSpine* synB) const override;
+    double getDistanceEffects(const CoopSynapseSpine* synA, const CoopSynapseSpine* synB) const override;
+    double getTimingEffects(const CoopSynapseSpine* synA, const CoopSynapseSpine* synB) const override;
 
     double muLTP{};
     double sigmaLTP{};
@@ -33,7 +33,7 @@ protected:
 public:
     explicit MonoDendriteSTDPTazerart(GlobalSimInfo* info);
     ~MonoDendriteSTDPTazerart() override = default;
-    virtual const std::string getType() override;
+    virtual const std::string GetType() override;
 
     void SaveParameters(std::ofstream * stream, std::string neuronPreId) override;
     void LoadParameters(std::vector<std::string> *input) override;

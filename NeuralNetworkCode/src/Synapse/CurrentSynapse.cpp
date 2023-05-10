@@ -2,7 +2,7 @@
 
 CurrentSynapse::CurrentSynapse(NeuronPop * postNeurons,NeuronPop * preNeurons,GlobalSimInfo * info):Synapse(postNeurons,preNeurons,info) {}
 
-void CurrentSynapse::advect_spikers (std::vector<double>& currents, long spiker)
+void CurrentSynapse::advectSpikers (std::vector<double>& currents, long spiker)
 {
     std::vector<unsigned long> *tL = geometry->GetTargetList(spiker);
 

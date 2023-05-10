@@ -51,7 +51,6 @@ protected:
 	int raster_t_0 = 0;
     std::valarray<unsigned long>			notrackNeuronPotentials;
     std::valarray<unsigned long>		    noRasterPlotNeurons;
-	//std::valarray<long>						noCorrNeurons;
 	std::valarray<long>						CurrentContributions;
 	std::valarray<std::valarray<double>>	Densimap;      // Number of neurons [of population i][in each pixel]
 	std::valarray<double>					CurrentContrBin;
@@ -62,12 +61,9 @@ protected:
     RecorderOpenStreams FileStreams;
 
     unsigned long stepCount;
-    unsigned long heteroRecordingPerSteps;
+    unsigned long heteroRecordingPerSteps{1};
 
-    bool hasBranchedSynapsePop{false};
 
-    // bool streamingNOutputBool{false};
-    // std::vector<int> streamingNeuronPops{};
 
     void reset_statistics(); //Resets all containers.
 
@@ -78,13 +74,10 @@ protected:
     void Record_Averages();
     void Record_SynapseStates();
 	void Record_Heatmap();
-//    void Record_Histogram(std::vector<std::vector<double>> * synaptic_dV);
-    //void Record_Correlations(std::vector<std::vector<double>> * synaptic_dV);
 	void Record_CurrentContributions(std::vector<std::vector<double>> * synaptic_dV);
 	void Record_HeteroSynapses();
     void Record_HeteroSynapsesOverall();
-    void Record_HeteroSynapsesBranched();
-    //void Record_AllNeuronsOutput();
+
 
 //WriteDataHeader functions
     void WriteDataHeader_Currents();
@@ -92,27 +85,22 @@ protected:
     void WriteDataHeader_Averages();
     void WriteDataHeader_SynapseStates();
     void WriteDataHeader_Potential();
-//    void WriteDataHeader_Histogram();
-    //void WriteDataHeader_Correlations();
 	void WriteDataHeader_Heatmap();
 	void WriteDataHeader_CurrentsContribution();
 	void WriteDataHeader_HeteroSynapses();
     void WriteDataHeader_HeteroSynapsesOverall();
-    void WriteDataHeader_HeteroSynapsesBranched();
-    //void WriteDataHeader_AllNeuronsOutput();
 
 
     void SetNoRasterplotNeurons(std::vector<std::string> *values);
     void SetNoTrackNeuronPotentials(std::vector<std::string> *values);
-    //void SetNoCorrNeurons(std::vector<std::string> *values);
 	void SetNoCurrentContribution(std::vector<std::string> *values);
-    void SetNoTrackHeteroSynapseProfilesPerTrackedNeuronPerPop(std::vector<std::string> *values);
+    void SetNoTrackHeteroSynapticProfilesPerTrackedNeuronPerPop(std::vector<std::string> *values);
 
 
 public:
 
     AdvancedRecorder(NeuronPopSample *ns,SynapseSample *syn,Stimulus *sti,std::string baseDir,std::vector<std::string> *input,std::string str_t,GlobalSimInfo * info);
-    ~AdvancedRecorder() {}
+    ~AdvancedRecorder()=default;
 
     void WriteDataHeader();
     void writeFinalDataFile(double comp_time);
@@ -123,17 +111,12 @@ public:
     std::string GetCurrentsFilename()   {return this->directoryPath + title + "_Currents.dat";}
     std::string GetPotentialFilename()  {return this->directoryPath + title + "_Potential.dat";}
     std::string GetSynapseStateFilename()  {return this->directoryPath + title + "_Synapses.dat";}
-//    std::string GetHistogramFilename()  {return this->directoryPath + title + "_Histogram.dat";}
-    //std::string GetMeanCorrelationsFilename() {return this->directoryPath + title + "_Correlations.dat";}
-    //std::string GetPairCorrelationsFilename() {return this->directoryPath + title + "_BinCorrelations" + std::to_string(info->time_step) + ".dat";}
 	std::string GetCurrentCrontributionFilename() { return this->directoryPath + title + "_CurrentContribution.dat"; }
     std::string GetHeteroSynapseStateFilename() { return this->directoryPath + title + "_HeteroSynapses.dat"; }
     std::string GetOverallHeteroSynapseStateFilename() { return this->directoryPath + title + "_OverallHS.dat"; }
     std::string GetHeteroBranchedSynapseStateFilename() { return this->directoryPath + title + "_BranchedHS.dat"; }
-    //std::string GetNeuronOutputFilename(int popId) { return this->directoryPath + title + "_NeuronPop_" + std::to_string(popId) + "_Output.dat"; }
     std::string GetType()   {return str_advancedRecorder;}
 
-    //std::vector<std::vector<std::vector<double>>> savecurrents;
 
     void SaveParameters(std::ofstream * stream);
     void LoadParameters(std::vector<std::string> *input);

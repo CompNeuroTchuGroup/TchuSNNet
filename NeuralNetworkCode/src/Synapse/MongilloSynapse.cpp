@@ -12,11 +12,11 @@ MongilloSynapse::MongilloSynapse(NeuronPop * postNeurons,NeuronPop * preNeurons,
     y.resize(GetNoNeuronsPre());
     spike_submitted.resize(GetNoNeuronsPre());
 
-    uni_distribution = std::uniform_real_distribution<double>(0.0,1.0);
+    uniformDistribution = std::uniform_real_distribution<double>(0.0,1.0);
 }
 
 
-void MongilloSynapse::advect_spikers (std::vector<double>& currents, long spiker)
+void MongilloSynapse::advectSpikers (std::vector<double>& currents, long spiker)
 {
     double dt_lastSpike    = neuronsPre->GetTimeSinceLastSpike(spiker); //double(info->time_step - neuronsPre->get_previous_spike_step(spiker))*dt;
     double exptf           = exp(-dt_lastSpike/tau_f);
@@ -26,15 +26,15 @@ void MongilloSynapse::advect_spikers (std::vector<double>& currents, long spiker
     {
         //SynapseData_STP * syn = &(synapseData[spiker][target_counter]);
         //In between spikes: unbind Calcium with rate 1/tau_f
-        if((y[spiker][target_counter]) && (uni_distribution(generator) < (1.0-exptf)))
+        if((y[spiker][target_counter]) && (uniformDistribution(generator) < (1.0-exptf)))
                 y[spiker][target_counter] = false;
 
         //In between spikes: refill neurotransmitter with rate 1/tauD
-        if((!x[spiker][target_counter]) && (uni_distribution(generator) < (1.0-exptd)))
+        if((!x[spiker][target_counter]) && (uniformDistribution(generator) < (1.0-exptd)))
                 x[spiker][target_counter] = true;
 
         //Upon presynaptic spike: bind Calcium with probability u
-        if(((!y[spiker][target_counter])) && (uni_distribution(generator) < u))
+        if(((!y[spiker][target_counter])) && (uniformDistribution(generator) < u))
                 y[spiker][target_counter] = true;
 
         //std::cout << "x = " << std::to_string(x[spiker][target_counter]) << "\n";
@@ -162,11 +162,11 @@ std::valarray<double> MongilloSynapse::GetSynapticState(int pre_neuron)
 
 void MongilloSynapse::SetSeed(int s){
     seed      = s;
-    generator = std::default_random_engine(seed);
+    generator = std::mt19937(seed);
 }
 
 
-void MongilloSynapse::SetSeed(std::default_random_engine *generator){
+void MongilloSynapse::SetSeed(std::mt19937 *generator){
     std::uniform_int_distribution<int> distribution(0,INT32_MAX);
     SetSeed(distribution(*generator));
     Synapse::SetSeed(generator);

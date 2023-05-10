@@ -47,7 +47,7 @@ void Connectivity::Test(){
     std::cout << synapse->GetIdStr() << " - Test OK \n";
 }
 
-void  Connectivity::SetSeed(std::default_random_engine *seedGenerator)  {
+void  Connectivity::SetSeed(std::mt19937 *seedGenerator)  {
     if(!fixSeed){
         std::uniform_int_distribution<int> distribution(0,INT32_MAX);
         SetSeed(distribution(*seedGenerator));
@@ -57,7 +57,7 @@ void  Connectivity::SetSeed(std::default_random_engine *seedGenerator)  {
 void  Connectivity::SetSeed(int s){
     if(!fixSeed){
         seed       = s;
-        generator  = std::default_random_engine(seed);
+        generator  = std::mt19937(seed);
     }
 }
 
@@ -132,7 +132,7 @@ int * Connectivity::GetDistributionD(long preNeuronId, long postNeuronId){
 }
 
 void Connectivity::SetDistributionD(){
-    std::uniform_int_distribution<int> uni_distribution(this->synapse->GetMinD(),this->synapse->GetMaxD());
+    std::uniform_int_distribution<int> uniformDistribution(this->synapse->GetMinD(),this->synapse->GetMaxD());
 	unsigned long noTarget;
 
 	if (synapse->GetMaxD()== synapse->GetMinD()) {
@@ -145,7 +145,7 @@ void Connectivity::SetDistributionD(){
             noTarget = static_cast<unsigned long>((target_id[source_neuron]).size());
 			D_distribution[source_neuron].resize(noTarget);
 			for (unsigned long target_neuron = 0; target_neuron < noTarget; target_neuron++) {
-                int d = uni_distribution(generator);
+                int d = uniformDistribution(generator);
                 D_distribution[source_neuron][target_neuron]=d;
                 //std::cout << std::to_string(d) << " ";
             }

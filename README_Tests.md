@@ -63,3 +63,24 @@ To analyse, run the Matlab Live Script in "Test_Results/Test8". For resuts, see 
 Reproduces contrast invariant selectivity and nonlinear sensitivity from Bernaez Timon et al. manuscript (Fig7); in preparation.
 
 To analyse, run the Matlab Live script in "Test_Results/Test9". For resuts, see [here](Test_Results/Test9/Test9.pdf).
+
+## Test 10: Heterosynaptic plasticity framework
+
+Reproduces part of Saif Ahmed's masters thesis (Heterosynaptic Cooperativity in Pair-based
+Spike-Timing-Dependent Plasticity (STDP), 2021). This test is built to test the basic heterosynaptic framework works as intended in its original version. We replicate the behaviour of heterosynaptic cooperativity when we increase alpha and beta parameters in the weight spread while varying the A factor(LTD_pre_factor) from Ahmed's model.
+#### IMPORTANT
+Put the ten generated folders from the simulation's iteration in the same folder as this notebook. The five folders' data is necessary for this analysis to replicate the figure.
+
+## Test 11: DictatNeuronPop
+This test acts as a unit test of the DictatNeuronPop feature, allowing the user to dictate the activity of the population through an external text file. The test requires an extra file apart from Parameters.txt, which contains the neuron instructions for spiking. The analysis is performed by the script found in the test's folder in Test_Results/.
+
+## Test 12: Pairing-based heterosynaptic plasticity with STDP and limited branch resources
+This test acts as a unit test of the model named BranchedResourcesHeteroSTDP (name subject to change), a model that attempts to repoduce the logic found empirically in heterosynaptic plasticity experiments from a pairing framework, while retaining regular STDP in the model. This test also uses the DictatNeuronPop feature, which could be a source of error if Test 11 has not been reproduced. 
+
+The model consists of pairing of synapses through presynaptic spikes (effect decays in time and space) and a potentiation of the pairing by the postsynaptic spike. STDP is identical but without the time and space decay of the synaptic spine pairing. The weights are also constrained following the equation:
+
+$w_{i}$=$\beta$*$\frac{\alpha_{base, i} + \alpha_{stim, i} *e^{-dt/\tau}}{\omega+\sum_{i=0}^{N}(\alpha_{base, i}+\alpha_{stim, i})}$ 
+
+Where $\alpha_{stim, i}$ is the only changing variable during the simulation.
+
+The test requires two extra files apart from Parameters.txt, which contains the neuron instructions for spiking. The analysis is performed by the script found in the test's folder in Test_Results/.

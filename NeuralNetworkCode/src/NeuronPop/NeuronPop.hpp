@@ -11,7 +11,9 @@
 #include <string>
 #include <memory>
 #include "../GlobalFunctions.hpp"
-#include "./HeterosynapticNeuronPop/Morphology/SynapseSpine.hpp"
+#include "./HeterosynapticNeuronPop/Morphology/SynapseSpines/BaseSynapseSpine.hpp"
+
+typedef std::shared_ptr<BaseSynapseSpine> BaseSpinePtr;
 
 class HeteroCurrentSynapse;
 class SynapseSpine;
@@ -33,7 +35,7 @@ protected:
     int    seed_InitialPotentials,seed_InitialPrevSpike;
 
     //bool streamingNOutputBool{false};
-    bool taskOutputBool{false};
+    bool TaskOutputBool{false};
 
     std::valarray<double>   potential;         // membrane potential
     std::vector<long>       spiker;            // indices of all neurons that have emitted a spike in the previous time step
@@ -46,7 +48,7 @@ protected:
 public:
     // constructor
     NeuronPop(GlobalSimInfo * info,int id);
-    virtual ~NeuronPop();
+    virtual ~NeuronPop()=default;
 
     //*******************
     //Get-Functions
@@ -68,7 +70,8 @@ public:
 
     virtual std::string GetType() = 0;
     int  const  GetId(){return this->identifier;}  
-
+    virtual std::valarray<double> GetIndividualSynapticProfile(unsigned long neuronId, unsigned long synapseId);
+    virtual std::valarray<double> GetOverallSynapticProfile(unsigned long neuronId);
 
 	//*******************
     //Set-Functions
@@ -78,24 +81,27 @@ public:
     void SetSeeds(int seed1,int seed2);
     //void SetGlobalNeuronId(long global_neuron_id);
 
+    //Main methods
     virtual void advect(std::vector<double> * synaptic_dV) = 0;
     void    LoadParameters(std::vector<std::string> *input,unsigned long noNeurons);
     virtual void LoadParameters(std::vector<std::string> *input);
     virtual void SaveParameters(std::ofstream * stream);
 
-    //To optimize the dynamic_casting in if statements
+    //Dyn_casting optimization methods
     virtual bool HasHeterosynapticPlasticity(){return false;}
-    virtual bool isBranchedBool() {return false;}
+    virtual bool IsBranchedBool() {return false;}
+    virtual unsigned long GetNumberOfSynapses() const {return 0;}// This is purely for virtualization reasons
     //All of the following functions throw to ease the virtualization, but it is a bad coding practice
-    virtual std::valarray<double> getIndividualSynapticProfile(unsigned long neuronId, unsigned long synapseId);
-    virtual std::valarray<double> getOverallSynapticProfile(unsigned long neuronId);
-    virtual void recordExcitatorySynapticSpike(unsigned long neuronId, unsigned long synapseId);
-    virtual std::shared_ptr<SynapseSpine> allocateNewSynapse(unsigned long neuronId, HeteroCurrentSynapse& syn);
 
+    virtual void RecordExcitatorySynapticSpike(unsigned long neuronId, unsigned long synapseId);
+    virtual BaseSpinePtr AllocateNewSynapse(unsigned long neuronId, HeteroCurrentSynapse& syn);
+    virtual std::string GetIndividualSynapticProfileHeaderInfo() const {return "{Something went wrong}";};
+    virtual std::string GetOverallSynapticProfileHeaderInfo() const {return "{Something went wrong}";};
+    virtual void PostConnectSetUp(){throw;};//This function cannot be called without throwing first
     //Task functions
     //bool const streamingOutput(){return streamingNOutputBool;}//functions
-    bool const taskOutput(){return taskOutputBool;}
-    std::vector<int> taskOutputVector(); //This function is not complete, will be implemented together with the task framework (supposed to return a vector of 0s and 1s equivalent to spikers)
+    bool const TaskOutput(){return TaskOutputBool;}
+    std::vector<int> TaskOutputVector(); //This function is not complete, will be implemented together with the task framework (supposed to return a vector of 0s and 1s equivalent to spikers)
 };
 
 

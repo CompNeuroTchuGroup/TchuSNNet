@@ -92,7 +92,7 @@ recorder_noCorrNeurons             0 	0 				#Record correlations between first x
 recorder_CurrentContributions      0	0	0.000000	#Record the sources of input current to x neurons. (i-th column is x for the i-th population). The i+1-th column sets the initial recording time
 recorder_trackSynapses             0					#Set = 1 to track averaged data from synapes, Set = 0 to ignore.
 recorder_Heatmap                   0					#Number of bins used to represent each dimension of the spatial domain in the firing rates Heatmap
-recorder_notrackHeteroSynProfiles 1	0   1				#Number of heterosynaptic profiles tracked per population. Extra number is required for recording every N timesteps. 
+recorder_notrackHeteroSynapticProfiles 1	0   1				#Number of heterosynaptic profiles tracked per population. Extra number is required for recording every N timesteps. 
 #*************************************************
 #************** Synaptic Parameters **************
 #*************************************************
@@ -144,9 +144,9 @@ synapses_1_1_connectivity_ConnectionProba	1.000000
 synapses_1_1_connectivity_seed				978382936
 #		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
 
-iterate_1 neurons_0_pre_factor_ltd 0.2 0.235 0.275 0.305 0.325
-iterate_2 neurons_0_alpha_ltp 0.1 1.0
-iterate_2 neurons_0_beta_ltd 0.25 2.5
+iterate_2 neurons_0_pre_factor_ltd 0.2 0.235 0.275 0.305 0.325
+iterate_1 neurons_0_alpha_ltp 0.1 1.0
+iterate_1 neurons_0_beta_ltd 0.25 2.5
 #*****************************************************************
 #Comp. finalized: Wed Oct 14 12:12:46 2020
 #Comp. time: 181.1 secs.

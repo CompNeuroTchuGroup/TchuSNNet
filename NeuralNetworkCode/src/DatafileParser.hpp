@@ -13,11 +13,11 @@
 #include <algorithm>
 
 struct recNeuronPopData{
-    int noNeurons;
-    double dt;
-    double simTime;
-    int totalTimesteps;
-    int neuronPopId;
+    int noNeurons{};
+    double dt{};
+    double simTime{};
+    int totalTimesteps{};
+    int neuronPopId{};
     recNeuronPopData(int noNeurons, double dt, int totalTimesteps,int neuronPopId, double simTime);
 };
 enum fileType{

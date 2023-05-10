@@ -21,9 +21,15 @@ OBJECTS = $(SOURCES:$(SRC_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o)
 # Set the dependency files that will be used to add header dependencies
 DEPS = $(OBJECTS:.o=.d)
 
-OPTIMIZE    = -ffast-math -O3
-# flags #
-COMPILE_FLAGS = -std=c++14 -Wall $(OPTIMIZE)
+OPTIMIZE    =  -funroll-loops -ffast-math -O3 -finline-functions -fexpensive-optimizations -msse4.2 -mavx -mavx2 -march=skylake
+# flags 
+# Do not use -mavx512f, gives an illegal instruction error, and if possible, we should find the proper AVX-512 flag for the servers CPU (Intel Xeon Gold)
+#-msse4.2 -mavx -mavx2 are specific of the servers CPU advanced vectorial instructions
+#-march=native forces optimization of the code as much as possible following the architecture of the processor
+#The interaction between the two previous groups of flags is unclear, as per StackOverflow consultation: https://stackoverflow.com/questions/943755/gcc-optimization-flags-for-xeon/25095818
+#All other flags could be redundant when -O3 is present
+
+COMPILE_FLAGS = -std=c++17 -Wall $(OPTIMIZE)
 
 .PHONY: default_target
 default_target: release

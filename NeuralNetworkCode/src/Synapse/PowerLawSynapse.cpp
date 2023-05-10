@@ -11,7 +11,7 @@ PowerLawSynapse::PowerLawSynapse(NeuronPop * postNeurons, NeuronPop * preNeurons
 }
 
 
-void PowerLawSynapse::advect_spikers(std::vector<double>& currents, long spiker)
+void PowerLawSynapse::advectSpikers(std::vector<double>& currents, long spiker)
 {
 	double ISI;
 	double nu_H; //estimated firing rate based on ISI

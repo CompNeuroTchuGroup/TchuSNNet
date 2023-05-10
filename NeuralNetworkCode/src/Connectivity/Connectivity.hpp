@@ -18,7 +18,7 @@ protected:
     GlobalSimInfo               * info;
     bool                        fixSeed{false};
     int                         seed{};
-    std::default_random_engine  generator;
+    std::mt19937  generator;
 
     Synapse                     * synapse;
     std::vector<unsigned long>  * target_id; //the list with postsynaptic (or target) neurons for each neuron of the presynaptic population {array of pointer to vectors}
@@ -47,7 +47,7 @@ public:
     virtual void LoadParameters(std::vector<std::string> *input);
 
     int GetSeed() const { return seed; }
-    void SetSeed(std::default_random_engine *seedGenerator);
+    void SetSeed(std::mt19937 *seedGenerator);
     void SetSeed(int s);
 
     // TODO/Suggestion: Replace pointer with raw value. For primitives there is no advantage returning a pointer unless it is changed by the caller

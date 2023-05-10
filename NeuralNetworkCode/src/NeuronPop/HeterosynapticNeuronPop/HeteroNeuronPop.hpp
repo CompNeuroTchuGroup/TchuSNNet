@@ -15,10 +15,11 @@
 #include "Morphology/TimingDependentModels/MonoDendriteSTDPTazerart.hpp"
 #include "Morphology/TimingDependentModels/MonoDendriteSTDPTazerartRelative.hpp"
 #include "Morphology/TimingDependentModels/MonoDendriteSTDPBiWindow.hpp"
-#include "Morphology/BranchedSimpleModels/SimplePOnlyB.hpp"
+#include "Morphology/BranchedResourceSTDPModel/BranchedResourceHeteroSTDP.hpp"
 #include "../../GlobalFunctions.hpp"
 #include "../NeuronPop.hpp"
-#include "./Morphology/SynapseSpine.hpp"
+
+typedef std::shared_ptr<BaseSynapseSpine> BaseSpinePtr;
 
 class HeteroCurrentSynapse;
 class SynapseSpine;
@@ -35,22 +36,28 @@ public:
     void SaveParameters(std::ofstream * stream) override;
     void LoadParameters(std::vector<std::string> *input) override;
 
-    // Heterosynaptic functionality
-    virtual std::shared_ptr<SynapseSpine> allocateNewSynapse(unsigned long neuronId, HeteroCurrentSynapse& syn) override;
-    virtual void recordExcitatorySynapticSpike(unsigned long neuronId, unsigned long synapseId) override;
-    virtual std::valarray<double> getIndividualSynapticProfile(unsigned long neuronId, unsigned long synapseId)  override;
-    virtual std::valarray<double> getOverallSynapticProfile(unsigned long neuronId) override;
+    void PostConnectSetUp() override;
+    //Getters
+    std::valarray<double> GetIndividualSynapticProfile(unsigned long neuronId, unsigned long synapseId)  override;
+    std::valarray<double> GetOverallSynapticProfile(unsigned long neuronId) override;
+    std::string GetIndividualSynapticProfileHeaderInfo() const override;
+    std::string GetOverallSynapticProfileHeaderInfo() const override;
+    unsigned long GetSynapseCount(unsigned long neuronId);
+    double GetWeight(unsigned long neuronId, unsigned long synapseId);
 
-    //Accessing dendritic data
-    unsigned long getSynapseCount(unsigned long neuronId);
-    double getWeight(unsigned long neuronId, unsigned long synapseId);
-
-    //Inheritance optimizations
-
-    virtual bool HasHeterosynapticPlasticity() override {return true;}
-    virtual bool isBranchedBool() override {return isBranched;}
+    //Setters
     void SetBranchedTrue(){isBranched=true;}
 
+    // Heterosynaptic functionality
+    BaseSpinePtr AllocateNewSynapse(unsigned long neuronId, HeteroCurrentSynapse& syn) override;
+    void RecordExcitatorySynapticSpike(unsigned long neuronId, unsigned long synapseId) override;
+
+
+    //Inheritance optimizations
+    bool HasHeterosynapticPlasticity() override {return true;}
+    bool IsBranchedBool() override {return isBranched;}
+
+    unsigned long GetNumberOfSynapses() const override {return morphology.size();}
     // Testing, check the purpose of this
     //friend std::vector<unsigned long> getSpikedSynapses(const HeteroNeuronPop&, unsigned long neuronId); //currently not in use
 

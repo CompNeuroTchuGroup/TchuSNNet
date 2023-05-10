@@ -15,7 +15,7 @@ SpatialGaussianStimulus::SpatialGaussianStimulus(NeuronPopSample *neur,std::vect
     //******************************
 
     LoadParameters(input);
-    generator  = std::default_random_engine(seed);
+    generator  = std::mt19937(seed);
 }
 
 

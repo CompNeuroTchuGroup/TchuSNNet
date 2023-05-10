@@ -62,10 +62,10 @@ void Recorder::SaveParameters(std::ofstream * stream){
     *stream <<  "#*************************************************\n";
     *stream <<  "#************** Recorder Parameters **************\n";
     *stream <<  "#*************************************************\n";
-    *stream <<  "recorder_type                      " << GetType() <<  "\n";
-    *stream <<  "recorder_noNeuronsConnectivity     " << std::to_string(noNeuronsConnectivity) << "\t\t\t\t\t#saves connectivity matrices for the first x neurons of each populations\n";
-    *stream <<  "recorder_noNeuronsDelay            " << std::to_string(noNeuronsDelay) << "\t\t\t\t\t#saves delay connectivity matrices for the first x neurons of each populations\n";
-    *stream <<  "recorder_noNeuronsJPot             " << std::to_string(noNeuronsJPot) << "\t\t\t\t\t#saves Jpot connectivity matrices for the first x neurons of each populations\n";
+    *stream <<  "recorder_type\t\t\t\t\t\t" << GetType() <<  "\n";
+    *stream <<  "recorder_noNeuronsConnectivity\t\t" << std::to_string(noNeuronsConnectivity) << "\t\t\t\t\t#saves connectivity matrices for the first x neurons of each populations\n";
+    *stream <<  "recorder_noNeuronsDelay\t\t\t\t" << std::to_string(noNeuronsDelay) << "\t\t\t\t\t#saves delay connectivity matrices for the first x neurons of each populations\n";
+    *stream <<  "recorder_noNeuronsJPot\t\t\t\t" << std::to_string(noNeuronsJPot) << "\t\t\t\t\t#saves Jpot connectivity matrices for the first x neurons of each populations\n";
 }
 
 

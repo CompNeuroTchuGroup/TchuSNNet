@@ -20,7 +20,7 @@ protected:
 	std::valarray<int> spike_count;
 	std::valarray<std::valarray<double>> ISI_table;
 
-	void advect_spikers(std::vector<double>& currents, long spiker) override;
+	void advectSpikers(std::vector<double>& currents, long spiker) override;
 	//void advect_finalize(std::vector<std::vector<double>> * waiting_matrix) override {};
 
 public:

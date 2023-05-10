@@ -31,7 +31,7 @@ protected:
 	std::vector<Step> meanCurrent;     
 	std::vector<Step> sigmaCurrent;
 
-	std::default_random_engine generator;
+	std::mt19937 generator;
 
 	void SetSignalArray();
 public:

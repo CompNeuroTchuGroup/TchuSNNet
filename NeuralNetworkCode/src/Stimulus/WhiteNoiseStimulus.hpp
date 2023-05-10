@@ -31,7 +31,7 @@ protected:
     std::vector<step> meanCurrent;     // indices of all neurons that have emitted a spike in the previous time step
     std::vector<step> sigmaCurrent;
 
-    std::default_random_engine generator;
+    std::mt19937 generator;
     
     void SetSignalArray();
 public:

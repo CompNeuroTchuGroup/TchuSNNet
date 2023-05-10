@@ -6,8 +6,8 @@
 
 HeteroPoissonNeuronPop::HeteroPoissonNeuronPop(GlobalSimInfo *info, int id): HeteroNeuronPop(info, id)    {
     r_target = 0; seed = 2;
-    generator = std::default_random_engine(seed);
-    uni_distribution = std::uniform_real_distribution<double>(0.0,1.0);
+    generator = std::mt19937(seed);
+    uniformDistribution = std::uniform_real_distribution<double>(0.0,1.0);
 }
 
 void HeteroPoissonNeuronPop::advect(std::vector<double> * synaptic_dV)
@@ -25,12 +25,12 @@ void HeteroPoissonNeuronPop::advect(std::vector<double> * synaptic_dV)
         }
 
         //check spiking
-        if (uni_distribution(generator) < lambda)
+        if (uniformDistribution(generator) < lambda)
             spiker.push_back(i);
     }
 
     for (auto neuron: this->spiker) {
-        this->morphology[neuron]->recordPostSpike();
+        this->morphology[neuron]->RecordPostSpike();
     }
 
     for (unsigned long morphId =  0; morphId < morphology.size(); ++morphId) {
@@ -61,7 +61,7 @@ void HeteroPoissonNeuronPop::LoadParameters(std::vector<std::string> *input){
     if(info->globalSeed != -1){
         std::uniform_int_distribution<int> distribution(0,INT32_MAX);
         seed = distribution(info->globalGenerator);
-        generator = std::default_random_engine(seed);
+        generator = std::mt19937(seed);
     }
 
 }

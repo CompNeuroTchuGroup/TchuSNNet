@@ -1,33 +1,36 @@
 #include "PoissonNeuronPop.hpp"
 
-PoissonNeuronPop::PoissonNeuronPop(GlobalSimInfo * info,int id):NeuronPop(info,id){
+PoissonNeuronPop::PoissonNeuronPop(GlobalSimInfo * info,int id):NeuronPop(info,id)
+{
         //r_target = 0; seed = 2;
-        generator = std::default_random_engine(seed);
-        uni_distribution = std::uniform_real_distribution<double>(0.0,1.0);}
+        generator = std::mt19937(seed);
+        uniformDistribution = std::uniform_real_distribution<double>(0.0,1.0);
+}
 
 void PoissonNeuronPop::advect(std::vector<double> * synaptic_dV)
 {
     // double dt           = info->dt;
 
     ClearSpiker();
-
+    if (inputDependant){
     //#pragma omp parallel for
-    for(unsigned long i = 0 ; i < noNeurons; i++)
-    {
-        // set target rate
-        if (inputDependant){
+        for(unsigned long i = 0 ; i < noNeurons; i++){
+            // set target rate
             lambda = synaptic_dV->at(i);
+            //Check if neuron fires
+            if (uniformDistribution(generator) < lambda){
+                spiker.push_back(i);
+            }
         }
-
-        //check spiking
-        if (uni_distribution(generator) < lambda)
-        spiker.push_back(i);
+    } else {
+        int totalFiringNeurons{ binomialDistribution(generator) };
+        spiker.resize(totalFiringNeurons);
+        std::sample(neuronIds.begin(), neuronIds.end(), spiker.begin(),totalFiringNeurons,generator);
     }
-
 }
 
-void PoissonNeuronPop::LoadParameters(std::vector<std::string> *input){
-
+void PoissonNeuronPop::LoadParameters(std::vector<std::string> *input)
+{
     NeuronPop::LoadParameters(input);
 
     std::string              name,token;
@@ -47,13 +50,16 @@ void PoissonNeuronPop::LoadParameters(std::vector<std::string> *input){
     if(info->globalSeed != -1){
         std::uniform_int_distribution<int> distribution(0,INT32_MAX);
         seed = distribution(info->globalGenerator);
-        generator = std::default_random_engine(seed);
+        generator = std::mt19937(seed);
     }
-
+    neuronIds.resize(noNeurons);
+    std::iota(neuronIds.begin(), neuronIds.end(), 0);
+    binomialDistribution=std::binomial_distribution<>(noNeurons, lambda);
 }
 
 
-void PoissonNeuronPop::SaveParameters(std::ofstream * stream){
+void PoissonNeuronPop::SaveParameters(std::ofstream * stream)
+{
 
     std::string id = "neurons_" + std::to_string(GetId());
 

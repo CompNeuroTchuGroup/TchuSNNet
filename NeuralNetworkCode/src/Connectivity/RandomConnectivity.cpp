@@ -29,7 +29,7 @@ void RandomConnectivity::LoadParameters(std::vector<std::string> *input){
             //std::cout << "number of neurons pre: " << std::to_string(synapse->GetNoNeuronsPre()) << ", ";
             //std::cout << "connection probability value: " << std::to_string(std::stod(values.at(0))) << ", ";
             //std::cout << "their product: " << std::to_string(synapse->GetNoNeuronsPre()*std::stod(values.at(0))) << "\n";
-            SetNoSourceNeurons(static_cast<unsigned long>(synapse->GetNoNeuronsPre() * std::stod(values.at(0))));
+            SetNoSourceNeurons(static_cast<unsigned long>(std::lround(synapse->GetNoNeuronsPre() * std::stod(values.at(0)))));
         }
         else if(name.find("noSourceNeurons") != std::string::npos){
             SetNoSourceNeurons(std::stoi(values.at(0)));
@@ -54,7 +54,7 @@ void RandomConnectivity::SetNoSourceNeurons(unsigned long noSN){
 double RandomConnectivity::GetConnectionProbability(){
     if(synapse ->GetNoNeuronsPre() == 0)
         return 0;
-    if(synapse->IsRecurrent()){
+    if((noSourceNeurons == synapse->GetNoNeuronsPre()) && synapse->IsRecurrent()){
         return (static_cast<double>(noSourceNeurons+1))/(static_cast<double>(synapse ->GetNoNeuronsPre()));
     }
     else
@@ -87,7 +87,7 @@ void RandomConnectivity::ConnectNeurons()
             source = distribution(generator);
 
             //Check if source and target neurons are equal
-            if( (synapse->IsRecurrent()) && (source == target))
+            if((synapse->IsRecurrent()) && (source == target))
                 continue;
 
             //Check if target was assigned to the same source already

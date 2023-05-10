@@ -11,11 +11,11 @@ MongilloSynapseContinuous::MongilloSynapseContinuous(NeuronPop * postNeurons,Neu
     y.resize(GetNoNeuronsPre());
     spike_submitted.resize(GetNoNeuronsPre());
 
-    uni_distribution = std::uniform_real_distribution<double>(0.0,1.0);
+    uniformDistribution = std::uniform_real_distribution<double>(0.0,1.0);
 }
 
 
-void MongilloSynapseContinuous::advect_spikers (std::vector<double>& currents, long spiker)
+void MongilloSynapseContinuous::advectSpikers (std::vector<double>& currents, long spiker)
 {
     double dt_lastSpike    = neuronsPre->GetTimeSinceLastSpike(spiker); //double(info->time_step - neuronsPre->get_previous_spike_step(spiker))*dt;
     double exptf           = exp(-dt_lastSpike/tau_f);
@@ -198,11 +198,11 @@ std::valarray<double> MongilloSynapseContinuous::GetSynapticState(int pre_neuron
 
 void MongilloSynapseContinuous::SetSeed(int s){
     seed      = s;
-    generator = std::default_random_engine(seed);
+    generator = std::mt19937(seed);
 }
 
 
-void MongilloSynapseContinuous::SetSeed(std::default_random_engine *generator){
+void MongilloSynapseContinuous::SetSeed(std::mt19937 *generator){
     std::uniform_int_distribution<int> distribution(0,INT32_MAX);
     SetSeed(distribution(*generator));
     Synapse::SetSeed(generator);

@@ -242,10 +242,8 @@ void NeuralNetwork::SaveParameterOptions(){// This function should have stuff mo
     tazden.SaveParameters(&stream,"neurons_0");
 
     stream <<  "#*************  Branched dendrites **************************************************************\n";
-
-    SimplePlasticityOnlyBranch simple(&mockInfo);
-    simple.SaveParameters(&stream,"neurons_0");
-
+    BranchedResourceHeteroSTDP brhSTDP(&mockInfo);
+    brhSTDP.SaveParameters(&stream,"neurons_0");
 //Instead of LIF, heteroLIF, put morphology options from Tazerart and HCS and HCP
 
     stream << std::endl;
@@ -281,7 +279,7 @@ int NeuralNetwork::LoadParameters(std::string baseDir,std::vector<FileEntry> *pa
         }
         else if(name.find("globalSeed") != std::string::npos){
             info.globalSeed = static_cast<int> (std::stod(values.at(0)));
-            info.globalGenerator  = std::default_random_engine(info.globalSeed);
+            info.globalGenerator  = std::mt19937(info.globalSeed);
         }
 		else if (name.find("density") != std::string::npos) {
             info.density = static_cast<int>(std::stod(values.at(0)));
@@ -397,7 +395,7 @@ int NeuralNetwork::Simulate()
     double   r;
     double   t_comp = 0;
     unsigned int      P = neurons->GetTotalPopulations();
-    std::uniform_real_distribution<double> uni_distribution (0.0,1.0);
+    std::uniform_real_distribution<double> uniformDistribution (0.0,1.0);
     long      simSteps      = static_cast<long>(info.simulationTime/info.dt);  // number of simulation time steps
     // int      global_D_max = this->synapses->GetMaxD();          // get maximum delay across all synapses: size of waiting matrix DEPRECATED
 
@@ -417,7 +415,6 @@ int NeuralNetwork::Simulate()
 
     this->recorder->SetFilenameDate();
     SaveParameters();
-    this->recorder->WriteDataHeader();
 
     //*****************************************************
     // --------------- START OF THE SIMULATION ------------
@@ -431,6 +428,7 @@ int NeuralNetwork::Simulate()
     this->recorder->WriteConnectivity();
     this->recorder->WriteDistributionD();
     this->recorder->WriteDistributionJ();
+    this->recorder->WriteDataHeader();
 
 	std::cout << "\n Pandas start simulation : " << this->recorder->GetTitle() << "\n";
 	auto start = std::chrono::high_resolution_clock::now();
@@ -446,7 +444,7 @@ int NeuralNetwork::Simulate()
         this->synapses->advect(&synaptic_dV);
         this->stimulus->Update(&synaptic_dV);
         this->neurons->advect(&synaptic_dV);
-		this->synapses->reset();
+		this->synapses->Reset();
         this->recorder->Record(&synaptic_dV);
 
 
@@ -489,9 +487,9 @@ void NeuralNetwork::outputHeteroEvents(){
             HeteroNeuronPop* pop = dynamic_cast<HeteroNeuronPop*>(neurons->GetPop(popId)); 
             //This dynamic cast happens only twice at runtime.
             for (unsigned long nId{ 0 }; nId < pop->GetNoNeurons(); nId++) {
-                unsigned long synCount{ pop->getSynapseCount(nId) };
+                unsigned long synCount{ pop->GetSynapseCount(nId) };
                 for (unsigned long sId{ 0 }; sId < synCount; ++sId) {
-                    double w{ pop->getWeight(nId, sId) };
+                    double w{ pop->GetWeight(nId, sId) };
                     if (w > 1.8) {
                         potentiationCount++;
                     }else if (w < 0.2) {

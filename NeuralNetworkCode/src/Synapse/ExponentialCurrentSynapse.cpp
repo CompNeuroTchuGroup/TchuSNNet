@@ -29,7 +29,7 @@ void ExponentialCurrentSynapse::resetcumulatedDV() {
 	cumulatedDV = cumulatedDV*h;
 }
 
-void ExponentialCurrentSynapse::advect_spikers (std::vector<double>& currents, long spiker){
+void ExponentialCurrentSynapse::advectSpikers (std::vector<double>& currents, long spiker){
 	std::vector<unsigned long> *tL = geometry->GetTargetList(spiker);
 
 	for (unsigned int target = 0; target < tL->size(); target++) {

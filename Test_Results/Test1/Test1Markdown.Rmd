@@ -29,11 +29,11 @@ Test1 is the quickest of the tests and is checking the fundamental basis of the 
 ```{r,include=FALSE}
 project_name  = 'Test1';#project_name is an identifier of the folder containing the simulation data. It is the title of the simulation 
                         #The date suffix does not need to be included
-base_path    = getwd();
+base_path    = dirname(getwd());
 
 folders_ = list.files(path = base_path,pattern=paste("*",project_name,"_20*",sep=""));
 folder_name = paste(base_path,folders_[1],sep="/");
-input_files_folder_name <-paste(dirname(dirname(base_path)),"/Input/",sep="")
+input_files_folder_name <-paste(dirname(dirname(dirname(base_path))),"/currentInputFiles/",sep="")
 setwd(folder_name);
 ```
 
@@ -121,7 +121,8 @@ image(data_DelayMatrix_10, axes=FALSE, col=coul)
 hist(data_DelayMatrix_10*1e-4,breaks = 15, xlab = "ms",main = "Synaptic Delay", freq = TRUE)
 coul <- colorRampPalette(brewer.pal(8, "RdYlGn"))(25)
 image(data_JpotMatrix_10, axes=FALSE, col=coul)
-hist(data_JpotMatrix_10,breaks = seq(from=0, to=0.3, by=0.025),xlab = "",main = "Synaptic Weight", freq = TRUE)
+data_JpotMatrix_10[is.na(data_JpotMatrix_10)]<-0
+hist(data_JpotMatrix_10,breaks = seq(from=0, to=0.32, length.out=11),xlab = "",main = "Synaptic Weight", freq = TRUE)
 
 
 ```

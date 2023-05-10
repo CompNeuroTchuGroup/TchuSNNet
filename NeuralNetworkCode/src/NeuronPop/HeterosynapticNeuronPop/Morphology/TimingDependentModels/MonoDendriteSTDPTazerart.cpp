@@ -76,17 +76,17 @@ void MonoDendriteSTDPTazerart::LoadParameters(std::vector<std::string> *input) {
 }
 
 void MonoDendriteSTDPTazerart::updateLTP(unsigned long synId) {
-    SynapseSpine* syn = this->synapseData[synId].get();
-//    this->weightsSum -= this->synapseData[synId]->weight;
-    double change = this->preFactorLTP * this->aLTP(syn->getTheta()) * this->gLTP(this->lastPostSpikeTime - syn->getLastSpike());
+    CoopSynapseSpine* syn = this->synapseDataCoop[synId].get();
+//    this->weightsSum -= this->synapseDataCoop[synId]->weight;
+    double change = this->preFactorLTP * this->aLTP(syn->GetTheta()) * this->gLTP(this->lastPostSpikeTime - syn->GetLastSpike());
 //    std::cout << synId << " : "  << change << std::endl;
-    this->synapseData[synId]->addToWeight(change);
+    this->synapseDataCoop[synId]->AddToWeight(change);
 
 //    if (synId == 0) {
 //        std::cout << synId << " -- "<< this->lastPostSpikeTime << ", " << syn->lastSpike << " : "  << change << std::endl;
 //    }
-//    this->synapseData[synId]->weight = std::min(2.0, this->synapseData[synId]->weight);
-//    this->weightsSum += this->synapseData[synId]->weight;
+//    this->synapseDataCoop[synId]->weight = std::min(2.0, this->synapseDataCoop[synId]->weight);
+//    this->weightsSum += this->synapseDataCoop[synId]->weight;
 //    this->ltpList.push_back(change);
 //    for (unsigned long i = 0; i < this->ltpList.size(); i++) {
 //        std::cout << this->ltpList.at(i) << ", ";
@@ -96,17 +96,17 @@ void MonoDendriteSTDPTazerart::updateLTP(unsigned long synId) {
 
 
 void MonoDendriteSTDPTazerart::updateLTD(unsigned long synId) {
-    SynapseSpine* syn = this->synapseData[synId].get();
-//    this->weightsSum -= this->synapseData[synId]->weight;
-    double change = this->preFactorLTD * this->aLTD(syn->getTheta()) * this->gLTD(syn->getLastSpike() - this->lastPostSpikeTime);
+    CoopSynapseSpine* syn = this->synapseDataCoop[synId].get();
+//    this->weightsSum -= this->synapseDataCoop[synId]->weight;
+    double change = this->preFactorLTD * this->aLTD(syn->GetTheta()) * this->gLTD(syn->GetLastSpike() - this->lastPostSpikeTime);
 //    std::cout << synId << " : "  << change << std::endl;
-    this->synapseData[synId]->addToWeight(change);
+    this->synapseDataCoop[synId]->AddToWeight(change);
 
 //    if (synId == 0) {
 //        std::cout << synId << " -- " << syn->lastSpike << " , " << this->lastPostSpikeTime << " : "  << change << std::endl;
 //    }
-//    this->synapseData[synId]->weight = std::max(0.0, this->synapseData[synId]->weight);
-//    this->weightsSum += this->synapseData[synId]->weight;
+//    this->synapseDataCoop[synId]->weight = std::max(0.0, this->synapseDataCoop[synId]->weight);
+//    this->weightsSum += this->synapseDataCoop[synId]->weight;
 //    this->ltdList.push_back(change);
 //    for (unsigned long i = 0; i < this->ltdList.size(); i++) {
 //        std::cout << this->ltdList.at(i) << ", ";
@@ -142,23 +142,23 @@ double MonoDendriteSTDPTazerart::aLTD(double theta) const {
     return - (base_ltd - decr_ltd * (1 - exp(-this->beta * theta)));
 }
 
-const std::string MonoDendriteSTDPTazerart::getType() {
+const std::string MonoDendriteSTDPTazerart::GetType() {
     return str_MonoDendriteSTDPTazerart;
 }
 
-double MonoDendriteSTDPTazerart::getTimingEffects(const SynapseSpine* synA, const SynapseSpine* synB) const {
+double MonoDendriteSTDPTazerart::getTimingEffects(const CoopSynapseSpine* synA, const CoopSynapseSpine* synB) const {
     if (synA == synB) {
         return 0.0;
     }
-    if (synA->getLastSpike() < 0 || synB->getLastSpike() < 0) {
+    if (synA->GetLastSpike() < 0 || synB->GetLastSpike() < 0) {
         return 0.0;
     }
-    return exp(-std::abs(synA->getLastSpike() - synB->getLastSpike()) / this->tauDelay);
+    return exp(-std::abs(synA->GetLastSpike() - synB->GetLastSpike()) / this->tauDelay);
 }
 
-double MonoDendriteSTDPTazerart::getDistanceEffects(const SynapseSpine* synA, const SynapseSpine* synB) const {
+double MonoDendriteSTDPTazerart::getDistanceEffects(const CoopSynapseSpine* synA, const CoopSynapseSpine* synB) const {
     if (synA == synB) {
         return 0;
     }
-    return exp(-std::abs(synA->getDistToSoma() - synB->getDistToSoma()) / this->lambdaDist);
+    return exp(-std::abs(synA->GetDistToSoma() - synB->GetDistToSoma()) / this->lambdaDist);
 }

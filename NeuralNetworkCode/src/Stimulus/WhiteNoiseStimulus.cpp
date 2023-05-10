@@ -18,7 +18,7 @@ WhiteNoiseStimulus::WhiteNoiseStimulus(NeuronPopSample *neur,std::vector<std::st
     //******************************
 
     LoadParameters(input);
-    generator  = std::default_random_engine(seed);
+    generator  = std::mt19937(seed);
 }
 
 

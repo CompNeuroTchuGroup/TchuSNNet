@@ -22,7 +22,7 @@ class ExponentialCurrentSynapse : public Synapse
 {
 protected:
     double Tau{};
-	void advect_spikers(std::vector<double>& currents, long spiker) override; // here, only expAddon is advected
+	void advectSpikers(std::vector<double>& currents, long spiker) override; // here, only expAddon is advected
 	//void advect_finalize(std::vector<std::vector<double>> * waiting_matrix) override {}
     void ResetWaitingMatrixEntry() override;  // synaptic_dV is updated here!
 	void resetcumulatedDV() override;

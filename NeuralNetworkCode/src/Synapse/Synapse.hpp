@@ -56,7 +56,7 @@ protected:
     //virtual void advect_finalize(std::vector<double> * synaptic_dV, std::vector<std::vector<std::vector<double>>> * waiting_matrix) = 0;
     void ReadWaitingMatrixEntry(std::vector<double>& synaptic_dV);
 	//virtual void advect_finalize(std::vector<std::vector<double>> * waiting_matrix) = 0;
-    virtual void advect_spikers (std::vector<double>& currents, long spiker) = 0;
+    virtual void advectSpikers (std::vector<double>& currents, long spiker) = 0;
 
     virtual void FillWaitingMatrix(long spiker, std::vector<double>& currents);
 	virtual void resetcumulatedDV();
@@ -119,7 +119,7 @@ public:
     virtual void LoadParameters(std::vector<std::string> *input);
     virtual void SaveParameters(std::ofstream * stream,std::string id_str);
 
-	virtual void SetSeed(std::default_random_engine *generator);
+	virtual void SetSeed(std::mt19937 *generator);
 
     bool IsRecurrent(){ return (neuronsPre == neuronsPost);}
     bool IsConnected(){return isConnectedBool;}

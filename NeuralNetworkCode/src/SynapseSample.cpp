@@ -46,9 +46,9 @@ void SynapseSample::LoadParameters(std::vector<std::string> *input){
 
     if(generalSynapseSeed >= 0){
         //Find P^2 different seed values
-        std::default_random_engine generator;
+        std::mt19937 generator;
         std::uniform_int_distribution<int> distribution(0,INT32_MAX);
-        generator = std::default_random_engine(generalSynapseSeed);
+        generator = std::mt19937(generalSynapseSeed);
 
         for(int i = 0; i < P; i++){
             for(int j = 0; j < P; j++){
@@ -57,7 +57,7 @@ void SynapseSample::LoadParameters(std::vector<std::string> *input){
         }
     }
 
-    //Check seeds
+    //Check seeds (SEPARATE FUNCTION for each pop)
     for(int i = 0; i < P; i++){
         for(int j = 0; j < P; j++){
             for(int k = 0; k < P; k++){
@@ -203,7 +203,7 @@ void SynapseSample::advect(std::vector<std::vector<double>> * synaptic_dV){
     }
 }
 
-void SynapseSample::reset() {
+void SynapseSample::Reset() {
 	int P = this->neurons->GetTotalPopulations();
 
 	for (int source_pop = 0; source_pop < P; source_pop++) {

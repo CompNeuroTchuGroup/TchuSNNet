@@ -73,6 +73,7 @@ void NeuronPopSample::LoadParameters(std::vector<std::string> *input){
             if(name.find("type") != std::string::npos){
                 //std::cout << values.at(0) << "\n";
                 type = values.at(0);
+                break;
             }
         }
 
@@ -86,7 +87,7 @@ void NeuronPopSample::LoadParameters(std::vector<std::string> *input){
 			neuronPops[p] = new EIFNeuronPop(info, p);
         } else if (type == str_PoissonNeuron) {
             neuronPops[p] = new PoissonNeuronPop(info, p);
-        } else if (type==str_QIFNeuron){
+        } else if (type == str_QIFNeuron){
             neuronPops[p] = new QIFNeuronPop(info, p);
         } else if (type == str_HeteroLIFNeuron) {
             // using more than 1 population wouSld mean there must be communcation between Connectivity objects that share the same target popluation
@@ -94,7 +95,7 @@ void NeuronPopSample::LoadParameters(std::vector<std::string> *input){
         } else if (type == str_HeteroPoissonNeuron) {
             // using more than 1 population wouSld mean there must be communcation between Connectivity objects that share the same target popluation
             neuronPops[p] = new HeteroPoissonNeuronPop(info, p);
-        }else if (type == str_InputNeuron) {
+        }else if (type == str_DictatNeuron) {
             // using more than 1 population wouSld mean there must be communcation between Connectivity objects that share the same target popluation
             neuronPops[p] = new DictatNeuronPop(info, p);
         }else {
@@ -110,9 +111,9 @@ void NeuronPopSample::LoadParameters(std::vector<std::string> *input){
 
     //Set seeds
     if(generalNeuronSeed >= 0){
-        std::default_random_engine generator;
+        std::mt19937 generator;
         std::uniform_int_distribution<int> distribution(0,INT32_MAX);
-        generator = std::default_random_engine(generalNeuronSeed);
+        generator = std::mt19937(generalNeuronSeed);
 
         for(unsigned int p = 0; p < noPopulations; p++)
             neuronPops[p]->SetSeeds(distribution(generator),distribution(generator));

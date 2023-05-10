@@ -172,7 +172,7 @@ void Synapse::advect(std::vector<double> * synaptic_dV)
         currents.resize(tL.size(),0);
         std::fill(currents.begin(), currents.end(), 0);//OPTIMIZATION: Change this to the HCS function (currents)
 
-        advect_spikers(currents, spiker);//Here target list is used again OPTIMIZATION. Both these optimizations can be done, but it requires a revision of all Synapse classes.
+        advectSpikers(currents, spiker);//Here target list is used again OPTIMIZATION. Both these optimizations can be done, but it requires a revision of all Synapse classes.
 
 
         FillWaitingMatrix(spiker, currents);//Here target list is used again OPTIMIZATION
@@ -209,7 +209,7 @@ void Synapse::ReadWaitingMatrixEntry(std::vector<double>& synaptic_dV) {
 		synaptic_dV[i] = synaptic_dV[i]+ waiting_matrix[i][index];
 }
 
-void Synapse::SetSeed(std::default_random_engine *generator){
+void Synapse::SetSeed(std::mt19937 *generator){
 
     geometry->SetSeed(generator);
     //std::uniform_int_distribution<int> distribution(0,INT32_MAX);

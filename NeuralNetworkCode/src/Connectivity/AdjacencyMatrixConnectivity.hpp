@@ -25,7 +25,7 @@ protected:
 public:
 
     AdjacencyMatrixConnectivity(Synapse* syn, GlobalSimInfo* info);
-    ~AdjacencyMatrixConnectivity() {}
+    ~AdjacencyMatrixConnectivity()=default;
 
     void                ConnectNeurons();
     unsigned long       GetNumberAverageSourceNeurons() { return noSourceNeurons; }

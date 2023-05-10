@@ -23,7 +23,7 @@ protected:
     double Delta_U;     // Effect of LPA on U
 	double Delta_tau_f; // Effect of LPA on tau_f
 
-    void advect_spikers(std::vector<double>& currents, long spiker) override;
+    void advectSpikers(std::vector<double>& currents, long spiker) override;
     void TransmitSpike(std::vector<double>& currents,long targetId,long spikerId) override;
 	void ConnectNeurons() override;
 

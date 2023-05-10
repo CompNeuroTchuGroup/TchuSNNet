@@ -36,14 +36,16 @@ void HeteroRandomConnectivity::ConnectNeurons() {
                 synapticTargets[source].push_back(std::make_pair(target, synapseId)); //Multi targeting has to change here (for random connectivity)
                 target_id[source].push_back(target);//Are both truly necessary?
                 countedSourceNeurons++;
-            } catch (const noAllocatableSynapseException& e) {
-                e.what();
-                break;
+            } catch (...) {//const noAllocatableSynapseException& e
+                throw;
             }
         }
         if ((target % output_Interval) == 0) {
             std::cout << 100 * target / numPostNeurons << "%-";
         }
+    }
+    if (this->synapse->GetNeuronsPost()->IsBranchedBool()){
+        this->synapse->GetNeuronsPost()->PostConnectSetUp();
     }
     std::cout << "100%\n";
 

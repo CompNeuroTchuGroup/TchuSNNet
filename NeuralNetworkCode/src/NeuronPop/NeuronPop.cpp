@@ -13,12 +13,16 @@ NeuronPop::NeuronPop(GlobalSimInfo * info,int id){
     v_thresh               = 0;
 }
 
-NeuronPop::~NeuronPop(){}
-
 
 void NeuronPop::SetSeeds(int seed1,int seed2) {
-    seed_InitialPrevSpike  = seed1;
-    seed_InitialPotentials = seed2;
+    if(info->globalSeed != -1){
+        std::uniform_int_distribution<int> distribution(0,INT32_MAX);
+        seed_InitialPrevSpike = distribution(info->globalGenerator);
+        seed_InitialPotentials = distribution(info->globalGenerator);
+    } else {
+        seed_InitialPrevSpike  = seed1;
+        seed_InitialPotentials = seed2;
+    }
 }
 
 
@@ -32,14 +36,14 @@ void NeuronPop::SetNeurons(unsigned long noNeur) {
 
     //std::cout << "v_thresh = " << std::to_string(this->v_thresh) << "\n";
     //std::cout << "v_reset = " << std::to_string(this->v_reset) << "\n";
-
-    std::default_random_engine generator(seed_InitialPotentials);
-    //std::uniform_real_distribution<double> uni_distribution (0.0,1.0); //v_thresh instead of 1.0
-    std::uniform_real_distribution<double> uni_distribution (v_reset,v_thresh);
+    
+    std::mt19937 generator(seed_InitialPotentials);
+    //std::uniform_real_distribution<double> uniformDistribution (0.0,1.0); //v_thresh instead of 1.0
+    std::uniform_real_distribution<double> uniformDistribution (v_reset,v_thresh);
 
     for(unsigned long i = 0; i < noNeurons; i++){
         previous_spike_step[i] = - rand() % static_cast<int>(3.0/info->dt);
-        potential[i]           = uni_distribution(generator);
+        potential[i]           = uniformDistribution(generator);
     }
 }
 
@@ -48,8 +52,8 @@ void NeuronPop::SetPosition(long noNeur)
 	if (info->Dimensions == 0)
 		return;
 	noNeurons = noNeur;
-	std::default_random_engine generator(seed_InitialPotentials);
-	std::uniform_real_distribution<double> uni_distribution(0.0, 1.0);
+	std::mt19937 generator(seed_InitialPotentials);
+	std::uniform_real_distribution<double> uniformDistribution(0.0, 1.0);
 	x_pos.resize(noNeurons);
 	y_pos.resize(noNeurons);
 	double Ly = info->Ly;
@@ -59,8 +63,8 @@ void NeuronPop::SetPosition(long noNeur)
 	int mod;
 
 	//for (int i = 0; i < noNeurons; i++) {
-	//	x_pos[i] = uni_distribution(generator) * info->Lx;
-	//	y_pos[i] = uni_distribution(generator) * info->Ly;
+	//	x_pos[i] = uniformDistribution(generator) * info->Lx;
+	//	y_pos[i] = uniformDistribution(generator) * info->Ly;
 	//}
 
 	if (info->Dimensions == 2) {
@@ -162,7 +166,6 @@ void NeuronPop::LoadParameters(std::vector<std::string> *input){
     //         //    neuronsInPopulation[i] = std::stoi(values.at(i));
     //     }
     // }
-
 }
 
 void NeuronPop::SaveParameters(std::ofstream * stream){
@@ -179,8 +182,8 @@ void NeuronPop::SaveParameters(std::ofstream * stream){
     *stream <<  id + "_refractoryTime              " << std::to_string(this->refractorySteps*info->dt)  << " #seconds\n";
     //*stream <<  id + "_r_target                    " << std::to_string(this->r_target)  << " Hz\n";
     if(info->globalSeed == -1){
-        *stream <<  id + "_seedInitialPotentials       " << this->seed_InitialPotentials << "\n";
-        *stream <<  id + "_seedInitialPrevSpike        " << this->seed_InitialPrevSpike << "\n";
+        *stream <<  id + "_seedInitialPotentials   " << this->seed_InitialPotentials << "\n";
+        *stream <<  id + "_seedInitialPrevSpike    " << this->seed_InitialPrevSpike << "\n";
     }
     *stream <<  "#\t\tNote: Resting potential is 0 by definition.\n";
 
@@ -190,24 +193,24 @@ void NeuronPop::SaveParameters(std::ofstream * stream){
 
 //From here on 
 
-std::shared_ptr<SynapseSpine> NeuronPop::allocateNewSynapse(unsigned long neuronId, HeteroCurrentSynapse&syn) {
-        assertm(false, "Non-hetero NeuronPop called allocateNewSynapse");
+BaseSpinePtr NeuronPop::AllocateNewSynapse(unsigned long neuronId, HeteroCurrentSynapse&syn) {
+        assertm(false, "Non-hetero NeuronPop called AllocateNewSynapse");
         throw; 
-        std::shared_ptr<SynapseSpine> empty{};
+        BaseSpinePtr empty{};
         return empty;
 }
 
-void NeuronPop::recordExcitatorySynapticSpike(unsigned long neuronId, unsigned long synapseId){
+void NeuronPop::RecordExcitatorySynapticSpike(unsigned long neuronId, unsigned long synapseId){
     throw;
 }
 
-std::valarray<double> NeuronPop::getOverallSynapticProfile(unsigned long neuronId){
+std::valarray<double> NeuronPop::GetOverallSynapticProfile(unsigned long neuronId){
     throw;
     std::valarray<double> empty{};
     return empty;
 }
 
-std::valarray<double> NeuronPop::getIndividualSynapticProfile(unsigned long neuronId, unsigned long synapseId){
+std::valarray<double> NeuronPop::GetIndividualSynapticProfile(unsigned long neuronId, unsigned long synapseId){
     throw;
     std::valarray<double> empty{};
     return empty;

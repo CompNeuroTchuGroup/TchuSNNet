@@ -23,7 +23,7 @@ protected:
 public:
 
     RandomConnectivity(Synapse *syn,GlobalSimInfo  * info);
-    ~RandomConnectivity(){}
+    ~RandomConnectivity()=default;
 
     virtual void        ConnectNeurons() override;
     unsigned long       GetNumberAverageSourceNeurons() override {return noSourceNeurons;}

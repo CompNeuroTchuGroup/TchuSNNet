@@ -19,7 +19,7 @@
 
 
 
-void multiply_vector (std::vector<unsigned long> &vector, unsigned long value)
+void MultiplyVector (std::vector<unsigned long> &vector, unsigned long value)
 {
     for(std::vector<unsigned long>::iterator it = vector.begin(); it != vector.end(); ++it)
     {
@@ -28,7 +28,7 @@ void multiply_vector (std::vector<unsigned long> &vector, unsigned long value)
 }
 
 
-void multiply_vector (std::vector<double> &vector, double value)
+void MultiplyVector (std::vector<double> &vector, double value)
 {
     for(std::vector<double>::iterator it = vector.begin(); it != vector.end(); ++it)
     {
@@ -36,6 +36,10 @@ void multiply_vector (std::vector<double> &vector, double value)
     }
 }
 
+int ReduceCountStopAtZero(int count)
+{
+    return (count>0) ? count-1 : 0;
+}
 
 void TestWritingFile(std::string filename)
 {
@@ -170,6 +174,17 @@ void SaveTupleOfDoublesFile(std::ofstream *file, std::valarray<double> tuple, in
     stream << std::fixed << std::setprecision(precision) << tuple[i] << "}";
     *file  << stream.str() << "\t";
 }
+void SaveTupleOfDoublesFile(std::ofstream * file, std::vector<double> tuple, int precision)
+{
+    std::stringstream stream;
+    unsigned long i;
+    stream << "{";
+    for (i = 0; i < tuple.size()-1; ++i) {
+        stream << std::fixed << std::setprecision(precision) << tuple[i] << ",";
+    }
+    stream << std::fixed << std::setprecision(precision) << tuple[i] << "}";
+    *file  << stream.str() << "\t";
+}
 
 bool is_double(const std::string& s)
 {
@@ -229,14 +244,4 @@ void RemoveCommentInString(std::vector<std::string> *string, char commentCharact
     }
     *string = new_string;
     return;
-}
-
-Branch::Branch(int gap, int branchLength, std::vector<int> anteriorBranches, int branchId):spikedSyn(static_cast<size_t>(branchLength/gap), false),morphoSynapseIDs(static_cast<size_t>(branchLength/gap), -1), synapticGap{gap}, branchLength{branchLength}, anteriorBranches{anteriorBranches}, branchId{branchId}//,branchSynapseIDs(static_cast<size_t>(branchLength/gap), -1)
-{
-    //std::iota(uniqueSynapsePositionIDs.begin(),uniqueSynapsePositionIDs.end() , branchId*(branchLength/gap));
-}
-
-SubRegion::SubRegion(char regionID, std::vector<int> branchesInRegion): regionID{regionID}, branchesInRegion{branchesInRegion}
-{
-
 }

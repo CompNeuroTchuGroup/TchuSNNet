@@ -24,7 +24,7 @@ protected:
 public:
 
 	DistanceConnectivity(Synapse *syn,GlobalSimInfo  * info);
-    ~DistanceConnectivity(){}
+    ~DistanceConnectivity()=default;
 
     void                ConnectNeurons();
 	void                ConnectNeuronsExact();

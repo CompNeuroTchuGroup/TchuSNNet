@@ -39,7 +39,7 @@ protected:
 
 public:
     Recorder(NeuronPopSample *ns,SynapseSample *syn,Stimulus *sti,std::string baseDir,std::vector<std::string> *input,std::string str_t,GlobalSimInfo * info);
-    virtual ~Recorder() {};
+    virtual ~Recorder()=default;
 
     virtual void WriteDataHeader() = 0;
 	virtual void writeFinalDataFile(double comp_time) = 0;

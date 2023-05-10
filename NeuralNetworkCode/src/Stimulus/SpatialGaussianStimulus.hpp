@@ -30,13 +30,13 @@ protected:
 	std::vector<signal_step> backgroundNoise;
 	std::valarray<double> GPos_X;
 	std::valarray<double> GPos_Y;
-    std::default_random_engine generator;
+    std::mt19937 generator;
     
     void SetSignalArray();
 public:
 
 	SpatialGaussianStimulus(NeuronPopSample * neur,std::vector<std::string> *input,GlobalSimInfo  * info);
-    virtual ~SpatialGaussianStimulus(){}
+    virtual ~SpatialGaussianStimulus()=default;
 
     std::string GetType(){return str_spatialgaussianStimulus;}
     void        Update(std::vector<std::vector<double>> * synaptic_dV);

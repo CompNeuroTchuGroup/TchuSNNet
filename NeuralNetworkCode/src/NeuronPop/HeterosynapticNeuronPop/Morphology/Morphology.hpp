@@ -2,7 +2,7 @@
 #define NEURALNETWORK_MORPHOLOGY_H
 
 
-#include "./SynapseSpine.hpp"
+#include "./SynapseSpines/BaseSynapseSpine.hpp"
 #include "./../../../GlobalFunctions.hpp"
 #include "../../../Synapse/HeteroCurrentSynapse.hpp"
 #include <vector>
@@ -13,6 +13,8 @@
 #include <iostream>
 #include <string>
 
+typedef std::shared_ptr<BaseSynapseSpine> BaseSpinePtr;
+typedef std::shared_ptr<Branch> BranchPtr;
 
 enum WeightNormalization {
     NOPNormalization, HardNormalization, SoftMaxNormalization
@@ -36,14 +38,20 @@ protected:
 
     GlobalSimInfo * info;
 
-    std::vector<std::shared_ptr<SynapseSpine>> synapseData;
+    std::vector<BaseSpinePtr> baseSynapseData;
+
     double weightsSum {};
     double totalPostSpikes {};
     double totalPreSpikes {};
+    bool postSpiked{false};
+
+    bool distributeWeights{false};
+    int seed{0};
+    std::mt19937 generator{ std::mt19937(seed) };
 
     double lastPostSpikeTime;
     std::vector<bool> spikedSynapses;
-    std::vector<unsigned long> spikedSynapsesId;
+    std::vector<int> spikedSynapsesId;
 
     WeightNormalization weightNormalization {NOPNormalization};
     double minWeight {0.0};
@@ -51,13 +59,15 @@ protected:
     double maxWeight {2.0};
 
     bool decayWeights {false};
-    double weightDecayConstant {};
+    double WeightDecayConstant{1.0};
     double weightExpDecay {};
 
-    virtual void reset();
-    void normalizeWeights();
+    unsigned long totalPlasticityEvents{};
 
-    virtual void timeDecay();
+    virtual void Reset()=0;
+    virtual void NormalizeWeights();
+
+    virtual void WeightDecay();
 
 public:
     explicit Morphology(GlobalSimInfo * info);
@@ -66,28 +76,30 @@ public:
     virtual void SaveParameters(std::ofstream * stream, std::string neuronPreId);
     virtual void LoadParameters(std::vector<std::string> *input);
 
-    virtual std::shared_ptr<SynapseSpine> allocateNewSynapse(HeteroCurrentSynapse& synapse)=0;
+    virtual BaseSpinePtr AllocateNewSynapse(const HeteroCurrentSynapse& synapse)=0;
+    double GenerateSynapticWeight();// Here we generate the synaptic weight to be allocated when a synapse is allocated
+    virtual const std::string GetType() = 0;
 
-    virtual const std::string getType() = 0;
-
-    virtual void advect();
-    virtual void recordPostSpike();
-    virtual void recordExcitatoryPreSpike(unsigned long synSpikerId);
-    virtual std::valarray<double> getIndividualSynapticProfile(unsigned long synapseId) const = 0;
-    virtual std::valarray<double> getOverallSynapticProfile() const = 0;
-
+    virtual void advect() = 0;
+    virtual void RecordPostSpike();
+    virtual void RecordExcitatoryPreSpike(int spikedSynapseId);
+    //Getters
+    std::valarray<double> GetIndividualSynapticProfile(unsigned long synapseId) const;
+    std::string GetIndividualSynapticProfileHeaderInfo() const;
+    virtual std::valarray<double> GetOverallSynapticProfile();
+    virtual std::string GetOverallSynapticProfileHeaderInfo() const;
+    //virtual void CalcMorphoPlasticityEvents() {return;};
     //friend std::vector<unsigned long> getSpikedSynapsesFromMorphology(const Morphology&); // This function is not necessary as the spikedSynapses is not used outside of the class
-    unsigned long getSynapseCount() const;
-
-    double getWeight(unsigned long synapseId) const;
-
+    unsigned long GetSynapseCount() const;
+    double GetWeight(unsigned long synapseId) const;
+    virtual void PostConnectSetUp(){};
     // STDP Analysis
     //void triggerStatOut(std::string dirPath);
 
     //void printThetasAndWeights();
 
     //Qualifying methods
-    virtual bool const isBranchedBool() {return false;}
+    virtual bool const IsBranchedBool() {return false;}
 
 };
 

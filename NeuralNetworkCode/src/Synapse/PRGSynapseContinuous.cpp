@@ -115,7 +115,7 @@ std::valarray<double> PRGSynapseContinuous::GetSynapticState(int pre_neuron)
 }
 
 
-void PRGSynapseContinuous::advect_spikers(std::vector<double>& currents, long spiker)
+void PRGSynapseContinuous::advectSpikers(std::vector<double>& currents, long spiker)
 {
 	double dt_lastSpike = neuronsPre->GetTimeSinceLastSpike(spiker); //double(info->time_step - neuronsPre->get_previous_spike_step(spiker))*dt;
 

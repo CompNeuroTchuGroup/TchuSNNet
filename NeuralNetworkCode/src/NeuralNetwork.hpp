@@ -43,7 +43,7 @@ private:
     void SaveParameterOptions();
 public:
     NeuralNetwork(std::string baseDir,std::vector<FileEntry> *parEntries);//std::string baseDir);
-    ~NeuralNetwork(){}
+    ~NeuralNetwork()=default;
 
     int  Simulate();
 
