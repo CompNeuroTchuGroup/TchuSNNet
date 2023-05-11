@@ -47,13 +47,13 @@ std::vector<FileEntry> DatafileParser::parseFileToEntries(std::ifstream& fileStr
 void DatafileParser::setUpSpikeTimesVector(std::vector<std::vector<std::pair<std::vector<double>, std::pair<int, int>>>> &spikeTimesVector)
 {
     //population level
-    for (int neuronPop: neuronPopRasterIds){ //To do proper indexing later, I will need a index-tracing function to get the index in the neuronPopRasterIds vector to index the larger vector properly when reading entries
+    for (int index = 0; index<neuronPopRasterIds.size(); index++){ //To do proper indexing later, I will need a index-tracing function to get the index in the neuronPopRasterIds vector to index the larger vector properly when reading entries
     //neuron level
         std::vector<std::pair<std::vector<double>, std::pair<int, int>>> tempVector;
-        for (int i = 0; i<rasterPlotMetadata.at(neuronPop).noNeurons;i++){
+        for (int i = 0; i<rasterPlotMetadata.at(index).noNeurons; i++){
             // std::pair<std::vector<double>, std::pair<int, int>> tempElement;
             // tempElement.second=std::pair<int, int>(neuronPop, i);
-            tempVector.push_back(std::pair<std::vector<double>, std::pair<int, int>>({}, std::pair<int, int>(neuronPop, i)));
+            tempVector.push_back(std::pair<std::vector<double>, std::pair<int, int>>({}, std::pair<int, int>(neuronPopRasterIds.at(index), i)));
         }
         spikeTimesVector.push_back(tempVector);
     }
