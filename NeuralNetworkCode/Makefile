@@ -21,9 +21,10 @@ OBJECTS = $(SOURCES:$(SRC_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o)
 # Set the dependency files that will be used to add header dependencies
 DEPS = $(OBJECTS:.o=.d)
 
-OPTIMIZE    =  -funroll-loops -ffast-math -O3 -finline-functions -fexpensive-optimizations -msse4.2 -mavx -mavx2 -march=skylake
+OPTIMIZE    =  -funroll-loops -ffast-math -O3 -finline-functions -fexpensive-optimizations -msse4.2 -mavx -mavx2 -march=native
 # flags 
-# Do not use -mavx512f, gives an illegal instruction error, and if possible, we should find the proper AVX-512 flag for the servers CPU (Intel Xeon Gold)
+# Illegal instruction errors are related to compilation flags that relate to instruction sets like AVX2. Depending on access to different CPUs, some additional flags might be available, or others might need to be removed. 
+#For proper -march=native compilation, sbatch the make command _to the CPU you want to use in runtime_.
 #-msse4.2 -mavx -mavx2 are specific of the servers CPU advanced vectorial instructions
 #-march=native forces optimization of the code as much as possible following the architecture of the processor
 #The interaction between the two previous groups of flags is unclear, as per StackOverflow consultation: https://stackoverflow.com/questions/943755/gcc-optimization-flags-for-xeon/25095818
