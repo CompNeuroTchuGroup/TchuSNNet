@@ -25,16 +25,16 @@ As an example, here is what the example parameter file defines:
 - resetType: this parameter determines whether the excess depolarization after spiking is stored. If set to 0 ,there is a "hard reset" to vReset. If set to 1, the overshoot in membrane potential will be added to the reset potential. Here, both populations are of reset type 0 (hard reset).
 
 ### Morphology parameters
-If you want to use a plasticity model (which for now requires the usage of neuron_type HeteroLIFNeuron or the poisson equivalent, synapse_type HeteroCurrentSynapse and connectivity_type HeteroConnectivity), you will need to specify extra parameters in the neuron section (These can be seen in tests 10 and 12). These parameters determine the morphology/physiology of the neuron population in relation to synaptic weights only.
-- morphology_type: Plasticity model that is used. Depending on the model (shown in the [complete guide]), extra parameters will need to be specified.
-- dendritic_length/morphology_branch_length: Determines of the theoretical dendrite or length of each branch for each neuron in micrometers. Its ratio with synaptic_gap defines the total spaces or slots available for synapse allocation. Trying to allocate more synapses than available slots will result in a runtime exception.
-- synaptic_gap: Determines the space between synapse slots.
+If you want to use a plasticity model (which for now requires the usage of synapses_N_N_type PModelSynapse, and all synapses that target the same neuronPop have to coincide in parameters, or you can only input them in one of the synapse parameter instances), you will need to specify extra parameters in the synapse section (These can be seen in tests 10 and 12). These parameters determine the morphology/physiology of the neuron population in relation to synaptic weights only.
+- pmodel_type: Plasticity model that is used. Depending on the model (shown in the [complete guide]), extra parameters will need to be specified.
+- dendriticLength/morphology_branchLength: Determines of the theoretical dendrite or length of each branch for each neuron in micrometres. Its ratio with synapticGap defines the total spaces or slots available for synapse allocation. Trying to allocate more synapses than available slots will result in a runtime exception.
+- synapticGap: Determines the space between synapse slots.
 Implemented model only work in excitatory populations/synapses. Usage in inhibitory populations will ignore the plasticity framework and the weights will remain constant or the weights will vary but be positive depending on the model unless the opposite is explicitly stated.
 
 ### BranchedMorphology parameters
 In case the morphology model used works on branched dendrites, the following parameters will apply:
-- dendrite_branchings: Number of branchings in the dendritic tree. The generated tree is a binary one, so the number of branches will be equal to $2^{branchings}$.
-- synapse_allocation: It can be either 'random' or 'ordered'. It corresponds to the order in which available synapse slots are allocated when the connectivity class connects a presynaptic population. **If connectivity is randomized, the resulting allocation will be randomized no matter what option you select**
+- dendriteBranchings: Number of branchings in the dendritic tree. The generated tree is a binary one, so the number of branches will be equal to $2^{branchings}$.
+- synapseAllocation: It can be either 'random' or 'ordered'. It corresponds to the order in which available synapse slots are allocated when the connectivity class connects a presynaptic population. **If connectivity is randomized, the resulting allocation will be randomized no matter what option you select**
 
 ## Stimulus Parameters
 - type: The type of stimulus which is fed in the network. Here, it is set to WhiteNoiseStimulus. This stimulus is the most standard one, and neurons are fed a white noise input. This input type has two parameters: meanCurrent and sigmaCurrent. Each of these can be defined as a succession of steps in time. 
@@ -53,12 +53,13 @@ Every pair of population has its own Synapse object. Here, we have the four: 0<-
 - J: the synaptic strength. This is the value of the PSP (the change in potential on the postsynaptic neuron upon presynaptic spike). Note that this is the only point at which we define which population is excitatory and which is inhibitory. Here, the population 0 is E and the population 1 is I: we set all EPSPs to 0.001 mV and IPSPs to -0.005mV.
 - Jpot and Ppot: Some synapses can be potentiated. With a probability of Ppot, synapses have a Synaptic strength of Jpot instead of J. Here, Ppot is set to 0 in all synapses, so no synapse is potentiated.
 - connectivity type: the rule for neuron connections. Here, it is set to RandomConnectivity in all synapses. This connectivity rule ensures that each neuron gets the same number of connections, which is determined from the probability of connection and the number of neurons in the presynaptic population: $C=p*N$. For each presynaptic neuron, its presynaptic connections are randomly drawn from the presynaptic population. Here, the connection probability (ConnectProba) is set to 5% in all synapse.
-### Branched parameters
+### Plasticity parameters
 In case the morphology model used works on branched dendrites, the following parameters will apply:
-- target_branch: It can be either 'ordered' (starts allocation at branch 0), 'random', or a specific branch ID (from zero onwards). In the future, subregion implementation will allow to target multiple branches. 
+- relativeCouplingStrength: a relative factor multiplying the weight of synapses from this object only in the model. This only works in plasticity models that are not MonoDendriteSTDP based.
+- targetBranch: It can be either 'ordered' (starts allocation at branch 0), 'random', or a specific branch ID (from zero onwards). In the future, subregion implementation will allow to target multiple branches. 
 
 ##Iterative parameters
-In every Parameters.txt file you have the option of including the iterate_1 and iterate_2 parameters (recommended to add at the end for consensus). Its usage can be seen in Test10_Parameters.txt, but because of how the programme iterates over these parameters, they will not be visible in the reconstituted copy of the parameter file in the output folder. Instead, it can only be recovered in the input_copy_parameters.txt, which is an identical copy of the original file.
+In every Parameters.txt file you have the option of including the iterate_1 and iterate_2 parameters (recommended to add at the end for consensus). Its usage can be seen in Test10_Parameters.txt, but because of how the programme iterates over these parameters, they will not be visible in the reconstituted copy of the parameter file in the output folder. Instead, it can only be recovered in the Title_inputParametersCopy.txt, which is an identical copy of the original file.
 ###Syntax example
 ->iterate_1 neuron_0_noNeurons 50 100 200 400
 ->iterate_1 synapses_1_0_J 0.05 0.025 0.0125 0.00625
@@ -70,6 +71,13 @@ Not following this recommendation will result in undefined behaviour or crashes.
 Iterate parameters of the same number will be combined by column or number of entry. In this example, 50 neurons will be paired with 0.05 dmV/s, and the next time parameters change, the pair will be 100 neurons with 0.025 dmV/s.
 
 **The original entry in the parameter that is substituted by the iterate_n entries will be ignored**
+
+####Special syntax cases
+When using this feature in parameters that contain more than 1 number, you must do two things:
+- Put in the original parameter's place the _precise_ number of numbers in that parameter entry. This is what the program will use to estimate the parameter iterations.
+- When writing the iterate entry, write for every iteration all the numbers that would be put in the parameter entry, no matter if some do not change across iterations.
+Following this requirements ensures the parameter substitution the program does works properly. If a simulation that uses this experiences trouble, debugging main.cpp is the only thing that is required.
+
 ###Functionality
 From the example above, once you run the programme, it will start a simulation with the first column of parameters for the specified parameters. Once it's done, it will start a new simulation with the first column of all iterate_1 parameters and the second column of iterate_2. Once all entries of iterate_2 have been an input in a simulation, the iterate_1 parameters will jump to the second entry, an start anew with the iterate_2 parameter entries. 
 The execution will finish once all possible combinations between columns of iterate_1 and iterate_2 have been run. The output writing is independent in each individual simulation, so in the case of crash or abort the comnpleted simulations will have intact data (including total runtime in seconds).
@@ -78,4 +86,5 @@ This parameteris extremely effective in case it is necessary to perform a grid s
 
 ##ParameterOptions
 The ParameterOption file is a catalogue of existing classes and can be used to check the other available classes for Stimulus, Neuron, Synapse and connectivity. It also shows the parameters which must be defined for each, and the recognized syntax.
+
 

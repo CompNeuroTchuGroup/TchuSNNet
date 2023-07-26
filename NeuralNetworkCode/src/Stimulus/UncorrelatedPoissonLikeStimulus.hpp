@@ -13,7 +13,6 @@
 #include <vector>
 #include <random>
 #include "Stimulus.hpp"
-#define min_(a,b) (((a)<(b)) ? (a):(b))
 
 /* class UncorrelatedPoissonLikeStimulus is a public Stimulus
  * It operates like a virtual external neuron distribution
@@ -29,66 +28,57 @@
  * higher firing rates.
  */
 
-class UncorrelatedPoissonLikeStimulus : public Stimulus
-{
+class UncorrelatedPoissonLikeStimulus : public Stimulus {
 private:
 
-    unsigned long   noExternalNeurons;
-    double          *J_X;
+    NeuronInt   noExternalNeurons{1};
+	std::vector<double>         J_External;
+    std::vector<double> externalCurrents;
+    // std::vector<double> poissonValueTable;    // a table of the poisson distribution for the custom made poisson generator:
+    // int      tableEntries;           // length of poissonValueTable
+    // int      seed;
 
-    double * poisson_value_table;    // a table of the poisson distribution for the custom made poisson generator:
-    int      table_entries;           // length of poisson_value_table
-    int      seed;
+    std::vector<StepStruct> stimulusSteps; //This vector contains the following commented ones. First is time step and second is the stimulation
+    StepStruct* currentStep;
+    // std::vector<double> nextStimTimeStep;
+    // std::vector<double>        nextStimStep;
 
-    std::vector<double> next_stimulus_time_step;
-    std::vector<double>        next_stimulus_step;
+    std::poisson_distribution<int> poissonDistr;
+    // std::mt19937 generator;
+    // std::uniform_int_distribution<int> distribution;
 
-    std::mt19937 generator;
-    std::uniform_int_distribution<int> distribution;
+    void UpdatePoissonTable();                // fills the signal_array
+    // inline void FillPoissonValueTable(double mu); // fills the poissonValueTable
 
-    inline void UpdatePoissonTable();                // fills the signal_array
-    inline void fill_poisson_value_table(double mu); // fills the poisson_value_table
-
-    double GetExternalCouplingStrength(int pop){
-        double h;
-        if (info->networkScaling_extern == 0)
-            h = static_cast<double>(noExternalNeurons);
-        else if (info->networkScaling_extern == 1)
-            h = static_cast<double>(neurons->GetTotalNeurons());
-        else{
-            throw "ERROR: GetExternalCouplingStrength";
-            h = 0;}
-
-        return (J_X[pop] * pow(h,info->networkScaling_synStrength));
-
-    }
+    double GetScaling(PopInt neuronPop) const override;
+    void PostLoadParameters() override;
+    void SetSignalMatrix() override;
 
 public:
-    UncorrelatedPoissonLikeStimulus(NeuronPopSample *neur,std::vector<std::string> *input,GlobalSimInfo  * info);
-    ~UncorrelatedPoissonLikeStimulus();
+    UncorrelatedPoissonLikeStimulus(std::shared_ptr<NeuronPopSample> neurons,std::vector<FileEntry>& stimulusParameters,GlobalSimInfo*  infoGlobal);
+    ~UncorrelatedPoissonLikeStimulus() override = default;
 
     //*******************
     // Get-Functions
     //*******************
-    long    GetStimulusStep_Time(int i) {return static_cast<long> (next_stimulus_time_step.at(i)); }
-    double  GetStimulusStep(int i)      {return next_stimulus_step.at(i);};
-    long    GetStimulusNoSteps() { return static_cast<long>(next_stimulus_step.size()); }
-    std::string GetType()               {return str_uncorrelatedStimulus;}
-    int     GetTable_entries()          {return table_entries;}
+    double    GetStimulusStepEndTime(int stepNo) const {return stimulusSteps.at(stepNo).endTimeStep;}
+    double  GetStimulusStep(int stepNo)   const   {return stimulusSteps.at(stepNo).parameterValues.at(0);};
+    long    GetStimulusNoSteps()  const  {return static_cast<long>(stimulusSteps.size()); }
+    std::string GetType() const override               {return IDstringUncorrelatedStimulus;}
+    // int     GetTableEntries()          {return tableEntries;}
 
     //*******************
     // Set-Functions
     //*******************
-    void SetSeed(int seed){this->seed = seed; generator = std::mt19937(seed);};
-    void SetTableEntries();
-    void AddStimulusStep(int ts,double sS);
+    // void SetSeed(int seed){this->seed = seed; generator = std::mt19937(seed);};
+    void AddStimulusStep(double endTime,double stimStep);
 
     //*******************************************
-    void    Update(std::vector<std::vector<double>> * synaptic_dV);
+    void    Update(std::vector<std::vector<double>>& synaptic_dV) override;
 
-    void    SaveParameters(std::ofstream * stream);
-    void    LoadParameters(std::vector<std::string> *input) override;
-    //void    LoadParameters(std::vector<std::string> *input,double synapticScaling);
+    void    SaveParameters(std::ofstream& wParameterStream) const override;
+    void    LoadParameters(const std::vector<FileEntry>& stimulusParameters) override;
+    //void    LoadParameters(const std::vector<FileEntry>& parameters,double synapticScaling);
 };
 
 

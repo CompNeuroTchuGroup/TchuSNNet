@@ -9,53 +9,47 @@
 #ifndef WhiteNoiseLinear_hpp
 #define WhiteNoiseLinear_hpp
 
+#include "Stimulus.hpp"
 #include <stdio.h>
-
+#include <limits.h>
 #include <iostream>
 #include <vector>
 #include <random>
-#include <limits.h>
-#include "Stimulus.hpp"
 
-struct Step {
-	int    start_time = 0;
-	int    end_time = INT_MAX;
-	std::vector<double> values;
-};
-
-class WhiteNoiseLinear : public Stimulus
-{
+class WhiteNoiseLinear : public Stimulus {
 protected:
-	unsigned seed;
+	// signed seed{};
 
-	std::vector<Step> meanCurrent;     
-	std::vector<Step> sigmaCurrent;
+	std::vector<StepStruct> meanCurrent;     
+	std::vector<StepStruct> sigmaCurrent;
 
-	std::mt19937 generator;
+	StepStruct* meanCurrentPtr;
+	StepStruct* sigmaCurrentPtr;
 
-	void SetSignalArray();
+	std::vector<double> cachedScalingConstants;
+	std::vector<double> meanScalingCache;
+	std::vector<double> sigmaScalingCache;
+
+	std::normal_distribution<double> standardDistribution{0.0,1.0};
+
+	// std::mt19937 generator;
+
+	void PostLoadParameters() override;
+    void SetSignalMatrix() override;
+	void RecalculateMeanScalingCache(StepStruct* meanStep);
+	void RecalculateSigmaScalingCache(StepStruct* sigmaStep);
 public:
 
-	WhiteNoiseLinear(NeuronPopSample * neur, std::vector<std::string> *input, GlobalSimInfo  * info);
-	virtual ~WhiteNoiseLinear() {}
+	WhiteNoiseLinear(std::shared_ptr<NeuronPopSample>  neurons, std::vector<FileEntry>& stimulusParameters, GlobalSimInfo*  infoGlobal);
+	~WhiteNoiseLinear() override = default;
 
-	std::string GetType() { return str_whitenoiseLinear; }
-	void        Update(std::vector<std::vector<double>> * synaptic_dV);
+	std::string GetType() const override { return IDstringWhiteNoiseLinear; }
+	void        Update(std::vector<std::vector<double>>& synaptic_dV) override;
 
-	virtual double GetScaling(int pop) {
-		if (info->networkScaling_extern == 0)
-			return 1.0;
-		else if (info->networkScaling_extern == 1)
-			return (neurons->GetTotalNeurons());
-		else {
-			std::cout << "WhiteNoiseLinear (GetScaling): External Scaling not well defined!";
-			std::terminate();
-			return 0;
-		}
-	};
+	double GetScaling(PopInt neuronPop) const override;
 
-	void    SaveParameters(std::ofstream * stream);
-	void    LoadParameters(std::vector<std::string> *input) override;
+	void    SaveParameters(std::ofstream& wParameterStream) const override;
+	void    LoadParameters(const std::vector<FileEntry>& stimulusParameters) override;
 };
 
 #endif /* WhiteNoiseLinear_hpp */

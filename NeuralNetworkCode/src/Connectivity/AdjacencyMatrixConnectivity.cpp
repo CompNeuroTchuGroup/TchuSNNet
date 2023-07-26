@@ -1,177 +1,149 @@
 #include "AdjacencyMatrixConnectivity.hpp"
 #include "../Synapse/Synapse.hpp"
 
-AdjacencyMatrixConnectivity::AdjacencyMatrixConnectivity(Synapse* syn, GlobalSimInfo* info) :Connectivity(syn, info) {
-    noSourceNeurons = 0;
-    SetSeed(0);
+AdjacencyMatrixConnectivity::AdjacencyMatrixConnectivity(Synapse* synapse, const GlobalSimInfo* infoGlobal) :Connectivity(synapse, infoGlobal) {
+    NeuronInt    noTargetNeurons = synapse->GetNoTargetNeurons();
+    NeuronInt    noSourceNeurons = synapse->GetNoSourceNeurons();
 
-    unsigned long    nPost = syn->GetNoNeuronsPost();
-    unsigned long    nPre = syn->GetNoNeuronsPre();
+    std::string idStr = synapse->GetIdStrWithULine();
 
-    std::string idStr = syn->GetIdStrWithULine();
-
-    connectivity_matrix.resize(nPost);
-    for (unsigned long i = 0; i < nPost; i++)
-        connectivity_matrix[i].resize(nPre);
-
-    for (unsigned long target = 0; target < nPost; target++) {
-        for (unsigned long source = 0; source < nPre; source++) {
-            connectivity_matrix[target][source] = 0;
-        }
+    connectivityMatrix.resize(noTargetNeurons);
+    for (NeuronInt targetNeuron : std::ranges::views::iota(0,noTargetNeurons)){
+        connectivityMatrix.at(targetNeuron).resize(noSourceNeurons, 0);
     }
-    connectionProbFile = info->pathTo_inputFile + "Connectivity_Matrix_"+idStr+".txt";
+
+    // for (NeuronInt targetNeuron : std::ranges::views::iota(0,noTargetNeurons)) {
+    //     for (NeuronInt sourceNeuron : std::ranges::views::iota(0,noSourceNeurons)) {
+    //         connectivityMatrix.at(targetNeuron).at(sourceNeuron) = 0;
+    //     }
+    // }
+    connectionProbFile = infoGlobal->pathToInputFile + "Connectivity_Matrix_"+idStr+".txt";
 }
 
-void AdjacencyMatrixConnectivity::SaveParameters(std::ofstream* stream, std::string id_str) {
-    Connectivity::SaveParameters(stream, id_str);
-    //*stream << id_str << "connectivity_noSourceNeurons " << std::to_string(this->noSourceNeurons) << "\n";
-    //*stream << id_str << "connectivity_ConnectionProba\t" << std::to_string(this->GetConnectionProbability()) << "\n";
-    //*stream << "#" << id_str << "connectivity_noSourceNeurons " << std::to_string(this->noSourceNeurons) << "\n";
-    *stream << "#\t\t" << str_adjacencyMatrixConnectivity << ": Pre and post population has adjacency matrix.\n";
+void AdjacencyMatrixConnectivity::SaveParameters(std::ofstream& wParameterStream, std::string idString) const {
+    Connectivity::SaveParameters(wParameterStream, idString);
+    //*stream << idString << "connectivity_noSourceNeurons " << std::to_string(this->noSourceNeurons) << "\n";
+    //*stream << idString << "connectivity_ConnectionProba\t" << std::to_string(this->GetConnectionProbability()) << "\n";
+    //*stream << "#" << idString << "connectivity_noSourceNeurons " << std::to_string(this->noSourceNeurons) << "\n";
+    wParameterStream << "#\t\t" << IDstringAdjacencyMatrixConnectivity << ": Pre and post population has adjacency matrix.\n";
 }
 
-void AdjacencyMatrixConnectivity::LoadParameters(std::vector<std::string>* input) {
-    Connectivity::LoadParameters(input);
-
-    std::string              name;
-    std::vector<std::string> values;
+void AdjacencyMatrixConnectivity::LoadParameters(const std::vector<FileEntry>& connectivityParameters) {
+    Connectivity::LoadParameters(connectivityParameters);
     
-    for (std::vector<std::string>::iterator it = (*input).begin(); it != (*input).end(); ++it) {
-        SplitString(&(*it), &name, &values);
-        if (name.find("seed") != std::string::npos) {
-            SetSeed(std::stoi(values.at(0)));
-        }
-        else if (name.find("noSourceNeurons") != std::string::npos) {
-            SetNoSourceNeurons(std::stoi(values.at(0)));
+    for (auto& [parameterName, parameterValues] : connectivityParameters) {
+        // if (parameterName.find("seed") != std::string::npos) {
+        //     SetSeed(std::stoi(parameterValues.at(0)));
+        // }
+        if (parameterName.find("noSourceNeurons") != std::string::npos) {
+            SetNoSourceNeurons(std::stoi(parameterValues.at(0)));
         }
 
     }
     GetConnectionWeightsFromFile(connectionProbFile);
 }
 
-void AdjacencyMatrixConnectivity::SetNoSourceNeurons(unsigned long noSN) {
-    if (noSN < 0)
+void AdjacencyMatrixConnectivity::SetNoSourceNeurons(NeuronInt readNoSourceNeurons) {
+    if (readNoSourceNeurons < 0){
         noSourceNeurons = 0;
-    else if (noSN > synapse->GetNoNeuronsPre())
-        noSourceNeurons = synapse->GetNoNeuronsPre();
-    else if ((noSN == synapse->GetNoNeuronsPre()) && (synapse->IsRecurrent()))
-        //noSourceNeurons = 0;
-        noSourceNeurons = synapse->GetNoNeuronsPre() - 1;
-    else
-        noSourceNeurons = noSN;
-
+    } else if (readNoSourceNeurons > synapse->GetNoSourceNeurons()){
+        noSourceNeurons = synapse->GetNoSourceNeurons();
+    } else if ((readNoSourceNeurons == synapse->GetNoSourceNeurons()) && (synapse->IsRecurrent())){
+        noSourceNeurons = synapse->GetNoSourceNeurons() - 1;
+    } else {
+        noSourceNeurons = readNoSourceNeurons;
+    }
 }
 
-double AdjacencyMatrixConnectivity::GetConnectionProbability() {
-    if (synapse->GetNoNeuronsPre() == 0)
+double AdjacencyMatrixConnectivity::GetConnectionProbability() const {
+    if (synapse->GetNoSourceNeurons() == 0)
         return 0;
     else
-        return static_cast<double>(noSourceNeurons) / static_cast<double>(synapse->GetNoNeuronsPre());
+        return static_cast<double>(noSourceNeurons) / static_cast<double>(synapse->GetNoSourceNeurons());
 }
 
 void AdjacencyMatrixConnectivity::GetConnectionWeightsFromFile(std::string filepath) {
 
-    std::vector<std::string> values;
-    std::string str_line;
+    std::string readStringLine;
 
-    std::ifstream stream(filepath);
+    std::ifstream connectivityStream(filepath);
     std::cout << filepath << std::endl;
 
-    unsigned long source = 0;
-    unsigned long    nPre = synapse->GetNoNeuronsPre();
-    unsigned long    nPost = synapse->GetNoNeuronsPost();
+    NeuronInt    sourceNeuron{};
+    NeuronInt    noSourceNeurons = synapse->GetNoSourceNeurons();
+    NeuronInt    noTargetNeurons = synapse->GetNoTargetNeurons();
 
-    std::vector<std::vector<double>> tmp_matrix;
-    try
-    {
-        bool tooManyColumnException = false;
+    std::vector<std::vector<double>> tempMatrix;
+    try  {
+        while (std::getline(connectivityStream, readStringLine)) {
+            std::vector<std::string> parameterValues = SplitStringToValues(readStringLine);
 
-        while (std::getline(stream, str_line))
-        {
-            std::vector<std::string> values;
-            SplitString(&str_line, &values);
-
-            if (source >= nPre) {
+            if (sourceNeuron >= noSourceNeurons) {
                 throw 4;
             }
-            if (values.size() < nPost) {
+            if (static_cast<NeuronInt>(parameterValues.size()) < noTargetNeurons) {
                 throw 1;
             }
-            if (values.size() > nPost) {
-                tooManyColumnException = true;
+            if (static_cast<NeuronInt>(parameterValues.size()) > noTargetNeurons) {
+                throw 3;
             }
 
-            for (std::vector<int>::size_type target = 0; target != nPost; target++) {
-                connectivity_matrix[target][source] = std::stoi(values.at(target));
+            for (size_t targetNeuron: std::ranges::views::iota(0, noTargetNeurons)) {
+                connectivityMatrix.at(targetNeuron).at(sourceNeuron) = std::stoi(parameterValues.at(targetNeuron));
             }
-
-            source++;
+            sourceNeuron++;
         }
-        if (source < nPre) {
+        if (sourceNeuron < noSourceNeurons) {
             throw 2;
         }
-        if (tooManyColumnException) {
-            throw 3;
-        }
     }
-    catch (int exception)
-    {
-        stream.close();
+    catch (int exception) {
+        connectivityStream.close();
         if (exception == 1) {
-            std::cout << "*************************\n";
-            std::cout << "Not enough columns of synaptic connection file!\n";
-            std::cout << "*************************\n";
-            exit(1);
+            throw "Not enough columns of synaptic connection file!";
         }
         else if (exception == 2) {
-            std::cout << "*************************\n";
-            std::cout << "Not enough rows of synaptic connection file!\n";
-            std::cout << "*************************\n";
-            exit(1);
+            throw "Not enough rows of synaptic connection file!";
         }
         else if (exception == 3) {
-            std::cout << "*************************\n";
-            std::cout << "Warning: Too many columns of synaptic connection file\n";
-            std::cout << "*************************\n";
+            throw "Warning: Too many columns of synaptic connection file";
         }
         else if (exception == 4) {
-            std::cout << "*************************\n";
-            std::cout << "Warning: Too many rows of synaptic connection file\n";
-            std::cout << "*************************\n";
+            throw "Warning: Too many rows of synaptic connection file";
         }
     }
-
-    stream.close();
+    connectivityStream.close();
 }
 
 void AdjacencyMatrixConnectivity::ConnectNeurons()
 {
 
-    unsigned long    countedSourceNeurons;
-    unsigned long    nPost = synapse->GetNoNeuronsPost();
-    unsigned long    nPre = synapse->GetNoNeuronsPre();
+    NeuronInt    countedSourceNeurons{};
+    NeuronInt    noTargetNeurons = synapse->GetNoTargetNeurons();
+    NeuronInt    noSourceNeurons = synapse->GetNoSourceNeurons();
 
-    long    output_Interval = nPost / 10;
-    if (output_Interval == 0)
-        output_Interval = 1;
-
-    countedSourceNeurons = 0;
+    NeuronInt    outputInterval = noTargetNeurons / 10;
+    if (outputInterval == 0)
+        outputInterval = 1;
 
     //Iterate through all target neurons
-    for (unsigned long target = 0; target < nPost; target++) {
-        for (unsigned long source = 0; source < nPre; source++) {
+    for (NeuronInt targetNeuron : std::ranges::views::iota(0,noTargetNeurons)) {
+        for (NeuronInt sourceNeuron : std::ranges::views::iota(0,noSourceNeurons)) {
 
-            int connection = connectivity_matrix[target][source];
+            int connection = connectivityMatrix.at(targetNeuron).at(sourceNeuron);
 
-            if (connection != 0) {
-                target_id[source].push_back(target);
-                countedSourceNeurons++;
+            if (connection != 0) { //Here we would for loop over the connection index to do multiple synapses
+                for (int connectionFormed : std::ranges::views::iota(0, connection)){
+                    (void)connectionFormed;
+                    synapse->AllocateSynapse(targetNeuron, sourceNeuron);
+                    countedSourceNeurons++;
+                }
             }
         }
 
-        if ((target) % output_Interval == 0)
-            std::cout << 100 * (target) / nPost << "%-";
+        // if ((targetNeuron) % outputInterval == 0)
+        //     std::cout << 100 * (targetNeuron) / noTargetNeurons << "%\n";
     }
-    std::cout << "100%\n";
-    SetNoSourceNeurons(int(countedSourceNeurons / nPost));
+    //     // std::cout << "100%\n";
+    SetNoSourceNeurons(countedSourceNeurons / noTargetNeurons);
 }

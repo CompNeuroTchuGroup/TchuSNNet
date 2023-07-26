@@ -7,165 +7,130 @@
 //
 
 #include "NeuronPopSample.hpp"
-#include "NeuronPop/HeterosynapticNeuronPop/HeteroLIFNeuronPop.hpp"
 
 
-NeuronPopSample::NeuronPopSample(std::vector<std::string> *input,GlobalSimInfo * info){
+NeuronPopSample::NeuronPopSample(std::vector<FileEntry> neuronParameters, GlobalSimInfo* infoGlobal) : infoGlobal{infoGlobal}{
 
-    this->generalNeuronSeed = -1;
-    this->info = info;
-    noPopulations = 0;
-
-    LoadParameters(input);
-
+    LoadParameters(neuronParameters);
 }
 
-void NeuronPopSample::LoadParameters(std::vector<std::string> *input){
-
-    std::string              name,token,type,filterStr;
-    std::vector<std::string> values,neurons_strs;
-    bool                     newFormat = false;
-    std::vector<std::string> Ni;
-
-    //for (std::vector<std::string>::const_iterator i = (*input).begin(); i != (*input).end(); ++i)
-    //std::cout << *i << " \n";
+void NeuronPopSample::LoadParameters(const std::vector<FileEntry>& neuronParameters){
 
     //Get number of populations
-    for(std::vector<std::string>::iterator it = (*input).begin(); it != (*input).end(); ++it) {
+    for(auto& [parameterName, parameterValues] : neuronParameters) {
 
-        SplitString(&(*it),&name,&values);
-
-        if(name.find("noPopulations") != std::string::npos){
-            noPopulations = static_cast<int>(std::stod(values.at(0)));
-            newFormat     = true;
+        if(parameterName.find("noPopulations") != std::string::npos){
+            noPopulations = static_cast<PopInt>(std::stoi(parameterValues.at(0)));
         }
-        else if(name.find("Ni") != std::string::npos){//Deprecated. I do not even know what this is
-            Ni            = values;
-            noPopulations = static_cast<int>(values.size());
-        }
-        else if(name.find("generalNeuronSeed") != std::string::npos){
-            generalNeuronSeed = std::stoi(values.at(0));
-        }
+        // else if(parameterName.find("generalNeuronSeed") != std::string::npos){
+        //     generalNeuronSeed = std::stoi(parameterValues.at(0));
+        // }
     }
-    neuronPops = new NeuronPop*[noPopulations];
+    //neuronPops.resize(noPopulations);
 
-    if(info->globalSeed != -1){
-        std::uniform_int_distribution<int> distribution(0,INT32_MAX);
-        generalNeuronSeed = distribution(info->globalGenerator);
-    }
+    // if(infoGlobal->globalSeed != -1){
+    //     std::uniform_int_distribution<int> distribution(0,INT32_MAX);
+    //     generalNeuronSeed = distribution(infoGlobal->globalGenerator);
+    // }
 
     //iterate through populations
-    for(unsigned int p = 0; p < noPopulations;p++){
+    for(PopInt population : std::ranges::views::iota(0,noPopulations)){
+        //It could be argued that the previous implementation was somewhat safer to misallocation of neuronPop ids, but the single-point of failure (the population signed int in the for loop statement),
+        //is exactly the same. The id that shows in neurons_id is the end-all-be-all of the position (which follows ascending order always).
         //std::cout << "number of population: " << std::to_string(p) << "\n";
+        std::string neuronType;
+        //filter population parameters
+        std::string filterStr = "neurons_" + std::to_string(population);
 
-        //filter input
-        if(newFormat)
-            filterStr = "neurons_" + std::to_string(p);
-        else
-            filterStr = "neurons_";
-
-        FilterStringVector(input, filterStr, &neurons_strs);
+        std::vector<FileEntry> singleNeuronPopParameters = FilterStringEntries(neuronParameters, filterStr);
 
         //find type
-        for(std::vector<std::string>::iterator it = (*(&neurons_strs)).begin(); it != (*(&neurons_strs)).end(); ++it) {
-
-            SplitString(&(*it),&name,&values);
-            if(name.find("type") != std::string::npos){
-                //std::cout << values.at(0) << "\n";
-                type = values.at(0);
+        for(FileEntry singleEntry : singleNeuronPopParameters) {
+            if (singleEntry.parameterNameContains("type") && !singleEntry.parameterNameContains("morphology")){
+                LoadNeuronPop(singleEntry.parameterValues.at(0), population, singleNeuronPopParameters);
                 break;
             }
         }
+    }
+    std::for_each(neuronPops.begin(), neuronPops.end(), [this](const PopPtr& neuronPop){
+        infoGlobal->totalNeurons  += neuronPop->GetNoNeurons();
+    });
+    // for(PopPtr neuronPopPtr : neuronPops) {
+    //     infoGlobal->totalNeurons  += neuronPop->GetNoNeurons();
+    // }
+	if (infoGlobal->dimensions == 1) {
+		infoGlobal->xAxisLength = infoGlobal->totalNeurons / static_cast<double>(infoGlobal->density);
+	} else if (infoGlobal->dimensions == 2) {
+		infoGlobal->xAxisLength = sqrt(infoGlobal->totalNeurons / static_cast<double>(infoGlobal->density) );
+		infoGlobal->yAxisLength = infoGlobal->xAxisLength;
+	}
+    std::for_each(neuronPops.begin(), neuronPops.end(), [](const PopPtr& neuronPop){
+        neuronPop->SetPosition();
+    });
+	// for (PopInt neuronPop : std::ranges::views::iota(0, noPopulations)){
+	// 	neuronPops.at(neuronPop)->SetPosition(neuronPops.at(neuronPop)->GetNoNeurons());
+    // }
 
-        //std::cout << "neuron type: " << type << "\n";
+}
 
-        //define neuronPopulation according to type
-        if(type == str_LIFNeuron){
-            //delete statements have been removed
-            neuronPops[p] = new LIFNeuronPop(info,p);
-        } else if (type == str_EIFNeuron) {
-			neuronPops[p] = new EIFNeuronPop(info, p);
-        } else if (type == str_PoissonNeuron) {
-            neuronPops[p] = new PoissonNeuronPop(info, p);
-        } else if (type == str_QIFNeuron){
-            neuronPops[p] = new QIFNeuronPop(info, p);
-        } else if (type == str_HeteroLIFNeuron) {
-            // using more than 1 population wouSld mean there must be communcation between Connectivity objects that share the same target popluation
-            neuronPops[p] = new HeteroLIFNeuronPop(info, p);
-        } else if (type == str_HeteroPoissonNeuron) {
-            // using more than 1 population wouSld mean there must be communcation between Connectivity objects that share the same target popluation
-            neuronPops[p] = new HeteroPoissonNeuronPop(info, p);
-        }else if (type == str_DictatNeuron) {
-            // using more than 1 population wouSld mean there must be communcation between Connectivity objects that share the same target popluation
-            neuronPops[p] = new DictatNeuronPop(info, p);
+void NeuronPopSample::LoadNeuronPop(std::string neuronPopType, PopInt popID, std::vector<FileEntry> neuronParameters) {
+
+        if(neuronPopType == IDstringLIFNeuron || neuronPopType ==IDstringHeteroLIFNeuron){
+            neuronPops.push_back(std::make_shared<LIFNeuronPop>(infoGlobal,popID));
+        } else if (neuronPopType == IDstringEIFNeuron) {
+			neuronPops.push_back(std::make_shared<EIFNeuronPop>(infoGlobal, popID));
+        } else if (neuronPopType == IDstringPoissonNeuron || neuronPopType == IDstringHeteroPoissonNeuron) {
+            neuronPops.push_back(std::make_shared<PoissonNeuronPop>(infoGlobal, popID));
+        } else if (neuronPopType == IDstringQIFNeuron){
+            neuronPops.push_back(std::make_shared<QIFNeuronPop>(infoGlobal, popID));
+        }else if (neuronPopType == IDstringDictatNeuron) {
+            neuronPops.push_back(std::make_shared<DictatNeuronPop>(infoGlobal, popID));
         }else {
-            throw std::runtime_error(">>>Undefined type of NeuronPop.\n>>>Check Parameters.txt.");
+            throw ">>>Undefined type of NeuronPop.\n>>>Check Parameters.txt.";
         }
 
         //load parameters
-        if(newFormat)
-            neuronPops[p]->LoadParameters(&neurons_strs);
-        else
-            neuronPops[p]->LoadParameters(&neurons_strs, static_cast<unsigned long>(std::stod(Ni.at(p))));
-    }
-
-    //Set seeds
-    if(generalNeuronSeed >= 0){
-        std::mt19937 generator;
-        std::uniform_int_distribution<int> distribution(0,INT32_MAX);
-        generator = std::mt19937(generalNeuronSeed);
-
-        for(unsigned int p = 0; p < noPopulations; p++)
-            neuronPops[p]->SetSeeds(distribution(generator),distribution(generator));
-    }
-
-
-    info->N = 0;
-    for(unsigned int i = 0;i<noPopulations;i++) {
-        info->N  += neuronPops[i]->GetNoNeurons();
-    }
-
-	if (info->Dimensions == 1) {
-		info->Lx = info->N / static_cast<double>(info->density);
-		info->Ly = 0;
-	}
-	else if (info->Dimensions == 2) {
-		info->Lx = sqrt(info->N / static_cast<double>(info->density) );
-		info->Ly = info->Lx;
-	}
-
-	for (unsigned int p = 0;p < noPopulations;p++)
-		neuronPops[p]->SetPosition(neuronPops[p]->GetNoNeurons());
-
-    // Set global neuron id
-    //long global_neuron_id = 0;
-    //for(int p = 0; p < noPopulations; p++){
-    //    neuronPops[p]->SetGlobalNeuronId(global_neuron_id);
-    //   global_neuron_id += neuronPops[p]->GetNoNeurons();
-    //}
+        neuronPops.back()->LoadParameters(neuronParameters);
 }
 
-void NeuronPopSample::advect(std::vector<std::vector<double>> * synaptic_dV){
+void NeuronPopSample::Advect(std::vector<std::vector<double>>& synaptic_dV){
+    // for(PopInt neuronPop : std::ranges::views::iota(0, noPopulations)) //Here container iteration is not possible because we need the index
+    //     neuronPops.at(neuronPop)->Advect(synaptic_dV.at(neuronPop));
+    // std::for_each(neuronPops.begin(), neuronPops.end(), [synaptic_dV](PopPtr neuronPopPtr){
+    //     neuronPopPtr->Advect(synaptic_dV.at(neuronPopPtr->GetId()));
+    // });
+    std::for_each(PAR,neuronPops.begin(), neuronPops.end(), [synaptic_dV](PopPtr neuronPopPtr){
+        neuronPopPtr->Advect(synaptic_dV.at(neuronPopPtr->GetId()));
+    });
+    //Test9 debugging
+    // std::cout << "spikers:";
+    // for (double spiker : neuronPops.at(0)->GetSpikers()) {
+    //     std::cout << spiker;
+    // }
+    // std::cout << std::endl;
+    /*    std::cout << "spikers:";
+    int spikers{};
+    for (unsigned int p = 0; p < noPopulations; p++)
+        spikers += neuronPops.at(p)->GetSpikers().size();
+    std::cout <<spikers<< std::endl;*/
 
-
-    for(unsigned int p = 0; p < noPopulations; p++)
-        neuronPops[p]->advect(&synaptic_dV->at(p));
 }
 
 
-void NeuronPopSample::SaveParameters(std::ofstream * stream){
+void NeuronPopSample::SaveParameters(std::ofstream& wParameterStream) const {
 
-    *stream <<  "#***********************************************\n";
-    *stream <<  "#************** Neuron Parameters **************\n";
-    *stream <<  "#***********************************************\n";
+    wParameterStream <<  "#***********************************************\n";
+    wParameterStream <<  "#************** Neuron Parameters **************\n";
+    wParameterStream <<  "#***********************************************\n";
 
-    *stream <<  "neurons_noPopulations                 " << std::to_string(noPopulations) << "\n";
-    if(info->globalSeed == -1){
-        *stream <<  "neurons_generalNeuronSeed             " << std::to_string(generalNeuronSeed) << "\n";
-        *stream <<  "#generalNeuronSeed = -1: seeds are defined at individual population level.\n";
-        *stream <<  "#generalNeuronSeed >= 0: general seed overrides individual seeds.\n";
+    wParameterStream <<  "neurons_noPopulations                 " << std::to_string(noPopulations) << "\n";
+    // if(infoGlobal->globalSeed == -1){
+    //     wParameterStream <<  "neurons_generalNeuronSeed             " << std::to_string(generalNeuronSeed) << "\n";
+    //     wParameterStream <<  "#generalNeuronSeed = -1: seeds are defined at individual population level.\n";
+    //     wParameterStream <<  "#generalNeuronSeed >= 0: general seed overrides individual seeds.\n";
+    // }
+
+    for(PopPtr neuronPopPtr: neuronPops){
+        neuronPopPtr->SaveParameters(wParameterStream);
     }
-
-    for(unsigned int p = 0;p < noPopulations; p++)
-        neuronPops[p]->SaveParameters(stream);
 }

@@ -9,131 +9,181 @@
 #include "WhiteNoiseStimulus.hpp"
 
 
-WhiteNoiseStimulus::WhiteNoiseStimulus(NeuronPopSample *neur,std::vector<std::string> *input,GlobalSimInfo  * info):Stimulus(neur,info){
+WhiteNoiseStimulus::WhiteNoiseStimulus(std::shared_ptr<NeuronPopSample> neurons,std::vector<FileEntry>& stimulusParameters,GlobalSimInfo*  infoGlobal): Stimulus(neurons,infoGlobal){
 
     //******************************
-    //***** Default values *********
+    //***** Default parameterValues *********
     //******************************
-    seed         = 0;
     //******************************
-
-    LoadParameters(input);
-    generator  = std::mt19937(seed);
+    cachedMeans.resize(neurons->GetTotalPopulations());
+    cachedSigmas.resize(neurons->GetTotalPopulations());
+    LoadParameters(stimulusParameters);
+    // generator  = std::mt19937(seed);
 }
 
 
-void WhiteNoiseStimulus::LoadParameters(std::vector<std::string> *input){
+void WhiteNoiseStimulus::LoadParameters(const std::vector<FileEntry>& stimulusParameters){
 
-    //Stimulus::LoadParameters(input);
-    std::string              name,token;
-    std::vector<std::string> values;
-    int                      P = neurons->GetTotalPopulations();
-    step s;
+    Stimulus::LoadParameters(stimulusParameters);
+    PopInt                      totalNeuronPops = neurons->GetTotalPopulations();
 
-    for(std::vector<std::string>::iterator it = (*input).begin(); it != (*input).end(); ++it) {
-
-        SplitString(&(*it),&name,&values);
-
-        if((name.find("seed") != std::string::npos)){
-            seed = static_cast<unsigned int>(std::stod(values.at(0)));
+    for(auto& [parameterName, parameterValues] : stimulusParameters) {
+        // if((parameterName.find("seed") != std::string::npos)){
+        //     seed = static_cast<signed int>(std::stod(parameterValues.at(0)));
+        if((parameterName.find("meanCurrent") != std::string::npos)){
+            StepStruct step;
+            for(PopInt neuronPop : std::ranges::views::iota(0, totalNeuronPops)){
+                step.parameterValues.push_back(std::stod(parameterValues.at(neuronPop)));
+            }
+            if(isDouble(parameterValues.at(totalNeuronPops))){
+                step.endTimeStep = static_cast<TStepInt>(std::round(std::stod(parameterValues.at(totalNeuronPops)) / infoGlobal->dtTimestep));
+                if ((step.endTimeStep < 0) || (step.endTimeStep >static_cast<TStepInt>(infoGlobal->simulationTime / infoGlobal->dtTimestep))){
+                    step.endTimeStep = static_cast<TStepInt>(std::round(infoGlobal->simulationTime / infoGlobal->dtTimestep));
+                }
+            } else {
+                step.endTimeStep = static_cast<TStepInt>(std::round(infoGlobal->simulationTime / infoGlobal->dtTimestep));;
+            }
+			
+            meanCurrent.push_back(step);
         }
-        else if((name.find("meanCurrent") != std::string::npos)){
-            s.values.clear();
-            for(int i = 0;i< P;i++)
-                s.values.push_back(std::stod(values.at(i)));
-            if(is_double(values.at(P)))
-                s.end_time = static_cast<int>(std::round(std::stod(values.at(P)) / info->dt));
-            else
-                s.end_time = INT_MAX;
-			if ((s.end_time < 0) || (s.end_time >static_cast<int>(info->simulationTime / info->dt)))
-                s.end_time = static_cast<int>(std::round(info->simulationTime / info->dt));
-
-            meanCurrent.push_back(s);
-        }
-        else if((name.find("sigmaCurrent") != std::string::npos)){
-            s.values.clear();
-            for(int i = 0;i< P;i++)
-                s.values.push_back(std::stod(values.at(i)));
-
-            if(is_double(values.at(P)))
-                s.end_time = static_cast<int>(std::round(std::stod(values.at(P)) / info->dt));
-            else
-                s.end_time = INT_MAX;
-
-            if((s.end_time < 0) || (s.end_time > std::round(info->simulationTime/info->dt)))
-                s.end_time = static_cast<int>(std::round(info->simulationTime / info->dt));
-
-            sigmaCurrent.push_back(s);
+        else if((parameterName.find("sigmaCurrent") != std::string::npos)){
+            StepStruct step;
+            for(PopInt neuronPop : std::ranges::views::iota (0, totalNeuronPops)){
+                step.parameterValues.push_back(std::stod(parameterValues.at(neuronPop)));
+            }
+            if(isDouble(parameterValues.at(totalNeuronPops))){
+                step.endTimeStep = static_cast<int>(std::round(std::stod(parameterValues.at(totalNeuronPops)) / infoGlobal->dtTimestep));
+                if((step.endTimeStep < 0) || (step.endTimeStep > std::round(infoGlobal->simulationTime/infoGlobal->dtTimestep))){
+                    step.endTimeStep = static_cast<int>(std::round(infoGlobal->simulationTime / infoGlobal->dtTimestep));
+                }
+            } else {
+                step.endTimeStep = static_cast<TStepInt>(std::round(infoGlobal->simulationTime / infoGlobal->dtTimestep));
+            }
+            sigmaCurrent.push_back(step);
         }
     }
-
-    if(info->globalSeed != -1){
-        std::uniform_int_distribution<int> distribution(0,INT32_MAX);
-        seed = distribution(info->globalGenerator);
-    }
+	if(infoGlobal->isMock){
+		return;
+	}
+    PostLoadParameters();
 }
 
 
-void WhiteNoiseStimulus::SaveParameters(std::ofstream * stream){
+void WhiteNoiseStimulus::SaveParameters(std::ofstream& wParameterStream) const{
 
-    int P        = neurons->GetTotalPopulations();
-    Stimulus::SaveParameters(stream);
+    PopInt totalNeuronPops        = neurons->GetTotalPopulations();
+    Stimulus::SaveParameters(wParameterStream);
 
-    if(info->globalSeed == -1){
-        *stream <<  "stimulus_seed                        " << std::to_string(seed)  << "\n";
-    }
+    // if(infoGlobal->globalSeed == -1){
+    //     wParameterStream <<  "stimulus_seed                        " << std::to_string(seed)  << "\n";
+    // }
 
-    for(auto const &s : meanCurrent){
-        *stream <<  "stimulus_meanCurrent                 ";
-        for(int i = 0;i<P;i++)
-            *stream << std::to_string(s.values.at(i)) << "\t ";
-        *stream << std::to_string(static_cast<double>(s.end_time)*info->dt) << " \t";
-        *stream << " [column 1: input for population 1, column 2: input for pop. 2, ... , last column: time until which input is set. Dimensions: [mV/sec , secs.]\n";
+    for(const StepStruct &step : meanCurrent){
+        wParameterStream <<  "stimulus_meanCurrent                 ";
+		for (PopInt neuronPop : std::ranges::views::iota(0,totalNeuronPops)){
+            wParameterStream << std::to_string(step.parameterValues.at(neuronPop)) << "\t ";
+        }
+        wParameterStream << std::to_string(static_cast<double>(step.endTimeStep)*infoGlobal->dtTimestep) << " \t";
+        wParameterStream << " #[column 1: input for population 1, column 2: input for neuronPop. 2, ... , last column: time until which input is set. Dimensions: [mV/sec , secs.]\n";
         //*stream << " [mV/sec -- sec]\n";
     }
 
-    for(auto const &s : sigmaCurrent){
-        *stream <<  "stimulus_sigmaCurrent                ";
-        for(int i = 0;i<P;i++)
-            *stream << std::to_string(s.values.at(i)) << "\t ";
-        *stream << std::to_string(static_cast<double>(s.end_time)*info->dt) << " \t";
-        *stream << " [column 1: input for population 1, column 2: input for pop. 2, ... , last column: time until which input is set. Dimensions: [mV/sqrt(sec) , secs.]\n";
+    for(const StepStruct &step : sigmaCurrent){
+        wParameterStream <<  "stimulus_sigmaCurrent                ";
+		for (PopInt neuronPop : std::ranges::views::iota(0,totalNeuronPops)){
+            wParameterStream << std::to_string(step.parameterValues.at(neuronPop)) << "\t ";
+        }
+        wParameterStream << std::to_string(static_cast<double>(step.endTimeStep)*infoGlobal->dtTimestep) << " \t";
+        wParameterStream << " #[column 1: input for population 1, column 2: input for neuronPop. 2, ... , last column: time until which input is set. Dimensions: [mV/sqrt(sec) , secs.]\n";
     }
 
-    if(GetType().compare("WhiteNoiseRescaled")==0)
-        *stream <<  "#\t\tRI_{i,ext}/tau_m*dt = meanCurrent_i*dt + sqrt(dt)*sigmaCurrent_i*NormalDistribution(0,1)\n";
+    if(infoGlobal->networkScaling_mode == 1){
+        wParameterStream <<  "#\t\tRI_{i,ext}/tauM*dt = meanCurrent_i*dt + sqrt(dt)*sigmaCurrent_i*NormalDistribution(0,1)\n";
+        wParameterStream<< "#\t\tmeanCurrent_i is rescaled with N^(-scalingSynapticStrength)";
+    }
 }
 
+void WhiteNoiseStimulus::RecalculateMeansCache(StepStruct *meanStep) {
+    double dtTimestep{infoGlobal->dtTimestep};
+	for (PopInt neuronPop : std::ranges::views::iota(0,neurons->GetTotalPopulations())){
+		cachedMeans.at(neuronPop) = meanStep->parameterValues.at(neuronPop)*dtTimestep*pow(GetScaling(neuronPop),-(infoGlobal->networkScaling_synStrength));
+	}
+}
 
-void WhiteNoiseStimulus::SetSignalArray(){
+void WhiteNoiseStimulus::RecalculateSigmasCache(StepStruct *sigmaStep) {
+    double dtSqrtd{infoGlobal->dtSqrt};
+	for (PopInt neuronPop : std::ranges::views::iota(0,neurons->GetTotalPopulations())){
+		cachedSigmas.at(neuronPop) = dtSqrtd*sigmaStep->parameterValues.at(neuronPop);
+	}
+}
 
-    double mean,sigma,s;
-    double dt      = info->dt;
-    int    P       = neurons->GetTotalPopulations();
-    double sqrt_dt = sqrt(dt);
-    long   t_step  = info->time_step;
-    std::normal_distribution<double> distribution(0,1);
-    step   *mean_step_current   = &meanCurrent.at(0);
-    step   *sigma_step_current  = &sigmaCurrent.at(0);
-
-    while((t_step > mean_step_current->end_time) && (mean_step_current != &meanCurrent.back()))
-        mean_step_current++;
-
-    while((t_step > sigma_step_current->end_time) && (sigma_step_current != &sigmaCurrent.back()))
-        sigma_step_current++;
-
-    for(int pop = 0;pop<P;pop++){
-        mean  = mean_step_current->values.at(pop);
-        sigma = sigma_step_current->values.at(pop);
-        s = GetScaling(pop);
-        for (unsigned long i = 0;i<neurons->GetNeuronsPop(pop); i++)
-            signal_array[pop][i] = mean*dt*pow(s,-(info->networkScaling_synStrength)) + sqrt_dt*sigma*distribution(generator);
+void WhiteNoiseStimulus::PostLoadParameters() {
+    std::cout<<"\nSetting up the stimulus class...";
+    if(meanCurrent.empty() || sigmaCurrent.empty()){
+        wellDefined=false;
+		std::cout<<"Stimulus class was ill-defined\n"<<std::endl;
+        return;
     }
 
+    double dtTimestep{infoGlobal->dtTimestep};
+    double dtSqrtd{infoGlobal->dtSqrt};
+
+    currentMeanStep=meanCurrent.data();
+    currentSigmaStep=sigmaCurrent.data();
+
+    for (PopInt neuronPop : std::ranges::views::iota(0,neurons->GetTotalPopulations())){
+		cachedMeans.at(neuronPop) = currentMeanStep->parameterValues.at(neuronPop)*dtTimestep*pow(GetScaling(neuronPop),-(infoGlobal->networkScaling_synStrength));
+	}
+    for (PopInt neuronPop : std::ranges::views::iota(0,neurons->GetTotalPopulations())){
+		cachedSigmas.at(neuronPop) = dtSqrtd*currentSigmaStep->parameterValues.at(neuronPop);
+	}
+    std::cout<<"Done.\n"<<std::endl;
 }
 
-void WhiteNoiseStimulus::Update(std::vector<std::vector<double>> * synaptic_dV)
-{
-    SetSignalArray();
+void WhiteNoiseStimulus::SetSignalMatrix() {
+
+    TStepInt   timeStep = infoGlobal->timeStep;
+
+    // StepStruct   meanStepCurrent   = meanCurrent.at(0);
+    // StepStruct   stepCurrentSigma  = sigmaCurrent.at(0);
+
+    //Change this with 
+    if((currentMeanStep != &meanCurrent.back()) && (currentMeanStep->endTimeStep<=timeStep)){
+		currentMeanStep++;
+		RecalculateMeansCache(currentMeanStep);
+	}
+	// const StepStruct& meanStepCurrent = *std::find_if(meanCurrent.begin(), meanCurrent.end(), [timeStep](StepStruct step){
+	// //Same as the while statement
+	// 		return (timeStep<=step.endTimeStep) || (step.lastStep);
+	// });
+    if((currentSigmaStep != &sigmaCurrent.back()) && (currentSigmaStep->endTimeStep<=timeStep)){
+		currentSigmaStep++;
+		RecalculateSigmasCache(currentSigmaStep);
+	}
+	// const StepStruct& stepCurrentSigma = *std::find_if(sigmaCurrent.begin(), sigmaCurrent.end(), [timeStep](StepStruct step){
+	// //Same as the while statement
+	// 		return (timeStep<=step.endTimeStep) || (step.lastStep);
+	// });
+
+    for(PopInt neuronPop : std::ranges::views::iota (0, neurons->GetTotalPopulations())){
+        for (NeuronInt neuron : std::ranges::views::iota(0,neurons->GetNeuronsPop(neuronPop))){
+            signalMatrix.at(neuronPop).at(neuron) = cachedMeans.at(neuronPop) + cachedSigmas.at(neuronPop)*standardDistribution(generator);
+        }
+    }
+}
+
+void WhiteNoiseStimulus::Update(std::vector<std::vector<double>>& synaptic_dV) {
+    SetSignalMatrix();
     Stimulus::Update(synaptic_dV);
 }
+
+double WhiteNoiseStimulus::GetScaling(PopInt neuronPop) const {
+    if(infoGlobal->networkScaling_mode == 0){
+        return 1.0;
+    } else if(infoGlobal->networkScaling_mode == 1){
+        return (neurons->GetTotalNeurons());
+    }else{
+        throw "WhiteNoiseStimulus (GetScaling): External Scaling not well defined!";
+    }
+}
+

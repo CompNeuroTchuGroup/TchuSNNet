@@ -1,15 +1,16 @@
+#ifndef DistanceConnectivity_hpp
+#define DistanceConnectivity_hpp
+
+#include "../GlobalFunctions.hpp"
+#include "Connectivity.hpp"
+#include "../Synapse/Synapse.hpp"
 #include <iostream>
 #include <vector>
 #include <random>
 #include <typeinfo>
 #include <cstring>
-#include <valarray>
-#include <fstream>
-#include "../GlobalFunctions.hpp"
-#include "Connectivity.hpp"
 
-#ifndef DistanceConnectivity_hpp
-#define DistanceConnectivity_hpp
+#include <fstream>
 
 class Synapse;
 
@@ -17,22 +18,22 @@ class DistanceConnectivity : public Connectivity
 {
 protected:
 
-    double PeakProbability;
-	double StdProbability;
-	double a;
-	int exact;
+    double peakProbability{};
+	double stdProbability{1};
+	double projectionLengthFactor{1};//==a
+	int isConnectionExact{};
 public:
 
-	DistanceConnectivity(Synapse *syn,GlobalSimInfo  * info);
-    ~DistanceConnectivity()=default;
+	DistanceConnectivity(Synapse* synapse,const GlobalSimInfo*  infoGlobal);
+    ~DistanceConnectivity() override = default;
 
     void                ConnectNeurons();
 	void                ConnectNeuronsExact();
-	unsigned long		GetNumberAverageSourceNeurons();
-    const std::string         GetTypeStr() override {return str_distanceConnectivity;}
+	double		GetExpectedConnections() const override;
+    std::string         GetTypeStr() const override {return IDstringDistanceConnectivity;}
 
-    void SaveParameters(std::ofstream * stream,std::string id_str);
-    void LoadParameters(std::vector<std::string> *input);
+    void SaveParameters(std::ofstream& wParameterStream,std::string idString) const;
+    void LoadParameters(const std::vector<FileEntry>& parameters);
 };
 
 #endif /* DistanceConnectivity_hpp */

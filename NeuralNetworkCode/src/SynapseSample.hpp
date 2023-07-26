@@ -1,3 +1,16 @@
+#ifndef SYNAPSESAMPLE_HPP
+#define SYNAPSESAMPLE_HPP
+
+#include "GlobalFunctions.hpp"
+#include "Synapse/CurrentSynapse.hpp"
+#include "Synapse/MongilloSynapse.hpp"
+#include "Synapse/MongilloSynapseContinuous.hpp"
+#include "Synapse/PRGSynapseContinuous.hpp"
+#include "Synapse/ExponentialCurrentSynapse.hpp"
+#include "Synapse/PowerLawSynapse.hpp"
+#include "Synapse/PModelSynapse.hpp"
+#include "NeuronPopSample.hpp"
+
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -5,70 +18,66 @@
 #include <vector>
 #include <random>
 #include <typeinfo>
-#include "GlobalFunctions.hpp"
-#include "NeuronPopSample.hpp"
-#include "Synapse/CurrentSynapse.hpp"
-#include "Synapse/MongilloSynapse.hpp"
-#include "Synapse/MongilloSynapseContinuous.hpp"
-#include "Synapse/PRGSynapseContinuous.hpp"
-#include "Synapse/ExponentialCurrentSynapse.hpp"
-#include "Synapse/PowerLawSynapse.hpp"
-#include "Synapse/HeteroCurrentSynapse.hpp"
 
-#ifndef SYNAPSESAMPLE_HPP
-#define SYNAPSESAMPLE_HPP
 
 //class NeuralNetwork;
 
-class SynapseSample
-{
+class SynapseSample {
 protected:
 
-    int                                  generalSynapseSeed;
-    int                                  global_D_max;
+    //int                                  generalSynapseSeed;
+    //int                                  global_D_max;
 
-    GlobalSimInfo   * info;
-    NeuronPopSample * neurons;
-    Synapse         *** synapses;
+    GlobalSimInfo* infoGlobal;
+    std::shared_ptr<NeuronPopSample> neurons;
+    std::vector<std::vector<SynapsePtr>> synapses; //Indexing is first target neuronPop, second is source neuronPop
+    std::vector<Synapse*> connectedSynapses;
+    std::vector<std::vector<bool>> synapseStates;
+    PopInt  totalNeuronPops;
 
-    void LoadParameters(std::vector<std::string> *input);
-    void SaveSynapseType(std::string name,std::string type,std::vector<std::string> *input);
+    std::mutex _syndVMutex;
+
+    void LoadParameters(const std::vector<FileEntry>& synapseParameters);
+    void SaveSynapseType(std::string parameterName,std::string type,const std::vector<FileEntry>& synapseParameters);
+    void SetUpSynapse(PopInt targetPop, PopInt sourcePop,std::string type,std::vector<FileEntry> synapseParameters);
 public:
-    SynapseSample(NeuronPopSample * neurons,std::vector<std::string> *input,GlobalSimInfo *info);
-    ~SynapseSample();//Need to make default, doable after moving arrays and pointer resources to std types, smart pointers and references
+    SynapseSample(std::shared_ptr<NeuronPopSample>  neurons,std::vector<FileEntry>& synapseParameters,GlobalSimInfo* infoGlobal);
+    ~SynapseSample()=default;
 
     void   ConnectNeurons();
-    void   WriteConnectivity(std::string filename,int noNeuronsConnectivity);
-    void   WriteDistributionD(std::string filename,int noNeuronsDelay);
-    void   WriteDistributionJ(std::string filename,int noNeuronsJPot);
+    void   WriteConnectivity(std::string filename,NeuronInt noNeuronsConnectivity) const;
+    void   WriteDistributionD(std::string filename,NeuronInt noNeuronsDelay)const;
+    void   WriteDistributionJ(std::string filename,NeuronInt noNeuronsJPot)const;
 
     //*******************
     // Get-Functions
     //*******************
-    int         GetNumberOfDataColumns();
-    int         GetNumberOfDataColumns(int post_population, int pre_population);
-    std::string GetDataHeader(int data_column);
-	std::string GetUnhashedDataHeader();
-    int         GetSeed();
-    int         GetMaxD(){return global_D_max;}
+    //int         GetNoDataColumns() const;
+        //CAREFUL CALLING THESE FUNCTIONS, ALWAYS CHECK CONNECTED STATE
+    int         GetNoDataColumns(PopInt targetPop, PopInt sourcePop) const;
+    std::string GetDataHeader(int dataColumn) const;
+	std::string GetUnhashedDataHeader() const;
+    //int         GetSeed();
+    //int         GetMaxD(){return global_D_max;}
     /**
      * Returns the sum of the synaptic state variables of neuron pre_neuron
      * targeting neurons in post_population.
      */
-    std::valarray<double>	GetSynapticState(int post_population,int pre_population,int pre_neuron);
-	double					GetRecurrentInput(int post_population, int pre_population, int post_neuron);
-    double					GetCumulatedDV(int post_population, int pre_population);
-    int						GetNumberOfPostsynapticTargets(int post_population,int pre_population,int pre_neuron);
+    //CAREFUL CALLING THESE FUNCTIONS, ALWAYS CHECK CONNECTED STATE
+    std::vector<double>	GetSynapticState(PopInt targetPop,PopInt sourcePop,NeuronInt sourceNeuron) const;
+	double					GetRecurrentInput(PopInt targetPop, PopInt sourcePop, NeuronInt targetNeuron) const;
+    double					GetCumulatedDV(PopInt targetPop, PopInt sourcePop) const;
+    NeuronInt				GetNoTargetedNeurons(PopInt targetPop,PopInt sourcePop,NeuronInt sourceNeuron) const;
+    bool GetConnectedState(PopInt targetPop, PopInt sourcePop) const {return synapseStates.at(targetPop).at(sourcePop);};
 
     //**************************************
     // Functions which are redirected to the synapse types
     //**************************************
-    //void advect(std::vector<std::vector<double>> * synaptic_dV, std::vector<std::vector<std::vector<double>>> * waiting_matrix);
-	void advect(std::vector<std::vector<double>> *  synaptic_dV);
+	void Advect(std::vector<std::vector<double>>&  synaptic_dV);
 	void Reset();
-    void SaveParameters(std::ofstream * stream);
+    void SaveParameters(std::ofstream& wParameterStream) const ;
 
-    void Test();
+    // void Test();
 };
 
 

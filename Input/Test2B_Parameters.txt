@@ -27,10 +27,10 @@ neurons_generalNeuronSeed             -1
 #***********************************************
 neurons_0_noNeurons                   10000
 neurons_0_type                        LIFNeuron
-neurons_0_tauM                        0.020000 seconds
-neurons_0_vReset                      10.000000 mV 
+neurons_0_tauM                        0.020000 #seconds
+neurons_0_vReset                      10.000000 #mV 
 neurons_0_vThresh                     20.000000 mV
-neurons_0_refractoryTime              0.002000 seconds
+neurons_0_refractoryTime              0.002000 #seconds
 neurons_0_seedInitialPotentials       0
 neurons_0_seedInitialPrevSpike        0
 #		Note: Resting potential is 0 by definition.
@@ -41,10 +41,10 @@ neurons_0_resetType                   0
 #***********************************************
 neurons_1_noNeurons                   2500
 neurons_1_type                        LIFNeuron
-neurons_1_tauM                        0.020000 seconds
-neurons_1_vReset                      10.000000 mV 
+neurons_1_tauM                        0.020000 #seconds
+neurons_1_vReset                      10.000000 #mV 
 neurons_1_vThresh                     20.000000 mV
-neurons_1_refractoryTime              0.002000 seconds
+neurons_1_refractoryTime              0.002000 #seconds
 neurons_1_seedInitialPotentials       0
 neurons_1_seedInitialPrevSpike        0
 #		Note: Resting potential is 0 by definition.
@@ -59,7 +59,7 @@ stimulus_type                        UncorrelatedStimulus
 stimulus_noExternalNeurons           1000
 stimulus_seed                        135
 stimulus_PoissonTableEntries         100000
-stimulus_J_X                         0.100000	0.100000	 dmV/Spike
+stimulus_J_X                         0.100000	0.100000	 #dmV/Spike
 stimulus_step                        10.000000	40.000000	 [t (secs.) -- Hz]
 stimulus_step                        0.000000	40.000000	 [t (secs.) -- Hz]
 #		UncorrelatedStimulus: noExternalNeurons external neurons with (poisson) firing rate defined in stimulus_step are connected with population X with strength J_X.
@@ -70,7 +70,7 @@ recorder_type                      AdvancedRecorder
 recorder_noNeuronsConnectivity     0					#saves connectivity matrices for the first x neurons of each populations
 recorder_noNeuronsDelay            0					#saves delay connectivity matrices for the first x neurons of each populations
 recorder_noNeuronsJPot             0					#saves Jpot connectivity matrices for the first x neurons of each populations
-recorder_binSize                   0.000100 seconds 	#Bin size over which data saved in main recording data file is average over
+recorder_binSize                   0.000100 #seconds 	#Bin size over which data saved in main recording data file is average over
 recorder_noRasterPlotNeurons       50 	50 	0.000000	#Record spike times of x neurons for (i-th column is x for the i-th population). The i+1-th column sets the initial recording time
 recorder_notrackNeuronProfiles     2 	2 				#Record currents and potentials at all time steps of the first x_p neurons, p = population index. [column 1: track #neurons in pop1, column 2: track #neurons in pop2, .. ]
 recorder_noCorrNeurons             0 	0 				#Record correlations between first x_p neurons for each bin size. p = population index. [column 1: #neurons in pop1, column 2: track #neurons in pop2, .. ]
@@ -85,10 +85,10 @@ synapses_generalSynapseSeed                -1
 #generalSynapseSeed >= 0: general seed overrides individual seeds.
 #*************************************************
 synapses_0_0_type							CurrentSynapse
-synapses_0_0_D_min							0.001500 seconds
-synapses_0_0_D_max							0.001500 seconds
-synapses_0_0_J								0.100000 dmV/Spike
-synapses_0_0_J_pot							0.000000 dmV/Spike
+synapses_0_0_D_min							0.001500 #seconds
+synapses_0_0_D_max							0.001500 #seconds
+synapses_0_0_J								0.100000 #dmV/Spike
+synapses_0_0_J_pot							0.000000 #dmV/Spike
 synapses_0_0_P_pot							0.000000
 synapses_0_0_connectivity_type				RandomConnectivity
 synapses_0_0_connectivity_ConnectionProba	0.100000
@@ -96,10 +96,10 @@ synapses_0_0_connectivity_seed				0
 #		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
 #*************************************************
 synapses_0_1_type							CurrentSynapse
-synapses_0_1_D_min							0.001500 seconds
-synapses_0_1_D_max							0.001500 seconds
-synapses_0_1_J								-0.600000 dmV/Spike
-synapses_0_1_J_pot							0.000000 dmV/Spike
+synapses_0_1_D_min							0.001500 #seconds
+synapses_0_1_D_max							0.001500 #seconds
+synapses_0_1_J								-0.600000 #dmV/Spike
+synapses_0_1_J_pot							0.000000 #dmV/Spike
 synapses_0_1_P_pot							0.000000
 synapses_0_1_connectivity_type				RandomConnectivity
 synapses_0_1_connectivity_ConnectionProba	0.100000
@@ -107,10 +107,10 @@ synapses_0_1_connectivity_seed				0
 #		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
 #*************************************************
 synapses_1_0_type							CurrentSynapse
-synapses_1_0_D_min							0.001500 seconds
-synapses_1_0_D_max							0.001500 seconds
-synapses_1_0_J								0.100000 dmV/Spike
-synapses_1_0_J_pot							0.000000 dmV/Spike
+synapses_1_0_D_min							0.001500 #seconds
+synapses_1_0_D_max							0.001500 #seconds
+synapses_1_0_J								0.100000 #dmV/Spike
+synapses_1_0_J_pot							0.000000 #dmV/Spike
 synapses_1_0_P_pot							0.000000
 synapses_1_0_connectivity_type				RandomConnectivity
 synapses_1_0_connectivity_ConnectionProba	0.100000
@@ -118,10 +118,10 @@ synapses_1_0_connectivity_seed				0
 #		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
 #*************************************************
 synapses_1_1_type							CurrentSynapse
-synapses_1_1_D_min							0.001500 seconds
-synapses_1_1_D_max							0.001500 seconds
-synapses_1_1_J								-0.600000 dmV/Spike
-synapses_1_1_J_pot							0.000000 dmV/Spike
+synapses_1_1_D_min							0.001500 #seconds
+synapses_1_1_D_max							0.001500 #seconds
+synapses_1_1_J								-0.600000 #dmV/Spike
+synapses_1_1_J_pot							0.000000 #dmV/Spike
 synapses_1_1_P_pot							0.000000
 synapses_1_1_connectivity_type				RandomConnectivity
 synapses_1_1_connectivity_ConnectionProba	0.100000

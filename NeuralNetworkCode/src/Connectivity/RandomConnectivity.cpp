@@ -1,104 +1,97 @@
 #include "RandomConnectivity.hpp"
 #include "../Synapse/Synapse.hpp"
 
-RandomConnectivity::RandomConnectivity(Synapse * syn,GlobalSimInfo  * info):Connectivity(syn,info){
-    noSourceNeurons    = 0;
-    SetSeed(0);
+RandomConnectivity::RandomConnectivity(Synapse* synapse,const GlobalSimInfo*  infoGlobal):Connectivity(synapse,infoGlobal){
 }
 
-void RandomConnectivity::SaveParameters(std::ofstream * stream,std::string id_str){
-    Connectivity::SaveParameters(stream,id_str);
-    //*stream << id_str << "connectivity_noSourceNeurons " << std::to_string(this->noSourceNeurons) << "\n";
-    *stream << id_str << "connectivity_ConnectionProba\t\t\t" << std::to_string(this->GetConnectionProbability()) << "\n";
-    //*stream << "#" << id_str << "connectivity_noSourceNeurons " << std::to_string(this->noSourceNeurons) << "\n";
-    *stream << "#\t\t"<< str_randomConnectivity << ": Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).\n";
+void RandomConnectivity::SaveParameters(std::ofstream& wParameterStream,std::string idString) const{
+    Connectivity::SaveParameters(wParameterStream,idString);
+    //*stream << idString << "connectivity_noSourceNeurons " << std::to_string(this->noSourceNeurons) << "\n";
+    wParameterStream << idString << "connectivity_ConnectionProba\t\t\t" << std::to_string(this->GetConnectionProbability()) << "\n";
+    //*stream << "#" << idString << "connectivity_noSourceNeurons " << std::to_string(this->noSourceNeurons) << "\n";
+    wParameterStream << "#\t\t"<< IDstringRandomConnectivity << ": Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).\n";
 }
 
-void RandomConnectivity::LoadParameters(std::vector<std::string> *input){
-    Connectivity::LoadParameters(input);
+void RandomConnectivity::LoadParameters(const std::vector<FileEntry>& connectivityParameters){
+    Connectivity::LoadParameters(connectivityParameters);
 
-    std::string              name;
-    std::vector<std::string> values;
-
-    for(std::vector<std::string>::iterator it = (*input).begin(); it != (*input).end(); ++it) {
-        SplitString(&(*it),&name,&values);
-        if(name.find("seed") != std::string::npos){
-            SetSeed(std::stoi(values.at(0)));
-        }
-		else if (name.find("ConnectionProba") != std::string::npos || name.find("connectionProbability") != std::string::npos) {
+    for(auto& [parameterName, parameterValues] : connectivityParameters) {
+        // if(parameterName.find("seed") != std::string::npos){
+        //     SetSeed(std::stoi(parameterValues.at(0)));
+        // }
+		if (parameterName.find("ConnectionProba") != std::string::npos || parameterName.find("connectionProbability") != std::string::npos) {
             //std::cout << "number of neurons pre: " << std::to_string(synapse->GetNoNeuronsPre()) << ", ";
-            //std::cout << "connection probability value: " << std::to_string(std::stod(values.at(0))) << ", ";
-            //std::cout << "their product: " << std::to_string(synapse->GetNoNeuronsPre()*std::stod(values.at(0))) << "\n";
-            SetNoSourceNeurons(static_cast<unsigned long>(std::lround(synapse->GetNoNeuronsPre() * std::stod(values.at(0)))));
-        }
-        else if(name.find("noSourceNeurons") != std::string::npos){
-            SetNoSourceNeurons(std::stoi(values.at(0)));
+            //std::cout << "connection probability value: " << std::to_string(std::stod(parameterValues.at(0))) << ", ";
+            
+            //std::cout << "their product: " << std::to_string(synapse->GetNoNeuronsPre()*std::stod(parameterValues.at(0))) << "\n";
+            // SetNoSourceNeurons(static_cast<signed long>((synapse->GetNoSourceNeurons() * std::stod(parameterValues.at(0)))));
+            SetNoSourceNeurons(static_cast<signed long>(std::lround(synapse->GetNoSourceNeurons() * std::stod(parameterValues.at(0)))));
+        } else if(parameterName.find("noSourceNeurons") != std::string::npos){
+            SetNoSourceNeurons(std::stoi(parameterValues.at(0)));
         }
 
     }
 }
 
-void RandomConnectivity::SetNoSourceNeurons(unsigned long noSN){
-    if(noSN < 0)
+void RandomConnectivity::SetNoSourceNeurons(NeuronInt readNoSourceNeurons){
+    if(readNoSourceNeurons < 0){
         noSourceNeurons = 0;
-    else if(noSN > synapse->GetNoNeuronsPre())
-        noSourceNeurons = synapse->GetNoNeuronsPre();
-    else if( (noSN == synapse->GetNoNeuronsPre()) && (synapse->IsRecurrent()))
+    } else if(readNoSourceNeurons > synapse->GetNoSourceNeurons()){
+        noSourceNeurons = synapse->GetNoSourceNeurons();
+    } else if((readNoSourceNeurons == synapse->GetNoSourceNeurons()) && (synapse->IsRecurrent())){
         //noSourceNeurons = 0;
-        noSourceNeurons = synapse->GetNoNeuronsPre()-1;
-    else
-        noSourceNeurons = noSN;
-
+        noSourceNeurons = synapse->GetNoSourceNeurons()-1;
+    } else {
+        noSourceNeurons = readNoSourceNeurons;
+    }
 }
 
-double RandomConnectivity::GetConnectionProbability(){
-    if(synapse ->GetNoNeuronsPre() == 0)
+double RandomConnectivity::GetConnectionProbability() const{
+    if(synapse ->GetNoSourceNeurons() == 0){
         return 0;
-    if((noSourceNeurons == synapse->GetNoNeuronsPre()) && synapse->IsRecurrent()){
-        return (static_cast<double>(noSourceNeurons+1))/(static_cast<double>(synapse ->GetNoNeuronsPre()));
+    } else if((noSourceNeurons == synapse->GetNoSourceNeurons()-1) && synapse->IsRecurrent()){
+        //This is necessary to avoid iterative Parameter files from lowering the connection probability in recurrent synapses
+        return (static_cast<double>(noSourceNeurons+1))/(static_cast<double>(synapse ->GetNoSourceNeurons()));
+    } else {
+        return (static_cast<double>(noSourceNeurons))/(static_cast<double>(synapse ->GetNoSourceNeurons()));
     }
-    else
-        return (static_cast<double>(noSourceNeurons))/(static_cast<double>(synapse ->GetNoNeuronsPre()));
 }
 
 
 void RandomConnectivity::ConnectNeurons()
 {
 
-    unsigned long    source,countedSourceNeurons;
-    unsigned long    nPost = synapse->GetNoNeuronsPost();
+    NeuronInt    sourceNeuron,countedSourceNeurons;
+    NeuronInt    noTargetNeurons = synapse->GetNoTargetNeurons();
 
-    long    output_Interval = nPost/10;
-    if(output_Interval == 0)
-        output_Interval = 1;
+    NeuronInt    outputInterval = noTargetNeurons/10;
+    if(outputInterval == 0){
+        outputInterval = 1;
+    }
+    std::uniform_int_distribution<NeuronInt> distribution(0,synapse->GetNoSourceNeurons()-1);
 
-    std::uniform_int_distribution<int> distribution(0,(int)synapse->GetNoNeuronsPre()-1);
-
-    //every target neuron has a fixed number of source neurons
+    //every target neuron has a fixed number of sourceNeuron neurons
 
     //Iterate through all target neurons
-    for(unsigned long target = 0; target < nPost; target++){
-
+    for(NeuronInt targetNeuron : std::ranges::views::iota(0,noTargetNeurons)){
         countedSourceNeurons = 0;
-
-        //assign for each target neuron 'noSourceNeurons' source neurons
-        while(countedSourceNeurons < noSourceNeurons)
-        {
-            source = distribution(generator);
-
-            //Check if source and target neurons are equal
-            if((synapse->IsRecurrent()) && (source == target))
+        //assign for each target neuron 'noSourceNeurons' sourceNeuron neurons
+        while(countedSourceNeurons < noSourceNeurons) {
+            sourceNeuron = distribution(generator);
+            //Check if sourceNeuron and target neurons are equal
+            if((synapse->IsRecurrent()) && (sourceNeuron == targetNeuron)){
                 continue;
-
-            //Check if target was assigned to the same source already
-            if(!target_id[source].empty() && target_id[source].back() == target)
+            }
+            //Check if target was assigned to the same sourceNeuron already
+            if(!synapse->IsSourceVectorEmpty(sourceNeuron) && synapse->IsTargetLastInVector(targetNeuron,sourceNeuron)){
                 continue;
-
-            target_id[source].push_back(target);
+            }
+            synapse->AllocateSynapse(targetNeuron, sourceNeuron);
             countedSourceNeurons++;
         }
-        if((target)%output_Interval == 0)
-            std::cout << 100*(target)/nPost << "%-";
+        // if((targetNeuron)%outputInterval == 0){
+        //     std::cout << 100*(targetNeuron)/noTargetNeurons << "%\n";
+        // }
     }
-    std::cout << "100%\n";
+        // std::cout << "100%\n";
 }

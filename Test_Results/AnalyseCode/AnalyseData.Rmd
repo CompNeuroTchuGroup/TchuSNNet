@@ -108,6 +108,7 @@ if(nrow(data_rasterplot) > 0){
 if(nrow(data_synapses) > 0){
   data_synapses %>%
     filter(!is.na(x))  %>%
+    filter(x != "-nan(ind)")  %>%
     gather(-time, key = "Variable", value = "Value") %>% 
     filter(Variable!="J")  %>%
     ggplot(aes(x = time, y = Value,color=Variable))  +

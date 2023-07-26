@@ -8,21 +8,21 @@
 #include "../NeuronPop.hpp"
 
 // sharpness > 0
-// 0 < v_critical < v_thresh
+// 0 < criticalPotential < thresholdV
 
 
 class QIFNeuronPop : public NeuronPop
 {
 protected:
-    double v_critical{};
+    double criticalV{};
     double sharpness{};
 public:
     //QIFNeuronPop(double tm, double vr, double vc, double s, double vt, double t);
-    QIFNeuronPop(GlobalSimInfo * info,int id) : NeuronPop(info,id) {}
+    QIFNeuronPop(GlobalSimInfo* infoGlobal,NeuronInt neuronID) : NeuronPop(infoGlobal,neuronID) {}
 
-    void advect(std::vector<double> * synaptic_dV);
-    void SaveParameters(std::ofstream * stream);
-    std::string GetType(){return str_QIFNeuron;}
+    void Advect(const std::vector<double>& synaptic_dV);
+    void SaveParameters(std::ofstream& wParameterStream) const;
+    std::string GetType() const override{return IDstringQIFNeuron;}
 };
 
 #endif // QIFNeuronPop_HPP

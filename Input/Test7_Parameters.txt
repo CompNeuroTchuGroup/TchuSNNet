@@ -3,7 +3,7 @@ Title                       Test7_Mongillo_Bistability
 #*****************************************************************
 simulationTime              40.000000 		seconds
 dt_timestep                          0.000010 		seconds
-globalSeed                  -1 				#overrides all other seeds if unequal -1
+globalSeed                  12344536 				#overrides all other seeds if unequal -1
 #*****************************************************************
 #****************        Spatial parameters        ***************
 #*****************************************************************
@@ -27,12 +27,13 @@ neurons_generalNeuronSeed             -1
 #***********************************************
 neurons_0_noNeurons                   200000
 neurons_0_type                        LIFNeuron
-neurons_0_tauM                        0.010000 seconds
-neurons_0_vReset                      0.750000 mV 
+neurons_0_tauM                        0.010000 #seconds
+neurons_0_vReset                      0.750000 #mV 
 neurons_0_vThresh                     1.000000 mV
-neurons_0_refractoryTime              0.000000 seconds
+neurons_0_refractoryTime              0.000000 #seconds
 neurons_0_seedInitialPotentials       135
 neurons_0_seedInitialPrevSpike        123
+neurons_0_prevMeanFrequency           2.5 #Hz
 #		Note: Resting potential is 0 by definition.
 neurons_0_resetType                   0
 #		LIF neuron: dV/dt = -V/tau_m + RI/tau_m 
@@ -41,10 +42,10 @@ neurons_0_resetType                   0
 #***********************************************
 neurons_1_noNeurons                   50000
 neurons_1_type                        LIFNeuron
-neurons_1_tauM                        0.010000 seconds
-neurons_1_vReset                      0.750000 mV 
+neurons_1_tauM                        0.010000 #seconds
+neurons_1_vReset                      0.750000 #mV 
 neurons_1_vThresh                     1.000000 mV
-neurons_1_refractoryTime              0.000000 seconds
+neurons_1_refractoryTime              0.000000 #seconds
 neurons_1_seedInitialPotentials       135
 neurons_1_seedInitialPrevSpike        123
 #		Note: Resting potential is 0 by definition.
@@ -68,7 +69,7 @@ recorder_type                      AdvancedRecorder
 recorder_noNeuronsConnectivity     0					#saves connectivity matrices for the first x neurons of each populations
 recorder_noNeuronsDelay            0					#saves delay connectivity matrices for the first x neurons of each populations
 recorder_noNeuronsJPot             0					#saves Jpot connectivity matrices for the first x neurons of each populations
-recorder_binSize                   0.025000 seconds 	#Bin size over which data saved in main recording data file is average over
+recorder_binSize                   0.025000 #seconds 	#Bin size over which data saved in main recording data file is average over
 recorder_noRasterPlotNeurons       0 	0 	0.000000	#Record spike times of x neurons for (i-th column is x for the i-th population). The i+1-th column sets the initial recording time
 recorder_notrackNeuronProfiles     0 	0 				#Record currents and potentials at all time steps of the first x_p neurons, p = population index. [column 1: track #neurons in pop1, column 2: track #neurons in pop2, .. ]
 recorder_noCorrNeurons             0 	0 				#Record correlations between first x_p neurons for each bin size. p = population index. [column 1: #neurons in pop1, column 2: track #neurons in pop2, .. ]
@@ -83,52 +84,52 @@ synapses_generalSynapseSeed                -1
 #generalSynapseSeed >= 0: general seed overrides individual seeds.
 #*************************************************
 synapses_0_0_type							MongilloSynapse
-synapses_0_0_D_min							0.000000 seconds
-synapses_0_0_D_max							0.000000 seconds
-synapses_0_0_J								1.850000 dmV/Spike
-synapses_0_0_J_pot							0.000000 dmV/Spike
+synapses_0_0_D_min							0.000000 #seconds
+synapses_0_0_D_max							0.000000 #seconds
+synapses_0_0_J								1.850000 #dmV/Spike
+synapses_0_0_J_pot							0.000000 #dmV/Spike
 synapses_0_0_P_pot							0.000000
-synapses_0_0_connectivity_type				BinaryRandomConnectivity
+synapses_0_0_connectivity_type				PoissonConnectivity
 synapses_0_0_connectivity_ConnectionProba	0.050000
 synapses_0_0_connectivity_seed                  1
-#		BinaryRandomConnectivity: Erdoes Renyi network. Each neuronal pair is connected with probability connectionProbability. (as used by [Renart et al. (2010)]). 
-synapses_0_0_mongillo_tauF					0.735000 seconds
-synapses_0_0_mongillo_tauD					0.200000 seconds
+#		RandomConnectivity: Erdoes Renyi network. Each neuronal pair is connected with probability connectionProbability. (as used by [Renart et al. (2010)]). 
+synapses_0_0_mongillo_tauF					0.735000 #seconds
+synapses_0_0_mongillo_tauD					0.200000 #seconds
 synapses_0_0_mongillo_U						0.070000
 synapses_0_0_mongillo_seed					345
 #*************************************************
 synapses_0_1_type							CurrentSynapse
-synapses_0_1_D_min							0.000000 seconds
-synapses_0_1_D_max							0.000000 seconds
-synapses_0_1_J								-0.460000 dmV/Spike
-synapses_0_1_J_pot							0.000000 dmV/Spike
+synapses_0_1_D_min							0.000000 #seconds
+synapses_0_1_D_max							0.000000 #seconds
+synapses_0_1_J								-0.460000 #dmV/Spike
+synapses_0_1_J_pot							0.000000 #dmV/Spike
 synapses_0_1_P_pot							0.000000
-synapses_0_1_connectivity_type				BinaryRandomConnectivity
+synapses_0_1_connectivity_type				PoissonConnectivity
 synapses_0_1_connectivity_ConnectionProba	0.050000
 synapses_0_1_connectivity_seed                  2
-#		BinaryRandomConnectivity: Erdoes Renyi network. Each neuronal pair is connected with probability connectionProbability. (as used by [Renart et al. (2010)]). 
+#		RandomConnectivity: Erdoes Renyi network. Each neuronal pair is connected with probability connectionProbability. (as used by [Renart et al. (2010)]). 
 #*************************************************
 synapses_1_0_type							CurrentSynapse
-synapses_1_0_D_min							0.000000 seconds
-synapses_1_0_D_max							0.000000 seconds
-synapses_1_0_J								0.310000 dmV/Spike
-synapses_1_0_J_pot							0.000000 dmV/Spike
+synapses_1_0_D_min							0.000000 #seconds
+synapses_1_0_D_max							0.000000 #seconds
+synapses_1_0_J								0.310000 #dmV/Spike
+synapses_1_0_J_pot							0.000000 #dmV/Spike
 synapses_1_0_P_pot							0.000000
-synapses_1_0_connectivity_type				BinaryRandomConnectivity
+synapses_1_0_connectivity_type				PoissonConnectivity
 synapses_1_0_connectivity_ConnectionProba	0.050000
 synapses_1_0_connectivity_seed                  3
-#		BinaryRandomConnectivity: Erdoes Renyi network. Each neuronal pair is connected with probability connectionProbability. (as used by [Renart et al. (2010)]). 
+#		RandomConnectivity: Erdoes Renyi network. Each neuronal pair is connected with probability connectionProbability. (as used by [Renart et al. (2010)]). 
 #*************************************************
 synapses_1_1_type							CurrentSynapse
-synapses_1_1_D_min							0.000000 seconds
-synapses_1_1_D_max							0.000000 seconds
-synapses_1_1_J								-0.500000 dmV/Spike
-synapses_1_1_J_pot							0.000000 dmV/Spike
+synapses_1_1_D_min							0.000000 #seconds
+synapses_1_1_D_max							0.000000 #seconds
+synapses_1_1_J								-0.500000 #dmV/Spike
+synapses_1_1_J_pot							0.000000 #dmV/Spike
 synapses_1_1_P_pot							0.000000
-synapses_1_1_connectivity_type				BinaryRandomConnectivity
+synapses_1_1_connectivity_type				PoissonConnectivity
 synapses_1_1_connectivity_ConnectionProba	0.050000
 synapses_1_1_connectivity_seed                  4
-#		BinaryRandomConnectivity: Erdoes Renyi network. Each neuronal pair is connected with probability connectionProbability. (as used by [Renart et al. (2010)]). 
+#		RandomConnectivity: Erdoes Renyi network. Each neuronal pair is connected with probability connectionProbability. (as used by [Renart et al. (2010)]). 
 
 #*****************************************************************
 #Comp. finalized: Wed Oct 21 04:28:34 2020

@@ -10,21 +10,17 @@
 #include "../../GlobalFunctions.hpp"
 
 
-class LIFNeuronPop : public NeuronPop
-{
+class LIFNeuronPop : public NeuronPop {
 protected:
-    int reset_type; //0: hard reset, 1: transfer overshoot
-    double membraneExpDecay{1.0};
+    int resetType{}; //0: hard reset, 1: transfer overshoot
 public:
-    LIFNeuronPop(GlobalSimInfo * info,int id): NeuronPop(info,id) {
-        reset_type = 0;
-    }
+    LIFNeuronPop(GlobalSimInfo* infoGlobal,NeuronInt neuronID);
     ~LIFNeuronPop() override = default;
 
-    void advect(std::vector<double> * synaptic_dV) override;
-    std::string GetType() override {return str_LIFNeuron;}
-    void SaveParameters(std::ofstream * stream) override;
-    void LoadParameters(std::vector<std::string> *input) override;
+    void Advect(const std::vector<double>& synaptic_dV) override;
+    std::string GetType() const override {return IDstringLIFNeuron;}
+    void SaveParameters(std::ofstream& wParameterStream) const override;
+    void LoadParameters(const std::vector<FileEntry>& parameters) override;
 };
 
 
