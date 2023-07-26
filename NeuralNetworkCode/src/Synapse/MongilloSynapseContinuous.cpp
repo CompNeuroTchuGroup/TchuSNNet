@@ -1,209 +1,184 @@
 #include "MongilloSynapseContinuous.hpp"
 
-MongilloSynapseContinuous::MongilloSynapseContinuous(NeuronPop * postNeurons,NeuronPop * preNeurons,GlobalSimInfo * info):Synapse(postNeurons,preNeurons,info)
-{
-    u                 = 0;
-    tau_f             = 0;
-    tau_d             = 0;
-    SetSeed(0);
+MongilloSynapseContinuous::MongilloSynapseContinuous(PopPtr targetPop,PopPtr sourcePop,GlobalSimInfo* infoGlobal):Synapse(targetPop,sourcePop,infoGlobal) {
+    // SetSeed(0);
 
-    x.resize(GetNoNeuronsPre());
-    y.resize(GetNoNeuronsPre());
-    spike_submitted.resize(GetNoNeuronsPre());
+    x_MongilloC.resize(GetNoSourceNeurons());
+    y_MongilloC.resize(GetNoSourceNeurons());
+    spikeSubmitted.resize(GetNoSourceNeurons());
 
-    uniformDistribution = std::uniform_real_distribution<double>(0.0,1.0);
+    // uniformDistribution = std::uniform_real_distribution<double>(0.0,1.0);
 }
 
 
-void MongilloSynapseContinuous::advectSpikers (std::vector<double>& currents, long spiker)
-{
-    double dt_lastSpike    = neuronsPre->GetTimeSinceLastSpike(spiker); //double(info->time_step - neuronsPre->get_previous_spike_step(spiker))*dt;
-    double exptf           = exp(-dt_lastSpike/tau_f);
-    double exptd           = exp(-dt_lastSpike/tau_d);
+std::vector<double> MongilloSynapseContinuous::AdvectSpikers (NeuronInt spiker){
+    double dtLastSpike    = sourcePop->GetTimeSinceLastSpike(spiker); //static_cast<double>(infoGlobal->timeStep - neuronsPre->get_previous_spike_step(spiker))*dtTimestep;
+    double exptf           = exp(-dtLastSpike/tauF_MongilloC);
+    double exptd           = exp(-dtLastSpike/tauD_MongilloC);
+    NeuronInt noTargetNeurons{ this->GetNoTargetedNeurons(spiker) };
 
+    std::vector<double> currents(noTargetNeurons);
     //std::cout << "Synapse " << this->GetIdStr() << "\n";
+    std::transform(std::execution::unseq,y_MongilloC.at(spiker).begin(), y_MongilloC.at(spiker).end(), y_MongilloC.at(spiker).begin(),std::bind(std::multiplies<double>(),std::placeholders::_1, exptf));
+    std::transform(std::execution::unseq,y_MongilloC.at(spiker).begin(), y_MongilloC.at(spiker).end(), y_MongilloC.at(spiker).begin(),[this](double y_MonC){
+        return y_MonC+u_MongilloC*(1-y_MonC);
+    });
+    std::transform(std::execution::unseq,x_MongilloC.at(spiker).begin(), x_MongilloC.at(spiker).end(), x_MongilloC.at(spiker).begin(),[exptd](double x_MonC){
+        return 1 - (1-x_MonC)*exptd;
+    });
 
-    for(unsigned long target_counter = 0;target_counter<x[spiker].size();target_counter++)
-    {
+    for(NeuronInt targetNeuron : std::ranges::views::iota(0, noTargetNeurons)){
         //std::cout << "spiker: " << std::to_string(spiker) << ", target: " << std::to_string(target_counter) << "\n";
 
-        //In between spikes: unbind Calcium with rate 1/tau_f
-        y[spiker][target_counter] = y[spiker][target_counter]*exptf;                // for decay back to 0
-        //y[spiker][target_counter] = (y[spiker][target_counter]-u)*exptf + u;        // for decay back to u
+        //In between spikes: unbind Calcium with rate 1/tauF_Mongillo
+        //y.at(spiker)[target_counter] = (y.at(spiker)[target_counter]-u_Mongillo)*exptf + u_Mongillo;        // for decay back to u_Mongillo
+        // y_Mongillo.at(spiker).at(targetNeuron) *=exptf;   
+        // //In between spikes: refill neurotransmitter with rate 1/tauD
+		// x_Mongillo.at(spiker).at(targetNeuron) = 1 - (1-x_Mongillo.at(spiker).at(targetNeuron))*exptd;
 
-        //In between spikes: refill neurotransmitter with rate 1/tauD
-		x[spiker][target_counter] = 1 - (1-x[spiker][target_counter])*exptd;
+        // //std::cout << "x_pre = " << std::to_string(x_Mongillo.at(spiker)[target_counter]) << " ";
+        // //std::cout << "y_pre = " << std::to_string(y.at(spiker)[target_counter]) << " ";
 
-        //std::cout << "x_pre = " << std::to_string(x[spiker][target_counter]) << " ";
-        //std::cout << "y_pre = " << std::to_string(y[spiker][target_counter]) << " ";
-
-        //Upon presynaptic spike: bind Calcium with probability u
-        y[spiker][target_counter] = y[spiker][target_counter]+u*(1-y[spiker][target_counter]);
+        // //Upon presynaptic spike: bind Calcium with probability u_Mongillo
+        // y_Mongillo.at(spiker).at(targetNeuron) += u_MongilloC*(1-y_Mongillo.at(spiker).at(targetNeuron));
 
         //Spike transmission
-        TransmitSpike(currents, target_counter,spiker);
+        currents.at(targetNeuron) += TransmitSpike(targetNeuron,spiker);
     }
+    return currents;
 }
 
 
-void MongilloSynapseContinuous::TransmitSpike(std::vector<double>& currents, long targetId,long spikerId){
+double MongilloSynapseContinuous::TransmitSpike(NeuronInt targetNeuron,NeuronInt spiker){
 
-    double J_ij                         = GetCouplingStrength(spikerId, targetId);
+    // double J_ij                         = GetCouplingStrength(targetNeuron, spiker);
+    double current {GetCouplingStrength(targetNeuron, spiker)*x_MongilloC.at(spiker).at(targetNeuron)*y_MongilloC.at(spiker).at(targetNeuron)};
+    this->cumulatedDV += current;
 
-    this->cumulatedDV                  += J_ij*x[spikerId][targetId]*y[spikerId][targetId];
-    currents[targetId]              += J_ij*x[spikerId][targetId]*y[spikerId][targetId];
+    spikeSubmitted.at(spiker).at(targetNeuron) = current;
+    x_MongilloC.at(spiker).at(targetNeuron) *= (1-y_MongilloC.at(spiker).at(targetNeuron));  // neurotransmitter release.
 
-    spike_submitted[spikerId][targetId] = J_ij*x[spikerId][targetId]*y[spikerId][targetId];
-    x[spikerId][targetId]               = x[spikerId][targetId]*(1-y[spikerId][targetId]);  // neurotransmitter release.
-
-    //std::cout << "x_post = " << std::to_string(x[spikerId][targetId]) << " ";
+    //std::cout << "x_post = " << std::to_string(x_Mongillo[spikerId][targetId]) << " ";
     //std::cout << "y_post = " << std::to_string(y[spikerId][targetId]) << "\n";
+    return current;
 }
 
 
-void MongilloSynapseContinuous::ConnectNeurons()
-{
+void MongilloSynapseContinuous::ConnectNeurons() {
     Synapse::ConnectNeurons();
 
     // test initialization
-    std::vector<double> x_local_max;
-    std::vector<double> x_local_min;
-    std::vector<double> y_local_max;
-    std::vector<double> y_local_min;
+    std::vector<double> xLocalMax;
+    std::vector<double> xLocalMin;
+    std::vector<double> yLocalMax;
+    std::vector<double> yLocalMin;
 
-    for(unsigned long source = 0;source < GetNoNeuronsPre();source ++){
-        unsigned long n{ static_cast<unsigned long>(geometry->GetTargetList(source)->size()) };
-        x[source].resize(n);
-        y[source].resize(n);
-        spike_submitted[source].resize(n);
-        for(unsigned int i_n=0; i_n<n; i_n++){
-            x[source][i_n] = 0.1;
-            y[source][i_n] = 0.4;
-        }
+    for(NeuronInt sourceNeuron : std::ranges::views::iota(0,GetNoSourceNeurons())){
+        NeuronInt totalTargets{ GetNoTargetedNeurons(sourceNeuron) };
+        x_MongilloC.at(sourceNeuron).resize(totalTargets, 0.1);
+        y_MongilloC.at(sourceNeuron).resize(totalTargets, 0.4);
+        spikeSubmitted.at(sourceNeuron).resize(totalTargets);
 
         // test initialization
-        x_local_max.push_back(*std::max_element(std::begin(x[source]),std::end(x[source])));
-        x_local_min.push_back(*std::min_element(std::begin(x[source]),std::end(x[source])));
-        y_local_max.push_back(*std::max_element(std::begin(y[source]),std::end(y[source])));
-        y_local_min.push_back(*std::min_element(std::begin(y[source]),std::end(y[source])));
-        //std::cout << "max x " << std::to_string(*std::max_element(std::begin(x[source]),std::end(x[source]))) << "\n";
-        //std::cout << "min x " << std::to_string(*std::min_element(std::begin(x[source]),std::end(x[source]))) << "\n";
+        xLocalMax.push_back(*std::max_element(std::begin(x_MongilloC.at(sourceNeuron)),std::end(x_MongilloC.at(sourceNeuron))));
+        xLocalMin.push_back(*std::min_element(std::begin(x_MongilloC.at(sourceNeuron)),std::end(x_MongilloC.at(sourceNeuron))));
+        yLocalMax.push_back(*std::max_element(std::begin(y_MongilloC.at(sourceNeuron)),std::end(y_MongilloC.at(sourceNeuron))));
+        yLocalMin.push_back(*std::min_element(std::begin(y_MongilloC.at(sourceNeuron)),std::end(y_MongilloC.at(sourceNeuron))));
+        //std::cout << "max x_Mongillo " << std::to_string(*std::max_element(std::begin(x_Mongillo.at(sourceNeuron)),std::end(x_Mongillo.at(sourceNeuron)))) << "\n";
+        //std::cout << "min x_Mongillo " << std::to_string(*std::min_element(std::begin(x_Mongillo.at(sourceNeuron)),std::end(x_Mongillo.at(sourceNeuron)))) << "\n";
         //std::cout << "\n";
     }
 
     // test initialization
-    std::cout << "min x = " << std::to_string(*std::min_element(std::begin(x_local_min),std::end(x_local_min))) << " ";
-    std::cout << "max x = " << std::to_string(*std::max_element(std::begin(x_local_max),std::end(x_local_max))) << " ";
-    std::cout << "min y = " << std::to_string(*std::min_element(std::begin(y_local_min),std::end(y_local_min))) << " ";
-    std::cout << "max y = " << std::to_string(*std::max_element(std::begin(y_local_max),std::end(y_local_max))) << " ";
+    std::cout << "min x = " << std::to_string(*std::min_element(std::begin(xLocalMin),std::end(xLocalMin))) << " ";
+    std::cout << "max x = " << std::to_string(*std::max_element(std::begin(xLocalMax),std::end(xLocalMax))) << " ";
+    std::cout << "min y = " << std::to_string(*std::min_element(std::begin(yLocalMin),std::end(yLocalMin))) << " ";
+    std::cout << "max y = " << std::to_string(*std::max_element(std::begin(yLocalMax),std::end(yLocalMax))) << " ";
     std::cout << "\n \n";
 }
 
 
-void MongilloSynapseContinuous::LoadParameters(std::vector<std::string> *input){
+void MongilloSynapseContinuous::LoadParameters(const std::vector<FileEntry>& synapseParameters){
 
-    Synapse::LoadParameters(input);
+    Synapse::LoadParameters(synapseParameters);
 
-    std::string              name;
-    std::vector<std::string> values;
-
-    for(std::vector<std::string>::iterator it = (*input).begin(); it != (*input).end(); ++it) {
-        SplitString(&(*it),&name,&values);
-
-        if(name.find("mongillo_tauF") != std::string::npos){
-            tau_f  = std::stod(values.at(0));
+    for(auto& [parameterName, parameterValues] : synapseParameters) {
+        if(parameterName.find("mongillo_tauF") != std::string::npos){
+            tauF_MongilloC  = std::stod(parameterValues.at(0));
         }
-        else if(name.find("mongillo_tauD") != std::string::npos){
-            tau_d  = std::stod(values.at(0));
+        else if(parameterName.find("mongillo_tauD") != std::string::npos){
+            tauD_MongilloC  = std::stod(parameterValues.at(0));
         }
-        else if(name.find("mongillo_U") != std::string::npos){
-            u  = std::stod(values.at(0));
+        else if(parameterName.find("mongillo_U") != std::string::npos){
+            u_MongilloC  = std::stod(parameterValues.at(0));
         }
-        else if(name.find("mongillo_seed") != std::string::npos){
-            SetSeed(static_cast<int>(std::stod(values.at(0))));
-        }
-
+        // else if(parameterName.find("mongillo_seed") != std::string::npos){
+        //     SetSeed(static_cast<int>(std::stod(parameterValues.at(0))));
+        // }
     }
 }
 
 
-void MongilloSynapseContinuous::SaveParameters(std::ofstream * stream,std::string id_str){
-    Synapse::SaveParameters(stream,id_str);
+void MongilloSynapseContinuous::SaveParameters(std::ofstream& wParameterStream,std::string idString) const{
+    Synapse::SaveParameters(wParameterStream,idString);
 
-    *stream << id_str << "mongillo_tauF\t\t\t\t\t" << std::to_string(tau_f) << " seconds\n";
-    *stream << id_str << "mongillo_tauD\t\t\t\t\t" << std::to_string(tau_d) << " seconds\n";
-    *stream << id_str << "mongillo_U\t\t\t\t\t\t" << std::to_string(this->u) << "\n";
-	if (info->globalSeed == -1) {
-		*stream << id_str << "mongillo_seed\t\t\t\t\t" << std::to_string(this->seed) << "\n";
-	}
+    wParameterStream << idString << "mongillo_tauF\t\t\t\t\t" << std::to_string(tauF_MongilloC) << " #secs\n";
+    wParameterStream << idString << "mongillo_tauD\t\t\t\t\t" << std::to_string(tauD_MongilloC) << " #secs\n";
+    wParameterStream << idString << "mongillo_U\t\t\t\t\t\t" << std::to_string(this->u_MongilloC) << "\n";
+	// if (infoGlobal->globalSeed == -1) {
+	// 	*stream << idString << "mongillo_seed\t\t\t\t\t" << std::to_string(this->seed) << "\n";
+	// }
 }
 
 
-std::string MongilloSynapseContinuous::GetDataHeader(int data_column)
-{
-    return "#" + std::to_string(data_column) + " J_" + GetIdStr() + " (mV)\n"
-        + "#" + std::to_string(data_column+1) + " <x>_"  + GetIdStr() + " ( x is given pre-spike : x = x_postspike + Spikesubmitted ) \n"
-        + "#" + std::to_string(data_column+2) + " <y>_"  + GetIdStr() + " ( y is given pre-spike : y = (y_postspike - U)/(1-U) ) \n"
-        + "#" + std::to_string(data_column+3) + " <pR>_"  + GetIdStr() + "\n";
+std::string MongilloSynapseContinuous::GetDataHeader(int dataColumn) {
+    return "#" + std::to_string(dataColumn) + " J_" + GetIdStr() + " (mV)\n"
+        + "#" + std::to_string(dataColumn+1) + " <x>_"  + GetIdStr() + " ( x is given pre-spike : x = x_postspike + Spikesubmitted ) \n"
+        + "#" + std::to_string(dataColumn+2) + " <y>_"  + GetIdStr() + " ( y is given pre-spike : y = (y_postspike - U)/(1-U) ) \n"
+        + "#" + std::to_string(dataColumn+3) + " <pR>_"  + GetIdStr() + "\n";
 	//+ "#" + std::to_string(data_column+4) + " <xy>_"  + GetIdStr() + "\n"   XY will always return 0 since it is calculated after spiking
 }
 
-std::string MongilloSynapseContinuous::GetUnhashedDataHeader()
-{
+std::string MongilloSynapseContinuous::GetUnhashedDataHeader() const {
 	return "J_" + GetIdStr() + "\t<x>_" + GetIdStr() + "\t<y>_" + GetIdStr() + "\t<pR>_" + GetIdStr() + "\t";
 }
 
-std::valarray<double> MongilloSynapseContinuous::GetSynapticState(int pre_neuron)
-{
-    std::valarray<double> val;
-    val.resize(GetNumberOfDataColumns());
+std::vector<double> MongilloSynapseContinuous::GetSynapticState(NeuronInt sourceNeuron) const {
+    std::vector<double> outputArray;
+    outputArray.resize(GetNoDataColumns());
 
-    double X{ 0 };
-    double Y{ 0 };
+    double sumXMinus{ 0 };//the synapses where the spike was transmitted a neurotransmitter count reset to 0
+    double sumYMinus{ 0 };//expected value of y before the spike-induced increase in bound calcium probability
     // double XY=0;
-    double SpikeSubmitted{ 0 };
-
-    double x_minus{ 0 }, y_minus{0};
-    int N_post{ static_cast<int>(x[pre_neuron].size()) };
-    for(int i = 0;i<N_post;i++){
-        y_minus = (y[pre_neuron][i] - u)/(1-u);
-        Y += y_minus;
-        if(y[pre_neuron][i] == 1){
-            double J_minus = GetCouplingStrength(pre_neuron, i);
-            x_minus = spike_submitted[pre_neuron][i]/(J_minus * y[pre_neuron][i]);
-        }
-        else{
-            // double x_now = x[pre_neuron][i];
-            x_minus = x[pre_neuron][i]/(1-y[pre_neuron][i]);
-        }
-        X	+= x_minus;
-        SpikeSubmitted += spike_submitted[pre_neuron][i];
-        //XY += x[pre_neuron][i] * y[pre_neuron][i];
-    }
-
-    // get average coupling strength
+    double recordedSpikeSubmitted{ 0 };
+    //double xMinus{ 0 }, yMinus{0}; //State of x and y before spike was processed
+    NeuronInt noTargetNeurons{ this->GetNoTargetedNeurons(sourceNeuron) };
     double Jsum{ 0 };
-    for(unsigned int target=0; target < this->GetNumberOfPostsynapticTargets(pre_neuron); target++){
-        Jsum += *(geometry->GetDistributionJ(pre_neuron,target));
+    
+    for(NeuronInt targetNeuron : std::ranges::views::iota(0, noTargetNeurons)){
+        //yMinus = (y_Mongillo.at(sourceNeuron).at(targetNeuron) - u_Mongillo)/(1-u_Mongillo);
+        sumYMinus += (y_MongilloC.at(sourceNeuron).at(targetNeuron) - u_MongilloC)/(1-u_MongilloC);
+        if(y_MongilloC.at(sourceNeuron).at(targetNeuron) == 1){
+            //double J_minus =GetCouplingStrength(sourceNeuron, targetNeuron);
+            //xMinus = spikeSubmitted.at(sourceNeuron).at(targetNeuron)/(J_minus * y_Mongillo.at(sourceNeuron).at(targetNeuron));
+            sumXMinus	+=spikeSubmitted.at(sourceNeuron).at(targetNeuron)/(GetCouplingStrength(targetNeuron,sourceNeuron) * y_MongilloC.at(sourceNeuron).at(targetNeuron));
+        } else{
+            // double x_now = x_Mongillo[pre_neuron][i];
+            //xMinus = x_Mongillo.at(sourceNeuron).at(targetNeuron)/(1-y_Mongillo.at(sourceNeuron).at(targetNeuron));
+            sumXMinus+=x_MongilloC.at(sourceNeuron).at(targetNeuron)/(1-y_MongilloC.at(sourceNeuron).at(targetNeuron));
+        }
+        // sumXMinus	+= xMinus;
+        recordedSpikeSubmitted += spikeSubmitted.at(sourceNeuron).at(targetNeuron);
+        //Get average coupling strength
+        Jsum += GetDistributionJ(targetNeuron,sourceNeuron);
+        //XY += x_Mongillo[pre_neuron][i] * y[pre_neuron][i];
     }
 
-    val[0] = Jsum/double(this->GetNumberOfPostsynapticTargets(pre_neuron));
-    //val[0]= GetCouplingStrength()*double(this->GetNumberOfPostsynapticTargets(pre_neuron));
-    val[1]= double(X);//the synapses where the spike was transmitted a neurotransmitter count reset to 0
-    val[2]= double(Y);//expected value of y before the spike-induced increase in bound calcium probability
-    val[3]= double(SpikeSubmitted);//shouldn't this be an average?
-//	val[4] = double(XY);
-    return val;
-}
-
-void MongilloSynapseContinuous::SetSeed(int s){
-    seed      = s;
-    generator = std::mt19937(seed);
-}
-
-
-void MongilloSynapseContinuous::SetSeed(std::mt19937 *generator){
-    std::uniform_int_distribution<int> distribution(0,INT32_MAX);
-    SetSeed(distribution(*generator));
-    Synapse::SetSeed(generator);
+    outputArray.at(0) = Jsum/static_cast<double>(this->GetNoTargetedNeurons(sourceNeuron));
+    //value[0]= GetCouplingStrength()*static_cast<double>(this->GetNumberOfPostsynapticTargets(pre_neuron));
+    outputArray.at(1)= sumXMinus;//the synapses where the spike was transmitted a neurotransmitter count reset to 0
+    outputArray.at(2)= sumYMinus;//expected value of y before the spike-induced increase in bound calcium probability
+    outputArray.at(3)= recordedSpikeSubmitted;//shouldn't this be an average?
+//	value[4] = static_cast<double>(XY);
+    return outputArray;
 }

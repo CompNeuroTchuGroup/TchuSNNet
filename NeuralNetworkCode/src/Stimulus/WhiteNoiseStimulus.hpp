@@ -9,51 +9,46 @@
 #ifndef WhiteNoiseStimulus_hpp
 #define WhiteNoiseStimulus_hpp
 
+#include "Stimulus.hpp"
 #include <stdio.h>
 
 #include <iostream>
 #include <vector>
 #include <random>
-#include <limits.h>
-#include "Stimulus.hpp"
-
-struct step {
-    int    end_time = INT_MAX;
-    std::vector<double> values;
-} ;
+// #include <limits.h>
 
 
-class WhiteNoiseStimulus : public Stimulus
-{
+
+class WhiteNoiseStimulus : public Stimulus {
 protected:
-    unsigned seed;
+    // signed seed{};
+    std::vector<StepStruct> meanCurrent;     // indices of all neurons that have emitted a spike in the previous time step
+    std::vector<StepStruct> sigmaCurrent;
 
-    std::vector<step> meanCurrent;     // indices of all neurons that have emitted a spike in the previous time step
-    std::vector<step> sigmaCurrent;
-
-    std::mt19937 generator;
+    StepStruct* currentMeanStep;
+    StepStruct* currentSigmaStep;
     
-    void SetSignalArray();
+    std::vector<double> cachedMeans;
+    std::vector<double> cachedSigmas;
+
+    std::normal_distribution<double> standardDistribution{0.0,1.0};
+    // std::mt19937 generator;
+    void RecalculateMeansCache(StepStruct* meanStep);
+    void RecalculateSigmasCache(StepStruct* sigmaStep);
+    void PostLoadParameters() override;
+    void SetSignalMatrix() override;
 public:
 
-    WhiteNoiseStimulus(NeuronPopSample * neur,std::vector<std::string> *input,GlobalSimInfo  * info);
-    virtual ~WhiteNoiseStimulus(){}
+    WhiteNoiseStimulus(std::shared_ptr<NeuronPopSample> neurons,std::vector<FileEntry>& stimulusParameters,GlobalSimInfo*  infoGlobal);
+    ~WhiteNoiseStimulus() override = default;
 
-    std::string GetType(){return str_whitenoiseStimulus;}
-    void        Update(std::vector<std::vector<double>> * synaptic_dV);
+    std::string GetType() const override{return IDstringWhitenoiseStimulus;}
+    void        Update(std::vector<std::vector<double>>& synaptic_dV) override;
 
-    virtual double GetScaling(int pop){
-        if(info->networkScaling_extern == 0)
-            return 1.0;
-        else{
-            std::cout << "WhiteNoiseStimulus (GetScaling): External Scaling not well defined!";
-            std::terminate();
-            return 0;}
-    };
-
+    double GetScaling(PopInt neuronPop) const override;
 	
-    void    SaveParameters(std::ofstream * stream);
-    void    LoadParameters(std::vector<std::string> *input) override;
+    void    SaveParameters(std::ofstream& wParameterStream) const override;
+    void    LoadParameters(const std::vector<FileEntry>& parameters) override;
 
 };
 

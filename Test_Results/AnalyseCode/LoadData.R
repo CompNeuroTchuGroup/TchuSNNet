@@ -108,7 +108,7 @@ Load_Synapses <- function(all_files,number_populations) {
   col_names = c("time","J","x","y","pR");
   
   if(file.exists(full_filename) && !dir.exists(full_filename)  ){
-    data      <- read.table(full_filename, header = TRUE, sep = "\t")
+    data      <- read.table(full_filename, header = TRUE, sep = "\t", na.strings="-nan(ind)")
     data <- data[, colSums(is.na(data)) != nrow(data)]
     
     #Only get the first five columns: (1-time), (2-J),(3-x) , (4-y) , (5-pR)

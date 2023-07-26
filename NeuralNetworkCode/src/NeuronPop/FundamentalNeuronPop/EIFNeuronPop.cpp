@@ -1,78 +1,76 @@
 #include "EIFNeuronPop.hpp"
 
 
-void EIFNeuronPop::advect(std::vector<double> * synaptic_dV)
+void EIFNeuronPop::Advect(const std::vector<double>& synaptic_dV)
 {
 
     //int   totalNeurons = this->GetTotalNeurons();
-    //int   pop;
-    double dt = info->dt;
+    //int   neuronPop;
+    double dtTimestep = infoGlobal->dtTimestep;
 
-    ClearSpiker();
-
-    for(unsigned long i = 0 ; i < noNeurons; i++){
+    ClearSpikerVector();
+	
+    for(NeuronInt neuronID : std::ranges::views::iota(0, noNeurons)){
 		//(a) wait for refractory period
-		if (info->time_step - previous_spike_step[i] <= static_cast<long>(refractorySteps))
+        if((previousSpikeDistance.at(neuronID)) <= refractorySteps){
 			continue;
-		//(b)advect
-		potential[i] += dt / tau_m * (-(potential[i] - Vleak) + dt / tau_m * sharpness * exp((potential[i] - v_critical) / sharpness)) + synaptic_dV->at(i);
-		potential[i] = fmax(V_lowerbound, potential[i]);
-		//(c)determine if neuron has spiked
-		if (this->potential[i] > v_thresh) {
-			spiker.push_back(i);
-			potential[i] = v_reset;
 		}
-        //    while(this->potential[i] > v_thresh)
-        //        this->potential[i] -= v_thresh-v_reset;
+		//(b)Advect
+		membraneV.at(neuronID) += dtTimestep / membraneVTau * (-(membraneV.at(neuronID) - leakPotential) + dtTimestep / membraneVTau * sharpness * exp((membraneV.at(neuronID) - criticalV) / sharpness)) + synaptic_dV.at(neuronID);
+		membraneV.at(neuronID) = fmax(lowerBoundPotential, membraneV.at(neuronID));
+		//(c)determine if neuron has spiked
+		if (this->membraneV.at(neuronID) > thresholdV) {
+			spikerNeurons.push_back(neuronID);
+			membraneV.at(neuronID) = resetV;
+		}
+        //    while(this->potential[i] > thresholdV)
+        //        this->potential[i] -= thresholdV-resetPotential;
         //}
     }
+	this->AdvectPlasticityModel();
 }
 
-void EIFNeuronPop::LoadParameters(std::vector<std::string> *input) {
+void EIFNeuronPop::LoadParameters(const std::vector<FileEntry>& neuronParameters) {
 
-	NeuronPop::LoadParameters(input);
+	NeuronPop::LoadParameters(neuronParameters);
 
-	std::string              name, token;
-	std::vector<std::string> values;
-
-	for (std::vector<std::string>::iterator it = (*input).begin(); it != (*input).end(); ++it) {
-		SplitString(&(*it), &name, &values);
-		if (name.find("V_Crit") != std::string::npos) {
-			v_critical= std::stod(values.at(0));
+	for (auto& [parameterName, parameterValues] : neuronParameters) {
+		if (parameterName.find("V_Crit") != std::string::npos) {
+			criticalV= std::stod(parameterValues.at(0));
 		}
-		if (name.find("sharpness") != std::string::npos) {
-			sharpness = std::stod(values.at(0));
+		if (parameterName.find("sharpness") != std::string::npos) {
+			sharpness = std::stod(parameterValues.at(0));
 		}
-		if (name.find("V_lowerbound") != std::string::npos) {
-			V_lowerbound = std::stod(values.at(0));
+		if (parameterName.find("V_lowerbound") != std::string::npos) {
+			lowerBoundPotential = std::stod(parameterValues.at(0));
 		}
-		if (name.find("V_leak") != std::string::npos) {
-			Vleak = std::stod(values.at(0));
+		if (parameterName.find("V_leak") != std::string::npos) {
+			leakPotential = std::stod(parameterValues.at(0));
 		}
 	}
 }
 
-void EIFNeuronPop::SaveParameters(std::ofstream * stream){
+void EIFNeuronPop::SaveParameters(std::ofstream& wParameterStream) const{
 
-	std::string id = "neurons_" + std::to_string(GetId());
+	std::string idString = "neurons_" + std::to_string(GetId());
 
-	NeuronPop::SaveParameters(stream);
-	*stream << id + "_V_Crit                      " << std::to_string(v_critical) << " #mV\n";
-	*stream << id + "_sharpness                   " << std::to_string(sharpness) << "\n";
-	*stream << id + "_V_lowerbound                " << std::to_string(V_lowerbound) << " #mV\n";
-	*stream << id + "_V_leak                      " << std::to_string(Vleak) << " #mV\n";
-    *stream <<  "#\t\tEIF neuron : dV/dt = -(V-Vleak)/tau_m + sharpness/tau_m * exp((V-V_Crit)/sharpness) + RI/tau_m \n";
-	*stream <<  "#\t\tVcannot be lower than V_lowerbound";
-	*stream <<  "#\t\treset: v = v_reset + (v - v_thresh)\n";
+	NeuronPop::SaveParameters(wParameterStream);
+	wParameterStream << idString + "_V_Crit\t\t\t" << std::to_string(criticalV) << " #mV\n";
+	wParameterStream << idString + "_sharpness\t\t\t" << std::to_string(sharpness) << "\n";
+	wParameterStream << idString + "_V_lowerbound\t\t\t" << std::to_string(lowerBoundPotential) << " #mV\n";
+	wParameterStream << idString + "_V_leak\t\t\t" << std::to_string(leakPotential) << " #mV\n";
+    wParameterStream <<  "#\t\tEIF neuron : dV/dt = -(V-Vleak)/tauM + sharpness/tauM * exp((V-V_Crit)/sharpness) + RI/tauM \n";
+	wParameterStream <<  "#\t\tVcannot be lower than V_lowerbound";
+	wParameterStream <<  "#\t\treset: v = v_reset + (v - v_thresh)\n";
 }
 
 /*EIFNeuronPop::EIFNeuronPop(double tm, double vr, double vc, double s, double vt, double t) :
 NeuronPop()
 {
-    this->tau_m = tm;
-    this->v_reset = vr;
-    this->v_critical = vc;
+    this->membraneVDecayTau = tm;
+    this->resetPotential = vr;
+    this->criticalPotential = vc;
     this->sharpness = s;
-    this->v_thresh = vt;
-    this->dt = t;
+    this->thresholdV = vt;
+    this->dtTimestep = t;
 }*/

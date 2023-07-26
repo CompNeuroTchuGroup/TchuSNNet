@@ -13,16 +13,14 @@
 #include "NeuralNetwork.hpp"
 #include "GlobalFunctions.hpp"
 #include <iostream>
-//#include <filesystem>
-//namespace fs = std::__fs::filesystem;
+//All files have been refactored by Antoni Bertolin. If something goes wrong, contact bertolin@uni-bonn.de.
 
-int main(int argc, char* argv[])
-{
-    std::string argv_str(argv[0]);
+int main(int argc, char* argv[]) {
+    std::string argvString(argv[0]);
     std::string base;
-    std::string inputFile;
+    std::string inputFileAddress;
 	bool Windows=false;
-    std::string pathTo_inputFile = "";
+    std::string pathToInputFile = "";
 
 
 	#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
@@ -32,154 +30,157 @@ int main(int argc, char* argv[])
     if(argc >= 2){
         base = argv[1];
         if(argc >= 3){
-            inputFile = argv[2];
+            inputFileAddress = argv[2];
 
-            pathTo_inputFile = getPathToInputFile(&inputFile, Windows);
+            pathToInputFile = getPathToInputFile(inputFileAddress, Windows);
         }
         else if (Windows) {
-            inputFile = base + "\\Parameters.txt";
+            inputFileAddress = base + "\\Parameters.txt";
 
-            pathTo_inputFile = base + "\\";
+            pathToInputFile = base + "\\";
         }
         else {
-            inputFile = base + "/Parameters.txt";
+            inputFileAddress = base + "/Parameters.txt";
 
-            pathTo_inputFile = base + "/";
+            pathToInputFile = base + "/";
         }
     }
     else{
         base = "";
-        inputFile = "Parameters.txt";
+        inputFileAddress = "Parameters.txt";
 
-        pathTo_inputFile = base;
+        pathToInputFile = base;
     }
     std::cout<<"Base folder: "+base+"\n";
-    std::cout<<"Input file : "+inputFile+"\n";
-
-    //******************************************
-    // Read parameter file
-    //******************************************
-
-    //array of FileEntry structs
-    char                            line[2048];
-    std::vector<FileEntry> parameterEntries;
-    std::vector<std::string>        full_strs,values;
-    std::string                     str_line,name,iterate_id;
-    std::vector<IterableFileEntry> iterate1_entries;
-    std::vector<IterableFileEntry> iterate2_entries;
+    std::cout<<"Input file : "+inputFileAddress+"\n";
 
     //************************************************
     // Read Parameter file
     //************************************************
     struct stat buffer;
-    if(stat(inputFile.c_str(),&buffer) != 0){
+    if(stat(inputFileAddress.c_str(),&buffer) != 0){
         std::cout << "*************************\n";
-        std::cout <<inputFile<<" Input file does not exist\n";
+        std::cout <<inputFileAddress<<" Input file does not exist\n";
         std::cout << "*************************\n";
-        return 0;
+        return EXIT_FAILURE;
     }
 
-    std::ifstream stream(inputFile);
-    //std::cout << inputFile << std::endl;
+        //array of FileEntry structs
+    std::string                     line;
 
-    std::string prefix;
-    while (stream.getline(line,256)){
-        if(line[0] == '#')
-            continue;
+    //std::vector<std::string>        allParamStringsVector;//,parameterValues;
+    //std::string                     readStringLine;//,parameterName,iterateID;
+    std::vector<FileEntry>          parameterEntries;
+    std::vector<IterableFileEntry>  iterate1Entries;
+    std::vector<IterableFileEntry>  iterate2Entries;
 
-        full_strs.push_back(line);
-        str_line = line;
-        prefix = str_line.substr(0, 9);
+    std::ifstream parameterFileStream(inputFileAddress, std::ios::in);
+    while(std::getline(parameterFileStream, line, '\n')){
+    //while (parameterFileStream.getline(line,256)){
+        if(line[0] == '#'){
+            continue;   
+        }
+        //allParamStringsVector.push_back(line);
+        //readStringLine = line;
+        //prefix = readStringLine.substr(0, 9);
 
         // if the entry in the parameter file is prefixed with iterate_1 or iterate_2, push them on iterateX_entries vector
-        if (prefix.compare("iterate_1") == 0) {
-            iterate1_entries.push_back(stringToIterableFileEntry(str_line));
-        } else if (prefix.compare("iterate_2") == 0) {
-            iterate2_entries.push_back(stringToIterableFileEntry(str_line));
+        if (line.find("iterate_1") != std::string::npos){//(prefix.compare("iterate_1") == 0) {
+            iterate1Entries.push_back(SplitStringToIterableEntry(line));
+        } else if (line.find("iterate_2") != std::string::npos) {
+            iterate2Entries.push_back(SplitStringToIterableEntry(line));
         } else {
-            parameterEntries.push_back(stringToFileEntry(str_line));
+            parameterEntries.push_back(SplitStringToEntry(line));
         }
     }
-    stream.close();
+    parameterFileStream.close();
 
     //Get path to input parameters file and save it in the parameterEntries
-    parameterEntries.push_back(stringToFileEntry("pathToInputFile  " + pathTo_inputFile));
-
+    parameterEntries.push_back(SplitStringToEntry("pathToInputFile  " + pathToInputFile));
+    std::for_each(parameterEntries.begin(), parameterEntries.end(), [](FileEntry& entry){
+        entry.RemoveCommentsInValues();
+    });
+    //parameterEntries.push_back(SplitStringToEntry("nonIterateTitle  " + pathToInputFile));
     //Check for consistency Iterate 1: do all entries have the same lenght?
-    if(iterate1_entries.empty()){
-        iterate1_entries.push_back(IterableFileEntry("iterate_1", "placeholder", {""}));
-    } else {
-        try {
-            checkConsistencyOfIterationParameters(iterate1_entries);
-        } catch (const std::invalid_argument& e) {
-            std::cerr << e.what() << std::endl;
-            abort();
-        }
-    }
+    if(iterate1Entries.empty()){
+        iterate1Entries.push_back(IterableFileEntry("iterate_1", "placeholder", {""}));
+    } 
+    // else {
+    //     CheckConsistencyOfIterationParameters(iterate1Entries);
+    // }
 
     //Check for consistency Iterate 2: do all entries have the same lenght?
-    if(iterate2_entries.empty()){
-        iterate2_entries.push_back(IterableFileEntry("iterate_2", "placeholder", {""}));
-    } else {
-        try {
-            checkConsistencyOfIterationParameters(iterate2_entries);
-        } catch (const std::invalid_argument& e) {
-            std::cerr << e.what() << std::endl;
-            abort();
-        }
-    }
-
-    unsigned int iterate1_len = static_cast<unsigned int>(iterate1_entries.front().values.size());
-    unsigned int iterate2_len = static_cast<unsigned int>(iterate2_entries.front().values.size());
-
+    if(iterate2Entries.empty()){
+        iterate2Entries.push_back(IterableFileEntry("iterate_2", "placeholder", {""}));
+    } 
+    // else {
+    //     CheckConsistencyOfIterationParameters(iterate2Entries);
+    // }
+    //signed int iterate1_len = static_cast<signed int>();
+    //signed int iterate2_len = static_cast<signed int>();
     //******************************************
     //******************************************
     // #pragma omp parallel for collapse(2)
-    for(unsigned int i1 = 0; i1 < iterate1_len; i1++) {
-        for(unsigned int i2 = 0; i2 < iterate2_len; i2++){
+    for(signed int iterate1Index : std::ranges::views::iota(0,MinIterateParameterSize(iterate1Entries))) {
+        for(signed int iterate2Index : std::ranges::views::iota(0,MinIterateParameterSize(iterate2Entries))){
 
-            std::vector<FileEntry> parEntries = parameterEntries;
+            std::vector<FileEntry> parameterEntriesCopy = parameterEntries; //Why is this copy created?
             std::cout << "******************************************" << std::endl;
-            std::cout << "i1 = " << i1+1 << " , i2 = " << i2+1 << std::endl;
-            for(auto & parEntry : parEntries){
+            std::cout << "iterate1 = " << iterate1Index+1 << " , iterate2 = " << iterate2Index+1 << std::endl;
+            for(FileEntry& parEntry : parameterEntriesCopy){
                 //Set parameters for Iterate 1
-                for (auto & parEntry_1 : iterate1_entries) {
-                    if(parEntry.name.compare(parEntry_1.name) == 0){
-                        parEntry.values[0] = parEntry_1.values[i1];
-                        std::cout << " " << parEntry_1.name << " = " << (parEntry_1.values[i1]) << std::endl;
+                for (IterableFileEntry& parameterEntry1 : iterate1Entries) {
+                    if(parEntry.parameterName.compare(parameterEntry1.parameterName) == 0){
+                        //This loop will allocate the parameters as long as the iterate parameter is consistent with the actual parameter (this requires the parameter be introduced in the params file properly).
+                        size_t indexMultiplier {IsIterateParamConsistent(parEntry, parameterEntry1)};
+                        for(size_t index : std::ranges::views::iota(0u, parEntry.parameterValues.size())){
+                            parEntry.parameterValues.at(index) = parameterEntry1.parameterValues.at(indexMultiplier*iterate1Index+index);
+                        }
+                        std::cout << " " << parameterEntry1.parameterName << " = " << (parameterEntry1.parameterValues.at(iterate1Index*indexMultiplier)) << std::endl;
                         break;
                     }
                 }
                 //Set parameters for Iterate 2
-                for (auto & parEntry_2 : iterate2_entries) {
-                    if(parEntry.name.compare(parEntry_2.name) == 0){
-                        parEntry.values[0] = parEntry_2.values[i2];
-                        std::cout << " " << parEntry_2.name << " = " << (parEntry_2.values[i2]) << std::endl;
+                for (IterableFileEntry& parameterEntry2 : iterate2Entries) {
+                    if(parEntry.parameterName.compare(parameterEntry2.parameterName) == 0){
+                        //This loop will allocate the parameters as long as the iterate parameter is consistent with the actual parameter (this requires the parameter be introduced in the params file properly).
+                        size_t indexMultiplier {IsIterateParamConsistent(parEntry, parameterEntry2)};
+                        for(size_t index : std::ranges::views::iota(0u, parEntry.parameterValues.size())){
+                            parEntry.parameterValues.at(index) = parameterEntry2.parameterValues.at(indexMultiplier*iterate2Index+index);
+                        }
+                        // parEntry.parameterValues.at(0) = parameterEntry2.parameterValues.at(iterate2Index);
+                        std::cout << " " << parameterEntry2.parameterName << " = " << (parameterEntry2.parameterValues.at(iterate2Index*indexMultiplier)) << std::endl;
                         break;
                     }
                 }
 
-                if((parEntry.name.compare("Title") == 0)){
-                    if(iterate1_entries[0].name.compare("placeholder") != 0)
-                        parEntry.values[0].append("_i1_"+std::to_string(i1+1)+"_"+iterate1_entries[0].name.substr(iterate1_entries[0].name.length()-6,6)+"_"+iterate1_entries[0].values[i1]);
-                    if(iterate2_entries[0].name.compare("placeholder") != 0)
-                        parEntry.values[0].append("_i2_"+std::to_string(i2+1)+"_"+iterate2_entries[0].name.substr(iterate2_entries[0].name.length()-6,6)+"_"+iterate2_entries[0].values[i2]);
+                if((parEntry.parameterName.compare("Title") == 0)){
+                    parEntry.parameterValues.push_back(parEntry.parameterValues.at(0));
+                    if (!(iterate1Entries.at(0).parameterName.find("placeholder") != std::string::npos))
+                        parEntry.parameterValues.at(0).append("_it1_"+std::to_string(iterate1Index+1)+"_").append(iterate1Entries.at(0).parameterName, iterate1Entries.at(0).parameterName.length()-std::min(static_cast<int>(iterate1Entries.at(0).parameterName.length()),10) ,std::min(iterate1Entries.at(0).parameterName.length(), static_cast<size_t>(10))).append("_"+iterate1Entries.at(0).parameterValues.at(iterate1Index));
+                    if (!(iterate2Entries.at(0).parameterName.find("placeholder") != std::string::npos))
+                        parEntry.parameterValues.at(0).append("_it2_"+std::to_string(iterate2Index+1)+"_").append(iterate2Entries.at(0).parameterName, iterate2Entries.at(0).parameterName.length()-std::min(static_cast<int>(iterate2Entries.at(0).parameterName.length()),10) ,std::min(iterate2Entries.at(0).parameterName.length(), static_cast<size_t>(10))).append( "_"+iterate2Entries.at(0).parameterValues.at(iterate2Index));
                 }
             }
             std::cout << "******************************************" << std::endl;
-
-            NeuralNetwork neuralNetwork(base,&parEntries);
-            neuralNetwork.Simulate();
-            neuralNetwork.makeInputCopy(inputFile);
-            DatafileParser parser(neuralNetwork.GetRecorder());
-            //neuralNetwork.~NeuralNetwork(); //This line is doing shennanigans I think
-            parser.parse();
+            try{
+                NeuralNetwork neuralNetwork(base,parameterEntriesCopy);
+                neuralNetwork.Simulate();
+                neuralNetwork.makeInputCopies(inputFileAddress);
+                DatafileParser parser(neuralNetwork.GetRecorderReference());
+                //neuralNetwork.~NeuralNetwork(); //This line is doing shennanigans I think
+                parser.parse();
+            }
+            catch(const char* message){
+                std::cout<<message<<std::endl;
+                return EXIT_FAILURE;
+            }
         }
     }
 
 
     //******************************************
     //******************************************
-    std::cout<< std::endl <<std::endl;
-	return 0;
+    std::cout<< "\n"<< std::endl;
+	return EXIT_SUCCESS;
 }

@@ -3,40 +3,37 @@
 /*QIFNeuronPop::QIFNeuronPop(double tm, double vr, double vc, double s, double vt, double t) :
 NeuronPop()
 {
-    tau_m = tm;
-    v_reset = vr;
-    v_critical = vc;
+    membraneVDecayTau = tm;
+    resetPotential = vr;
+    criticalPotential = vc;
     sharpness = s;
-    v_thresh = vt;
-    dt = t;
+    thresholdV = vt;
+    dtTimestep = t;
 }*/
 
-void QIFNeuronPop::advect(std::vector<double> * synaptic_dV)
-{
-    double dt = info->dt;
+void QIFNeuronPop::Advect(const std::vector<double>& synaptic_dV){
+
     //int totalNeurons = GetTotalNeurons();
-    // int pop;
+    // PopInt neuronPop;
 
-    ClearSpiker();
+    ClearSpikerVector();
 
-    for(unsigned long i = 0 ; i < noNeurons; i++)
-    {
-        potential[i] += potential[i] *dt/tau_m * sharpness * (potential[i] - v_critical ) + synaptic_dV->at(i);
-        if(this->potential[i] > v_thresh)
-        {
-            spiker.push_back(i);
-            while(this->potential[i] > v_thresh)
-                this->potential[i]-= v_thresh-v_reset;
+    for(NeuronInt neuron : std::ranges::views::iota(0,noNeurons)){
+        membraneV.at(neuron) += membraneV.at(neuron) *infoGlobal->dtTimestep/membraneVTau*sharpness*(membraneV.at(neuron)-criticalV)+synaptic_dV.at(neuron);
+        if(this->membraneV.at(neuron) > thresholdV){
+            spikerNeurons.push_back(neuron);
+            while(this->membraneV.at(neuron) > thresholdV)
+                this->membraneV.at(neuron)-= thresholdV-resetV;
         }
     }
 }
 
 
-void QIFNeuronPop::SaveParameters(std::ofstream * stream){
+void QIFNeuronPop::SaveParameters(std::ofstream& wParameterStream) const{
 
-    NeuronPop::SaveParameters(stream);
-    *stream <<  "#\t\tQIF neuron (UNDER CONSTRUCTION): dV/dt = V /tau_m * sharpness * (V - v_critical) + RI/tau_m\n";
-    *stream <<  "#\t\treset: v = v_reset + (v - v_thresh)\n";
-    *stream <<  "#\t\tUNDER CONSTRUCTION: sharpness/ v_critical not defined\n";
+    NeuronPop::SaveParameters(wParameterStream);
+    wParameterStream <<  "#\t\tQIF neuron (UNDER CONSTRUCTION): dV/dt = V /tauM * sharpness * (V - v_critical) + RI/tauM\n";
+    wParameterStream <<  "#\t\treset: v = v_reset + (v - v_thresh)\n";
+    wParameterStream <<  "#\t\tUNDER CONSTRUCTION: sharpness/ v_critical not defined\n";
 
 }

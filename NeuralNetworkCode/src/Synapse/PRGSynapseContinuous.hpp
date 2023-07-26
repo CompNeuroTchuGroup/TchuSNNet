@@ -1,44 +1,45 @@
 #ifndef PRGSYNAPSECONTINUOUS_HPP
 #define PRGSYNAPSECONTINUOUS_HPP
 
-#include <iostream>
-#include <vector>
-#include <random>
-#include <typeinfo>
-#include <valarray>
 #include "Synapse.hpp"
 #include "MongilloSynapseContinuous.hpp"
 #include "../GlobalFunctions.hpp"
 #include "../NeuronPop/NeuronPop.hpp"
+#include <iostream>
+#include <vector>
+#include <random>
+#include <typeinfo>
+
+
 
 
 class PRGSynapseContinuous : public MongilloSynapseContinuous
 {
 protected:
 
-    std::valarray<std::valarray<double>> l;
+    std::vector<std::vector<double>> l_PRG;
 
-    double tau_l;       // Decay time constant
-    double M;           // LPA2 filling probability per transmitted spike
-    double Delta_U;     // Effect of LPA on U
-	double Delta_tau_f; // Effect of LPA on tau_f
+    double tauL_PRG{};       // Decay time constant
+    double M_PRG{};           // LPA2 filling probability per transmitted spike
+    double deltaU_PRG{};     // Effect of LPA on U
+	double deltaTauF_PRG{}; // Effect of LPA on tauF_Mongillo
 
-    void advectSpikers(std::vector<double>& currents, long spiker) override;
-    void TransmitSpike(std::vector<double>& currents,long targetId,long spikerId) override;
+    std::vector<double> AdvectSpikers (NeuronInt spiker) override;
+    double TransmitSpike(NeuronInt targetId,NeuronInt spikerId) override;
 	void ConnectNeurons() override;
 
 public:
-    PRGSynapseContinuous(NeuronPop * postNeurons,NeuronPop * preNeurons,GlobalSimInfo * info);
+    PRGSynapseContinuous(PopPtr targetPop,PopPtr sourcePop,GlobalSimInfo* infoGlobal);
     ~PRGSynapseContinuous() override = default;
 
-    int GetNumberOfDataColumns() override {return 5;} // J, <y>, <x>, <l>, <submitted_spikes>
-	std::string GetDataHeader(int data_column) override;
-	std::string GetUnhashedDataHeader() override;
-	std::valarray<double> GetSynapticState(int pre_neuron) override;
-    const std::string GetTypeStr() override { return str_prgSynapseContinuous; }
+    int GetNoDataColumns() const override {return 5;} // J, <y>, <x>, <l>, <submitted_spikes>
+	std::string GetDataHeader(int dataColumn) override;
+	std::string GetUnhashedDataHeader() const override;
+	std::vector<double> GetSynapticState(NeuronInt sourceNeuron) const override;
+    std::string GetTypeStr() const override { return IDstringPRGSynapseContinuous; }
 
-    void SaveParameters(std::ofstream * stream,std::string id_str) override;
-    void LoadParameters(std::vector<std::string> *input) override;
+    void SaveParameters(std::ofstream& wParameterStream,std::string idString) const override;
+    void LoadParameters(const std::vector<FileEntry>& synapseParameters) override;
 
 };
 

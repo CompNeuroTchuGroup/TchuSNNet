@@ -1,217 +1,250 @@
+
 #include "NeuronPop.hpp"
 
-NeuronPop::NeuronPop(GlobalSimInfo * info,int id){
-    refractorySteps        = 0;
-    this->info             = info;
-    seed_InitialPotentials = 0;
-    seed_InitialPrevSpike  = 0;
-    noNeurons              = 0;
-    this->identifier       = id;
-
-    tau_m                  = 0;
-    v_reset                = 0;
-    v_thresh               = 0;
+NeuronPop::NeuronPop(GlobalSimInfo* globalInfo,PopInt inputID) :  infoGlobal{globalInfo},identifier{inputID}{
+    std::uniform_int_distribution<int> distribution(0, INT_MAX);
+    seed = distribution(infoGlobal->globalGenerator);
+    // seedInitialPreviousSpike  = distribution(infoGlobal->globalGenerator);
+    // seedInitialPotentials = distribution(infoGlobal->globalGenerator);
+    generator = std::mt19937(seed);
 }
 
 
-void NeuronPop::SetSeeds(int seed1,int seed2) {
-    if(info->globalSeed != -1){
-        std::uniform_int_distribution<int> distribution(0,INT32_MAX);
-        seed_InitialPrevSpike = distribution(info->globalGenerator);
-        seed_InitialPotentials = distribution(info->globalGenerator);
-    } else {
-        seed_InitialPrevSpike  = seed1;
-        seed_InitialPotentials = seed2;
-    }
-}
+void NeuronPop::SetNeurons() {
 
+    // std::mt19937 generatorPreviousSpikes(seedInitialPreviousSpike);
 
-void NeuronPop::SetNeurons(unsigned long noNeur) {
-    noNeurons = noNeur;
-
-    srand(seed_InitialPrevSpike);
-
-    previous_spike_step.resize(noNeurons);
-    potential.resize(noNeurons);
-
-    //std::cout << "v_thresh = " << std::to_string(this->v_thresh) << "\n";
-    //std::cout << "v_reset = " << std::to_string(this->v_reset) << "\n";
+    previousSpikeDistance.resize(noNeurons);
+    membraneV.resize(noNeurons);
     
-    std::mt19937 generator(seed_InitialPotentials);
-    //std::uniform_real_distribution<double> uniformDistribution (0.0,1.0); //v_thresh instead of 1.0
-    std::uniform_real_distribution<double> uniformDistribution (v_reset,v_thresh);
+    // std::mt19937 generatorPotentials(seedInitialPotentials);
+    //std::uniform_real_distribution<double> uniformDistribution (0.0,1.0); //thresholdV instead of 1.0
+    std::uniform_real_distribution<double> potentialDistribution (resetV,thresholdV);
+    std::uniform_real_distribution<double> timeDistribution (infoGlobal->dtTimestep,(1/prevMinFrequency)); //The expectation of exponential is the inverse of the lambda. By giving avg freq as lambda, we get avg ISI as expectation (in seconds).
 
-    for(unsigned long i = 0; i < noNeurons; i++){
-        previous_spike_step[i] = - rand() % static_cast<int>(3.0/info->dt);
-        potential[i]           = uniformDistribution(generator);
+    for(NeuronInt neuron : std::ranges::views::iota(0,noNeurons)){
+        previousSpikeDistance.at(neuron) = static_cast<TStepInt>(timeDistribution(generator)/infoGlobal->dtTimestep);
+        membraneV.at(neuron)           = potentialDistribution(generator);
     }
 }
 
-void NeuronPop::SetPosition(long noNeur)
-{
-	if (info->Dimensions == 0)
-		return;
-	noNeurons = noNeur;
-	std::mt19937 generator(seed_InitialPotentials);
+void NeuronPop::SetPosition() {
+    if (infoGlobal->dimensions == 0) {
+        return;
+    }
+	// std::mt19937 generator(seedInitialPotentials);
 	std::uniform_real_distribution<double> uniformDistribution(0.0, 1.0);
-	x_pos.resize(noNeurons);
-	y_pos.resize(noNeurons);
-	double Ly = info->Ly;
-	double Lx = info->Lx;
+	xAxisPosition.resize(noNeurons);
+	yAxisPosition.resize(noNeurons);
+	double yAxisLength = infoGlobal->yAxisLength;
+	double xAxisLength = infoGlobal->xAxisLength;
 	int rows;
 	int columns;
 	int mod;
 
-	//for (int i = 0; i < noNeurons; i++) {
-	//	x_pos[i] = uniformDistribution(generator) * info->Lx;
-	//	y_pos[i] = uniformDistribution(generator) * info->Ly;
+	//for (int i = 0; i < nos; i++) {
+	//	xAxisPosition[i] = uniformDistribution(generator) * infoGlobal->xAxisLength;
+	//	yAxisPosition[i] = uniformDistribution(generator) * infoGlobal->yAxisLength;
 	//}
 
-	if (info->Dimensions == 2) {
+	if (infoGlobal->dimensions == 2) {
         rows = static_cast<int>(ceil(sqrt(noNeurons)));
 		columns = noNeurons / rows;
 		mod = noNeurons -rows*columns;//the difference is added by including one extra column in each of the first mod rows
 
-		for (int i = 0; i < mod*(columns+1); i++) {
-			x_pos[i] = (Lx / (columns + 1))*(i % (columns + 1));
-			y_pos[i] = (Ly / rows) *floor(i / (columns + 1));
+		for (NeuronInt neuron : std::ranges::views::iota(0,mod*(columns+1))) {
+            //This loop only runs if it is not a perfect square, shifts the available grid into one slightly tighter
+			xAxisPosition.at(neuron) = (xAxisLength / (columns + 1))*(neuron % (columns + 1)); //Assign the position of the column (x axis)
+			yAxisPosition.at(neuron) = (yAxisLength / rows) *floor(neuron / (columns + 1));// The same thing for y
 		}
-		for (unsigned long i = (mod+mod*columns); i < noNeurons; i++) {
-			x_pos[i] = (Lx / (columns))*((i - mod) % columns);
-			y_pos[i] = (Ly / rows) *floor((i - mod) / (columns));
-		}
-	}
-	else if (info->Dimensions == 1) {
-		for (unsigned long i = 0;i < noNeurons; i++) {
-			x_pos[i] = i * Lx / noNeurons;
+		for (NeuronInt neuron : std::ranges::views::iota (mod*(columns+1), noNeurons)) {
+            //This loop runs from the endpoint of the last loop to the total number of neurons
+			xAxisPosition.at(neuron) = (xAxisLength / (columns))*((neuron - mod) % columns);
+			yAxisPosition.at(neuron) = (yAxisLength / rows) *floor((neuron - mod) / (columns));
 		}
 	}
+	else if (infoGlobal->dimensions == 1) {
+		for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
+			xAxisPosition.at(neuron) = neuron * xAxisLength / noNeurons;
+		}
+	}
 }
 
-//void NeuronPop::SetGlobalNeuronId(long global_neuron_id){
-//    global_id.resize(noNeurons);
-//    for(long i = 0; i < noNeurons; i++){
-//        global_id[i] = global_neuron_id + i;
-//    }
-//}
-
-void NeuronPop::ClearSpiker(){
-    for(const auto &previous_spiker : spiker)
-        previous_spike_step[previous_spiker] = info->time_step-1;
-
-    spiker.clear();
+void NeuronPop::ClearSpikerVector() {
+    std::for_each(spikerNeurons.begin(), spikerNeurons.end(), [this](NeuronInt previousSpiker){
+        previousSpikeDistance.at(previousSpiker) = 0; 
+    });
+    //v1
+    // spikerNeuronsPrevdt=std::move(spikerNeurons);
+    // spikerNeurons.clear();
+    //v2. This is done to preserve capacity of spiker vector. It would be faster to just have pointers and swap those, but that would add dereferences everywhere (tested and faster in MVSC)
+    std::swap(spikerNeurons, spikerNeuronsPrevdt);
+    spikerNeurons.clear();
+	std::transform(std::execution::unseq,previousSpikeDistance.begin(), previousSpikeDistance.end(), previousSpikeDistance.begin(),std::bind(std::plus<TStepInt>(),std::placeholders::_1, 1));
 }
 
-void NeuronPop::LoadParameters(std::vector<std::string> *input,unsigned long noNeurons){
-    SetNeurons(noNeurons);
-    LoadParameters(input);
+void NeuronPop::AdvectPlasticityModel() {
+    if (this->hasPlasticity){
+        std::for_each(std::execution::unseq,spikerNeurons.begin(), spikerNeurons.end(), [this](NeuronInt spiker){
+            RecordPostSpike(spiker);
+        });
+        std::for_each(PAR,morphology.begin(), morphology.end(), [](std::unique_ptr<Morphology>& singleMorphology){
+            singleMorphology->Advect();
+        });
+    }
 }
 
-void NeuronPop::LoadParameters(std::vector<std::string> *input){
+// void NeuronPop::LoadParameters(const std::vector<FileEntry>& neuronParameters, signed long noNeurons) {
+//     SetNeurons(noNeurons);
+//     LoadParameters(neuronParameters);
+// }
 
-    std::string              name,token;
-    std::vector<std::string> values;
+void NeuronPop::LoadParameters(const std::vector<FileEntry>& neuronParameters){
 
-    for(std::vector<std::string>::iterator it = (*input).begin(); it != (*input).end(); ++it) {
-
-        SplitString(&(*it),&name,&values);
-
-        /*if(name.find("Ni") != std::string::npos){
-            totalPopulations = (int)values.size();
+    for(auto& [parameterName, parameterValues] : neuronParameters) {
+        //This is what is called a "structured binding", it assigns the first value to the first variable, etc for the whole container.
+        /*if(parameterName.find("Ni") != std::string::npos){
+            totalPopulations = (int)parameterValues.size();
             //spiker              = new std::vector<int>[totalPopulations];
             //neuronsInPopulation = new int[totalPopulations];
             //for(int i = 0;i<totalPopulations;i++)
-            //    neuronsInPopulation[i] = std::stoi(values.at(i));
+            //    neuronsInPopulation[i] = std::stoi(parameterValues.at(i));
         }*/
-        if(name.find("tauM") != std::string::npos){
-            this->tau_m = (std::stod(values.at(0)));
+        if(parameterName.find("tauM") != std::string::npos){
+            this->membraneVTau = (std::stod(parameterValues.at(0)));
+            this->membraneExpDecay=exp(-infoGlobal->dtTimestep/membraneVTau);
+        } else if(parameterName.find("vReset") != std::string::npos){
+            this->resetV = (std::stod(parameterValues.at(0)));
+        } else if(parameterName.find("vThresh") != std::string::npos){
+            this->thresholdV = (std::stod(parameterValues.at(0)));
+        } else if(parameterName.find("refractoryTime") != std::string::npos){
+            this->refractorySteps = std::lround((std::stod(parameterValues.at(0)))/infoGlobal->dtTimestep);
+        //} else if(parameterName.find("r_target") != std::string::npos){
+         //   this->targetRate = (std::stoi(parameterValues.at(0)));
+        }else if(parameterName.find("seed") != std::string::npos){
+            this->userSeeds=true;
+            this->seed = (std::stoi(parameterValues.at(0)));
+        }else if(parameterName.find("prevMinFrequency") != std::string::npos){
+            this->prevMinFrequency = (std::stod(parameterValues.at(0)));
+            this->definedPrevMeanFreq=true;
+        // } else if(parameterName.find("seedInitialPotentials") != std::string::npos){
+        //     userSeeds=true;
+        //     this->seedInitialPotentials = (std::stoi(parameterValues.at(0)));
+        // } else if(parameterName.find("seedInitialPrevSpike") != std::string::npos){
+        //     userSeeds=true;
+        //     this->seedInitialPreviousSpike = (std::stoi(parameterValues.at(0)));
+        }  else if(parameterName.find("noNeurons") != std::string::npos ){ //|| parameterName.find("nos") != std::string::npos
+            this->noNeurons = std::stol(parameterValues.at(0));
         }
-        else if(name.find("vReset") != std::string::npos){
-            this->v_reset = (std::stod(values.at(0)));
-        }
-        else if(name.find("vThresh") != std::string::npos){
-            this->v_thresh = (std::stod(values.at(0)));
-        }
-        else if(name.find("refractoryTime") != std::string::npos){
-            this->refractorySteps = std::round((std::stod(values.at(0)))/info->dt);
-        }
-        //else if(name.find("r_target") != std::string::npos){
-         //   this->r_target = (std::stoi(values.at(0)));
-        //}
-        else if(name.find("seedInitialPotentials") != std::string::npos){
-            this->seed_InitialPotentials = (std::stoi(values.at(0)));
-        }
-        else if(name.find("seedInitialPrevSpike") != std::string::npos){
-            this->seed_InitialPrevSpike = (std::stoi(values.at(0)));
-        }
-        else if(name.find("noNeurons") != std::string::npos){
-                    SetNeurons(static_cast<long>(std::stod(values.at(0))));
-        }
-        // else if(name.find("streamOutput") != std::string::npos){
-        //             if (values.at(0).find("true") != std::string::npos){
-        //                 streamingNOutputBool=true;
-        //             }
-        // }
     }
-
-    // for(std::vector<std::string>::iterator it = (*input).begin(); it != (*input).end(); ++it) {
-    //
-    //     SplitString(&(*it),&name,&values);
-    //
-    //     if(name.find("noNeurons") != std::string::npos){
-    //         SetNeurons((long)(std::stod(values.at(0))));
-    //         //spiker              = new std::vector<int>[totalPopulations];
-    //         //neuronsInPopulation = new int[totalPopulations];
-    //         //for(int i = 0;i<totalPopulations;i++)
-    //         //    neuronsInPopulation[i] = std::stoi(values.at(i));
-    //     }
-    // }
+    if(resetV>=thresholdV){
+        throw "There was an attempt to select a resetV>thresholdV. For safety reasons this is disabled.";
+    }
+    SetNeurons();
 }
 
-void NeuronPop::SaveParameters(std::ofstream * stream){
-
-    std::string id = "neurons_" + std::to_string(GetId());
-
-    *stream <<  "#***********************************************\n";
-    //*stream <<  id + "_streamOutput                " << std::boolalpha<< streamingNOutputBool << std::noboolalpha << "\n";
-    *stream <<  id + "_noNeurons                   " << noNeurons << "\n";
-    *stream <<  id + "_type                        " << GetType() << "\n";
-    *stream <<  id + "_tauM                        " << std::to_string(this->tau_m)  << " #seconds\n";
-    *stream <<  id + "_vReset                      " << std::to_string(this->v_reset)  << " #mV \n";
-    *stream <<  id + "_vThresh                     " << std::to_string(this->v_thresh)  << " #mV\n";
-    *stream <<  id + "_refractoryTime              " << std::to_string(this->refractorySteps*info->dt)  << " #seconds\n";
-    //*stream <<  id + "_r_target                    " << std::to_string(this->r_target)  << " Hz\n";
-    if(info->globalSeed == -1){
-        *stream <<  id + "_seedInitialPotentials   " << this->seed_InitialPotentials << "\n";
-        *stream <<  id + "_seedInitialPrevSpike    " << this->seed_InitialPrevSpike << "\n";
+void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry> &morphologyParameters) {
+    if(!hasPlasticity){
+        for(auto& [parameterName, parameterValues] : morphologyParameters) {
+            if(parameterName.find("pmodel_type") != std::string::npos) {
+                if (parameterValues.at(0) == IDstringMonoDendriteSTDPTazerart) {
+                    for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
+                        (void)neuron;//Does nothing, removes warning on unused vars
+                        this->morphology.push_back(std::make_unique<MonoDendriteSTDPTazerart>(this->infoGlobal));
+                        this->morphology.back()->LoadParameters(morphologyParameters);
+                        this->hasPlasticity=true;
+                    }
+                } else if (parameterValues.at(0) == IDstringMonoDendriteSTDPBiWindow) {
+                    for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
+                        (void)neuron;//Does nothing, removes warning on unused vars
+                        this->morphology.push_back(std::make_unique<MonoDendriteSTDPBiWindow>(this->infoGlobal));
+                        this->morphology.back()->LoadParameters(morphologyParameters);
+                        this->hasPlasticity=true;
+                    }
+                } else if (parameterValues.at(0) == IDstringMonoDendriteSTDPTazerartRelative) {
+                    for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
+                        (void)neuron;//Does nothing, removes warning on unused vars
+                        this->morphology.push_back(std::make_unique<MonoDendriteSTDPTazerartRelative>(this->infoGlobal));
+                        this->morphology.back()->LoadParameters(morphologyParameters);
+                        this->hasPlasticity=true;
+                    }
+                } else if (parameterValues.at(0) == IDstringTraceResourceHSTDP) {
+                    for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
+                        (void)neuron;//Does nothing, removes warning on unused vars
+                        this->morphology.push_back(std::make_unique<TraceRBranchedHSTDP>(this->infoGlobal)); //Remove, will not  be used
+                        this->morphology.back()->LoadParameters(morphologyParameters);
+                        this->hasPlasticity=true;
+                        this->isBranched=true;
+                    }
+                } else {
+                    throw "Unespecified morphology type";
+                }
+            }
+        }
+    } else {
+        morphology.back()->CheckParameters(morphologyParameters);
     }
-    *stream <<  "#\t\tNote: Resting potential is 0 by definition.\n";
+    if (!hasPlasticity){
+        throw "Error, cannot use PModelSynapse without a plasticity model";
+    }
+}
 
+void NeuronPop::SaveParameters(std::ofstream& wParameterStream) const{
+
+    std::string neuronID = "neurons_" + std::to_string(GetId());
+
+    wParameterStream <<  "#***********************************************\n";
+    //*stream <<  neuronID + "_streamOutput                " << std::boolalpha<< streamingNOutputBool << std::noboolalpha << "\n";
+    wParameterStream <<  neuronID + "_noNeurons\t\t\t" << std::to_string(noNeurons) << "\n";
+    wParameterStream <<  neuronID + "_type\t\t\t\t" << GetType() << "\n";
+    wParameterStream <<  neuronID + "_tauM\t\t\t\t" << std::to_string(this->membraneVTau)  << " #secs\n";
+    wParameterStream <<  neuronID + "_vReset\t\t\t" << std::to_string(this->resetV)  << " #mV \n";
+    wParameterStream <<  neuronID + "_vThresh\t\t\t" << std::to_string(this->thresholdV)  << " #mV\n";
+    wParameterStream <<  neuronID + "_refractoryTime\t\t" << std::to_string(this->refractorySteps*infoGlobal->dtTimestep)  << " #secs\n";
+    //*stream <<  neuronID + "_r_target                    " << std::to_string(this->targetRate)  << " Hz\n";
+    if(userSeeds){
+        // wParameterStream <<  neuronID + "_seedInitialPotentials   " << this->seedInitialPotentials << "\n";
+        // wParameterStream <<  neuronID + "_seedInitialPrevSpike    " << this->seedInitialPreviousSpike << "\n";
+        wParameterStream <<  neuronID + "_seed\t\t\t\t" << this->seed << "\n";
+    }
+    if (definedPrevMeanFreq){
+        wParameterStream <<  neuronID + "_prevMinFrequency\t\t" << std::to_string(this->prevMinFrequency)  << " #Hz #Average frequency at which the population was firing before the start of the simulation (relevant to STP classes).\n";
+    }
+    wParameterStream <<  "#\t\tNote: Resting potential is 0 by definition.\n";
 
 }
 
+void NeuronPop::SavePlasticityModel(std::ofstream &wParameterStream,std::string idString) const {
+    if (this->hasPlasticity && (!this->savedModel)){
+        morphology.at(0)->SaveParameters(wParameterStream, idString);//"neurons_" + std::to_string(GetId())
+        return;
+    } else if (savedModel) {
+        return;
+    } else {
+        throw "This NeuronPop has no plasticity model";
+    }
+}
 
 //From here on 
 
-BaseSpinePtr NeuronPop::AllocateNewSynapse(unsigned long neuronId, HeteroCurrentSynapse&syn) {
-        assertm(false, "Non-hetero NeuronPop called AllocateNewSynapse");
-        throw; 
-        BaseSpinePtr empty{};
-        return empty;
+BaseSpinePtr NeuronPop::AllocateNewSynapse(NeuronInt neuronId, BranchTargeting& branchTarget) {
+    std::lock_guard<std::mutex> _guardedMutexLock(_morphologyMutex);
+    return morphology.at(neuronId)->AllocateNewSynapse(branchTarget);
 }
 
-void NeuronPop::RecordExcitatorySynapticSpike(unsigned long neuronId, unsigned long synapseId){
-    throw;
+std::string NeuronPop::GetIndividualSynapticProfileHeaderInfo() const {
+    return morphology.at(0)->GetIndividualSynapticProfileHeaderInfo();
 }
 
-std::valarray<double> NeuronPop::GetOverallSynapticProfile(unsigned long neuronId){
-    throw;
-    std::valarray<double> empty{};
-    return empty;
+std::string NeuronPop::GetOverallSynapticProfileHeaderInfo() const {
+    return morphology.at(0)->GetOverallSynapticProfileHeaderInfo();
 }
 
-std::valarray<double> NeuronPop::GetIndividualSynapticProfile(unsigned long neuronId, unsigned long synapseId){
-    throw;
-    std::valarray<double> empty{};
-    return empty;
+void NeuronPop::PostConnectSetUp() {
+    std::lock_guard<std::mutex> _guardedMutexLock(_morphologyMutex);
+    if (!morphology.empty()){
+        std::for_each(morphology.begin(), morphology.end(), [](std::unique_ptr<Morphology>& singleMorphology){
+            singleMorphology->PostConnectSetUp();
+        });
+    }
 }

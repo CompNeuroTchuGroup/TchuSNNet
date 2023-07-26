@@ -14,45 +14,42 @@
 #include <limits.h>
 #include "Stimulus.hpp"
 
-struct signal_step {
-    int    end_time = INT_MAX;
-	std::vector<double> values;
-} ;
-
-class SpatialGaussianStimulus : public Stimulus
-{
+class SpatialGaussianStimulus : public Stimulus {
 protected:
-    unsigned seed;
-	int Ngauss;
-    std::valarray<std::vector<signal_step>> maxCurrent;
-	std::valarray<std::vector<signal_step>> sigmaCurrent_t;
-	std::valarray<std::vector<signal_step>> sigmaCurrent_x;
-	std::vector<signal_step> backgroundNoise;
-	std::valarray<double> GPos_X;
-	std::valarray<double> GPos_Y;
-    std::mt19937 generator;
+	int noGaussians{1};
+	std::normal_distribution<double> standardDistribution{0.0, 1.0};
+    std::vector<std::vector<StepStruct>> maxCurrent;
+	std::vector<std::vector<StepStruct>> sigmaCurrentT;
+	std::vector<std::vector<StepStruct>> sigmaCurrentX;
+	std::vector<StepStruct> backgroundNoise;
+
+	std::vector<StepStruct*> maxCurrentPtrs;
+	std::vector<StepStruct*> sigmaCurrentTPtrs;
+	std::vector<StepStruct*> sigmaCurrentXPtrs;
+	StepStruct* backgroundNoisePtr;
+
+	std::vector<double> gaussianPositionX;
+	std::vector<double> gaussianPositionY;
+
+	std::vector<std::vector<std::vector<double>>> cachedMuNeuronFactors;
+
+	std::function<double(PopInt,NeuronInt,int)> calculateDistance;
     
-    void SetSignalArray();
+    void SetSignalMatrix() override;
+	void PostLoadParameters() override;
+	void RecalculateFactors(int gaussianIndex, double sigmaX);
 public:
 
-	SpatialGaussianStimulus(NeuronPopSample * neur,std::vector<std::string> *input,GlobalSimInfo  * info);
-    virtual ~SpatialGaussianStimulus()=default;
+	SpatialGaussianStimulus(std::shared_ptr<NeuronPopSample>  neur,std::vector<FileEntry>& parameters,GlobalSimInfo*  infoGlobal);
+    ~SpatialGaussianStimulus() override = default;
 
-    std::string GetType(){return str_spatialgaussianStimulus;}
-    void        Update(std::vector<std::vector<double>> * synaptic_dV);
+    std::string GetType() const override{return IDstringSpatialGaussianStimulus;}
+    void        Update(std::vector<std::vector<double>>& synaptic_dV) override;
 
-	virtual double GetScaling(int pop) {
-		if (info->networkScaling_extern == 1)
-			return (neurons->GetTotalNeurons());
-		else if (info->networkScaling_extern == 0) {
-			return 1.0;
-		}
-        else
-            return -1.0;
-	}
+	double GetScaling(PopInt neuronPop) const override;
 
-    void    SaveParameters(std::ofstream * stream);
-    void    LoadParameters(std::vector<std::string> *input) override;
+    void    SaveParameters(std::ofstream& wParameterStream) const override;
+    void    LoadParameters(const std::vector<FileEntry>& parameters) override;
 
 };
 

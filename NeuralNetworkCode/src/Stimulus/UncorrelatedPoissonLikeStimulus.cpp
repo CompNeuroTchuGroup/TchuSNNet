@@ -1,209 +1,223 @@
 #include "UncorrelatedPoissonLikeStimulus.hpp"
 
 /* When the stimulus has to be changed, the stimulus value at the end
- * is deleted such that at the end of next_stimulus_step there is the current
+ * is deleted such that at the end of nextStimStep there is the current
  * stimulus value.
- * The last value of next_stimulus_time_step is also deleted such that
+ * The last value of nextStimTimeStep is also deleted such that
  * at the end there is the timestep for the next stimulus change.
  */
 
-UncorrelatedPoissonLikeStimulus::UncorrelatedPoissonLikeStimulus(NeuronPopSample *neur,
-                                                                 std::vector<std::string> *input,
-                                                                 GlobalSimInfo  * info):Stimulus(neur,info){
+UncorrelatedPoissonLikeStimulus::UncorrelatedPoissonLikeStimulus(std::shared_ptr<NeuronPopSample> neurons,std::vector<FileEntry>& stimulusParameters, GlobalSimInfo*  infoGlobal): Stimulus(neurons,infoGlobal){
 
-    int P             = neurons->GetTotalPopulations();
-    noExternalNeurons = 1;
-    table_entries     = 10;
-    J_X               = new double[P];
-    seed              = -1;
+    PopInt totalNeuronPops             = neurons->GetTotalPopulations();
+    // tableEntries     = 10;
+    J_External.resize(totalNeuronPops, 0.0);
+    externalCurrents.resize(totalNeuronPops, 0.0);
+    // seed              = -1;
 
-    for(int i = 0; i < P; i++)
-        J_X[i] = 0.0;
+    // for(PopInt neuronPop : std::ranges::views::iota(0, totalNeuronPops))
+    //     J_External[i] = 0.0;
 
-    LoadParameters(input);
-    SetTableEntries();
+    LoadParameters(stimulusParameters);
 }
 
-UncorrelatedPoissonLikeStimulus::~UncorrelatedPoissonLikeStimulus()
-{
-    delete [] poisson_value_table;
-    delete [] J_X;
-}
+void UncorrelatedPoissonLikeStimulus::LoadParameters(const std::vector<FileEntry>& stimulusParameters){
 
-void UncorrelatedPoissonLikeStimulus::SetTableEntries(){
+    Stimulus::LoadParameters(stimulusParameters);
+    PopInt  totalNeuronPops = neurons->GetTotalPopulations();
 
-    double  dt = info->dt;
-    distribution        = std::uniform_int_distribution<int>(0,table_entries-1);
-    poisson_value_table = new double[table_entries];
+    for(auto& [parameterName, parameterValues] : stimulusParameters) {
 
-    double signal;
-
-    if(next_stimulus_step.size() == 0)
-        signal = 0;
-    else
-        signal = dt*static_cast<double>(noExternalNeurons)*next_stimulus_step.back();
-
-    fill_poisson_value_table(signal);
-}
-
-inline void UncorrelatedPoissonLikeStimulus::UpdatePoissonTable()
-{
-    double  signal;
-    double  dt = info->dt;
-    if(!next_stimulus_time_step.empty())
-    {
-       while(next_stimulus_time_step.back() <= info->time_step)
-        {
-            next_stimulus_step.pop_back();
-            next_stimulus_time_step.pop_back();
-            signal = dt*static_cast<double>(noExternalNeurons)*next_stimulus_step.back();
-            fill_poisson_value_table(signal);
-
-            if(next_stimulus_time_step.empty())
-                break;
+        if((parameterName.find("virtualExternalNeurons") != std::string::npos) ||
+           (parameterName.find("noExternalNeurons") != std::string::npos)){
+            this->noExternalNeurons = std::stoi(parameterValues.at(0));
+        // } else if(parameterName.find("seed") != std::string::npos){
+        //     SetSeed(static_cast<int>(std::stod(parameterValues.at(0))));
+        } else if(parameterName.find("stimulus_step") != std::string::npos){
+            AddStimulusStep(std::stod(parameterValues.at(0)), std::stod(parameterValues.at(1)));
+        // } else if((parameterName.find("Poisson_table_entries") != std::string::npos) ||
+        //         (parameterName.find("PoissonTableEntries") != std::string::npos)){
+        //     this->tableEntries = static_cast<int>(std::stod(parameterValues.at(0)));
+		} else if (parameterName.find("J_X") != std::string::npos) {
+			for (PopInt neuronPop : std::ranges::views::iota(0,totalNeuronPops)){
+				try{
+					this->J_External.at(neuronPop) = std::stod(parameterValues.at(neuronPop));
+				} catch (...){
+					throw "J_X parameters do not account for all populations";
+				}
+			}
         }
     }
+	if(infoGlobal->isMock){
+		return;
+	}
+    PostLoadParameters();
+}
+void UncorrelatedPoissonLikeStimulus::SaveParameters(std::ofstream& wParameterStream) const{
+
+    PopInt totalNeuronPops        = neurons->GetTotalPopulations();
+    Stimulus::SaveParameters(wParameterStream);
+
+    wParameterStream <<  "stimulus_noExternalNeurons           " << std::to_string(noExternalNeurons)  << "\n";
+    // if(infoGlobal->globalSeed == -1){
+    //     wParameterStream <<  "stimulus_seed                        " << std::to_string(seed)  << "\n";
+    // }
+    // wParameterStream <<  "stimulus_PoissonTableEntries         " << std::to_string(GetTableEntries())  << "\n";
+    wParameterStream <<  "stimulus_J_X                         ";
+    for (PopInt neuronPop : std::ranges::views::iota(0,totalNeuronPops)){
+        wParameterStream << std::to_string(J_External.at(neuronPop)) << "\t";
+    }
+    wParameterStream << " #dmV/Spike\n";
+
+    for(int step : std::ranges::views::iota(0,GetStimulusNoSteps())){
+        wParameterStream <<  "stimulus_step                        " << std::to_string(GetStimulusStepEndTime(step)*infoGlobal->dtTimestep)  << "\t" << std::to_string(GetStimulusStep(step))  << "\t [t (secs.) -- Hz]\n";
+    }
+    wParameterStream <<  "#\t\t" << IDstringUncorrelatedStimulus << ": noExternalNeurons external neurons with (poisson) firing rate defined in stimulus_step are connected with population X with strength J_X.\n";
 }
 
-void UncorrelatedPoissonLikeStimulus::Update(std::vector<std::vector<double>> * synaptic_dV)
-{
-    int P = this->neurons->GetTotalPopulations();
-    double c;
+void UncorrelatedPoissonLikeStimulus::PostLoadParameters(){
+	std::cout<<"\nSetting up the stimulus class...";
+    if(stimulusSteps.empty()){ //Nothing should happen if there is no structs in the vector
+    	wellDefined=false;
+        std::cout<<"Stimulus class was ill-defined\n"<<std::endl;
+        return;
+    }
+    std::sort(stimulusSteps.begin(), stimulusSteps.end(), [](StepStruct& step1,StepStruct& step2){
+		return step1.endTimeStep<step2.endTimeStep;
+	});
+    currentStep=stimulusSteps.data();
+	for(PopInt neuronPop : std::ranges::views::iota(0,neurons->GetTotalPopulations())){
+		externalCurrents.at(neuronPop)= J_External.at(neuronPop) * pow(GetScaling(neuronPop),(infoGlobal->networkScaling_synStrength));
+	}
+    //Previously in SetTableEntries
+    //double signal = infoGlobal->dtTimestep*static_cast<double>(noExternalNeurons)*stimulusSteps.front().parameterValues.at(0);
+
+    poissonDistr=std::poisson_distribution<int>(infoGlobal->dtTimestep*static_cast<double>(noExternalNeurons)*currentStep->parameterValues.at(0));
+    std::cout<<"Done.\n"<<std::endl;
+}
+
+void UncorrelatedPoissonLikeStimulus::AddStimulusStep(double endTime,double stimStep){
+    StepStruct step;
+	step.endTimeStep=static_cast<TStepInt>(std::lround(endTime/infoGlobal->dtTimestep));
+	step.parameterValues.push_back(stimStep);
+	stimulusSteps.push_back(step);
+    // TStepInt	endTimeStep{ static_cast<TStepInt>(std::lround(endTime / infoGlobal->dtTimestep)) };
+    // if(nextStimStep.empty())
+    // {
+    //   nextStimTimeStep.push_back(endTimeStep);
+    //   nextStimStep.push_back(stimStep);
+    // }
+    // else
+    // {
+    //   if(endTimeStep > nextStimTimeStep.back())
+    //   {
+    //     std::vector<double> temp_time_step(nextStimTimeStep);
+    //     std::vector<double> temp_stimulus(nextStimStep);
+
+    //     nextStimTimeStep.clear();
+    //     nextStimStep.clear();
+
+    //     bool done_flag = false;
+    //     for(signed i = 0; i < temp_time_step.size(); i++)
+    //     {
+    //       if(!done_flag && (endTimeStep > temp_time_step[i]))
+    //       {
+    //         nextStimTimeStep.push_back(endTimeStep);
+    //         nextStimStep.push_back(stimStep);
+    //         done_flag = true;
+    //       }
+    //       nextStimTimeStep.push_back(temp_time_step[i]);
+    //       nextStimStep.push_back(temp_stimulus[i]);
+    //     }
+    //     if(nextStimTimeStep.size() == temp_time_step.size())
+    //     {
+    //       nextStimTimeStep.push_back(endTimeStep);
+    //       nextStimStep.push_back(stimStep);
+    //     }
+    //   }
+    //   else
+    //   {
+    //     nextStimTimeStep.push_back(endTimeStep);
+    //     nextStimStep.push_back(stimStep);
+    //   }
+    // }
+}
+
+void UncorrelatedPoissonLikeStimulus::UpdatePoissonTable() {
+   	// StepStruct& step = *std::find_if(stimulusSteps.begin(), stimulusSteps.end(), [this](StepStruct step){
+	// 	//Confusing unless you think about a while loop with the condition
+	// 	return (infoGlobal->timeStep<=step.endTimeStep) || (step.lastStep);
+	// });
+    if((currentStep != &stimulusSteps.back()) && (currentStep->endTimeStep<=infoGlobal->dtTimestep)){
+		currentStep++;
+    	poissonDistr=std::poisson_distribution<int>(infoGlobal->dtTimestep*static_cast<double>(noExternalNeurons)*currentStep->parameterValues.at(0));
+	}
+    // double  signal;
+    // double  dtTimestep = infoGlobal->dtTimestep;
+    // if(!nextStimTimeStep.empty())
+    // {
+    //    while(nextStimTimeStep.back() <= infoGlobal->timeStep)
+    //     {
+    //         nextStimStep.pop_back();
+    //         nextStimTimeStep.pop_back();
+    //         signal = dtTimestep*static_cast<double>(noExternalNeurons)*nextStimStep.back();
+    //         FillPoissonValueTable(signal);
+
+    //         if(nextStimTimeStep.empty())
+    //             break;
+    //     }
+    // }
+}
+void UncorrelatedPoissonLikeStimulus::SetSignalMatrix() {
 
     UpdatePoissonTable();
 
-    for(int pop = 0;pop < P;pop++){
-        c       = GetExternalCouplingStrength(pop);
-        for(unsigned int i = 0;i<neurons->GetNeuronsPop(pop);i++)
-            signal_array[pop][i]   = c*poisson_value_table[distribution(generator)];
+    for(PopInt neuronPop : std::ranges::views::iota(0,neurons->GetTotalPopulations())){
+        for(NeuronInt neuron : std::ranges::views::iota(0,neurons->GetNeuronsPop(neuronPop))){
+            signalMatrix.at(neuronPop).at(neuron)   = externalCurrents.at(neuronPop)*poissonDistr(generator);
+        }
     }
+}
 
+void UncorrelatedPoissonLikeStimulus::Update(std::vector<std::vector<double>>& synaptic_dV){
+    if(!wellDefined){
+        return;
+    }
+    SetSignalMatrix();
     Stimulus::Update(synaptic_dV);
 }
 
-
-// fills the poisson_value_table that is a tabular version of the poisson distribution
+double UncorrelatedPoissonLikeStimulus::GetScaling(PopInt neuronPop) const {
+        double avgConnExtPop;//Average connections of the external populations
+        if (infoGlobal->networkScaling_mode == 0){
+            avgConnExtPop = static_cast<double>(noExternalNeurons);
+        } else if (infoGlobal->networkScaling_mode == 1){
+            avgConnExtPop = static_cast<double>(neurons->GetTotalNeurons());
+        } else{
+            throw "ERROR: GetExternalCouplingStrength";
+        }
+        return avgConnExtPop;
+}
+// fills the poissonValueTable that is a tabular version of the poisson distribution
 // with the needed mean that is firing_rate*dt*number_of_neurons
-inline void UncorrelatedPoissonLikeStimulus::fill_poisson_value_table(double mu)
-{
+// inline void UncorrelatedPoissonLikeStimulus::FillPoissonValueTable(double mu)
+// {
 
-	int value                    = 0;
-	double probability           = exp(-mu);
-	double cumulated_probability = exp(-mu);
+// 	int value                    = 0;
+// 	double probability           = exp(-mu);
+// 	double cumulated_probability = exp(-mu);
 
-	for(int i = 0; i < table_entries; ++i)
-	{
-		if(cumulated_probability < static_cast<double>(i)/static_cast<double>(table_entries))
-		{
-			++value;
-			probability            = probability*mu/static_cast<double>(value);
-			cumulated_probability += probability;
-		}
-		poisson_value_table[i] = static_cast<double>(value);
-	}
-}
-
-void UncorrelatedPoissonLikeStimulus::AddStimulusStep(int ts,double sS){
-    long	Time_step{ static_cast<long>(std::round(ts / info->dt)) };
-    if(next_stimulus_step.empty())
-    {
-      next_stimulus_time_step.push_back(Time_step);
-      next_stimulus_step.push_back(sS);
-    }
-    else
-    {
-      if(Time_step > next_stimulus_time_step.back())
-      {
-        std::vector<double> temp_time_step(next_stimulus_time_step);
-        std::vector<double> temp_stimulus(next_stimulus_step);
-
-        next_stimulus_time_step.clear();
-        next_stimulus_step.clear();
-
-        bool done_flag = false;
-        for(unsigned i = 0; i < temp_time_step.size(); i++)
-        {
-          if(!done_flag && (Time_step > temp_time_step[i]))
-          {
-            next_stimulus_time_step.push_back(Time_step);
-            next_stimulus_step.push_back(sS);
-            done_flag = true;
-          }
-          next_stimulus_time_step.push_back(temp_time_step[i]);
-          next_stimulus_step.push_back(temp_stimulus[i]);
-        }
-        if(next_stimulus_time_step.size() == temp_time_step.size())
-        {
-          next_stimulus_time_step.push_back(Time_step);
-          next_stimulus_step.push_back(sS);
-        }
-      }
-      else
-      {
-        next_stimulus_time_step.push_back(Time_step);
-        next_stimulus_step.push_back(sS);
-      }
-    }
-}
-
-void UncorrelatedPoissonLikeStimulus::SaveParameters(std::ofstream * stream){
-
-    int P        = neurons->GetTotalPopulations();
-    Stimulus::SaveParameters(stream);
-
-    *stream <<  "stimulus_noExternalNeurons           " << std::to_string(noExternalNeurons)  << "\n";
-    if(info->globalSeed == -1){
-        *stream <<  "stimulus_seed                        " << std::to_string(seed)  << "\n";
-    }
-    *stream <<  "stimulus_PoissonTableEntries         " << std::to_string(GetTable_entries())  << "\n";
-    *stream <<  "stimulus_J_X                         ";
-    for(int i = 0;i<P;i++)
-        *stream << std::to_string(J_X[i]) << "\t";
-    *stream << " dmV/Spike\n";
-
-    for(int i = 0; i < GetStimulusNoSteps(); i++)
-        *stream <<  "stimulus_step                        " << std::to_string(GetStimulusStep_Time(i)*info->dt)  << "\t"
-        << std::to_string(GetStimulusStep(i))  << "\t [t (secs.) -- Hz]\n";
-
-    *stream <<  "#\t\t" << str_uncorrelatedStimulus << ": noExternalNeurons external neurons with (poisson) firing rate defined in stimulus_step are connected with population X with strength J_X.\n";
-}
-
-void UncorrelatedPoissonLikeStimulus::LoadParameters(std::vector<std::string> *input){
-
-    //Stimulus::LoadParameters(input);
-    std::string              name,token;
-    std::vector<std::string> values;
-    int                      P = neurons->GetTotalPopulations();
-
-    for(std::vector<std::string>::iterator it = (*input).begin(); it != (*input).end(); ++it) {
-
-        SplitString(&(*it),&name,&values);
-
-        if((name.find("virtualExternalNeurons") != std::string::npos) ||
-           (name.find("noExternalNeurons") != std::string::npos)){
-            this->noExternalNeurons = std::stoi(values.at(0));
-        }
-        else if(name.find("seed") != std::string::npos){
-            SetSeed(static_cast<int>(std::stod(values.at(0))));
-        }
-        else if(name.find("stimulus_step") != std::string::npos){
-            AddStimulusStep(static_cast<int>(std::stod(values.at(0))), std::stod(values.at(1)));
-        }
-        else if((name.find("Poisson_table_entries") != std::string::npos) ||
-                (name.find("PoissonTableEntries") != std::string::npos)){
-            this->table_entries = static_cast<int>(std::stod(values.at(0)));
-        }
-        else if(name.find("J_X") != std::string::npos){
-            for(int i = 0;i < min_(P,(int)values.size());i++)
-                this->J_X[i] = std::stod(values.at(i));
-        }
-
-    }
-
-    if(info->globalSeed != -1){
-        std::uniform_int_distribution<int> distribution(0,INT32_MAX);
-        seed = distribution(info->globalGenerator);
-    }
+// 	for(int i = 0; i < tableEntries; ++i)
+// 	{
+// 		if(cumulated_probability < static_cast<double>(i)/static_cast<double>(tableEntries))
+// 		{
+// 			++value;
+// 			probability            = probability*mu/static_cast<double>(value);
+// 			cumulated_probability += probability;
+// 		}
+// 		poissonValueTable[i] = static_cast<double>(value);
+// 	}
+// }
 
 
-}
+

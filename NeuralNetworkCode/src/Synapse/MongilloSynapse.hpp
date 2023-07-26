@@ -1,62 +1,56 @@
 
 #ifndef MONGILLOSYNAPSE_CURRENTBASED
 #define MONGILLOSYNAPSE_CURRENTBASED
-
+#include "Synapse.hpp"
+#include "../NeuronPop/NeuronPop.hpp"
+#include "../GlobalFunctions.hpp"
 #include <iostream>
 #include <vector>
 #include <random>
 #include <typeinfo>
-#include <valarray>
-#include "Synapse.hpp"
-#include "../NeuronPop/NeuronPop.hpp"
-#include "../GlobalFunctions.hpp"
 
-/*struct SynapseData_STP {
+/*struct SpineData_STP {
     bool x = 0;
     bool y = 0;
     bool spike_submitted = 0;
     bool gamma_s = false; //this is only used for PRG Synapses (can be removed for Mongillo only)
 };*/
 
-class MongilloSynapse : public Synapse
-{
+class MongilloSynapse : public Synapse {
 protected:
 
-    double u;
-    double tau_f;  // in units of time steps
-    double tau_d;  // in units of time steps
+    double u_Mongillo{}; //Calcium binding probability
+    double tauF_Mongillo{};  // in units of time steps, calcium unbinding time constant
+    double tauD_Mongillo{};  // in units of time steps, neurotransmitter refill time constant
 
-    //std::valarray<std::valarray<SynapseData_STP>> synapseData;
-    std::valarray<std::valarray<bool>> x,y,spike_submitted;
+    //std::valarray<std::valarray<SpineData_STP>> synapseData;
+    std::vector<std::vector<bool>> x_Mongillo; //Neurotransmitter amount
+    std::vector<std::vector<bool>> y_Mongillo;//Calcium binding
+    std::vector<std::vector<bool>> spikeSubmitted;
+    std::uniform_real_distribution<double> uniformDistribution{0.0, 1.0};
 
-    int seed;
-    std::mt19937 generator;
-    std::uniform_real_distribution<double> uniformDistribution;
 
-
-    void advectSpikers(std::vector<double>& currents, long spiker) override;
+    std::vector<double> AdvectSpikers (NeuronInt spiker) override;
     //void advect_finalize(std::vector<std::vector<double>> * waiting_matrix) override {}
-    virtual void  TransmitSpike(std::vector<double>& currents, long targetId,long spikerId);
+    virtual double TransmitSpike(NeuronInt targetNeuron,NeuronInt spiker);
 
-    void SetSeed(int s);
 public:
-    MongilloSynapse(NeuronPop * postNeurons,NeuronPop * preNeurons,GlobalSimInfo * info);
+    MongilloSynapse(PopPtr targetPop,PopPtr sourcePop,GlobalSimInfo* infoGlobal);
     ~MongilloSynapse() override = default;
 
     void ConnectNeurons() override;
 
-    void SetSeed(std::mt19937 *generator) override;
     //*****************************
     //******* Get Functions *******
     //*****************************
-    int                     GetNumberOfDataColumns() override { return 4; } // J, <y>, <x>, <submitted_spikes>
-    std::string             GetDataHeader(int data_column) override;
-	std::string				GetUnhashedDataHeader() override;
-    std::valarray<double>   GetSynapticState(int pre_neuron) override;
-    const std::string             GetTypeStr() override { return str_mongilloSynapse; };
+    int                     GetNoDataColumns() const override { return 4; } // J, <y>, <x>, <submitted_spikes>
+    std::string             GetDataHeader(int dataColumn) override;
+	std::string				GetUnhashedDataHeader() const override;
+    std::vector<double>   GetSynapticState(NeuronInt sourceNeuron) const override;
+    std::string             GetTypeStr() const override { return IDstringMongilloSynapse; };
 
-    void SaveParameters(std::ofstream * stream,std::string id_str) override;
-    void LoadParameters(std::vector<std::string> *input) override;
+    void SaveParameters(std::ofstream& wParameterStream,std::string idString) const override;
+    void LoadParameters(const std::vector<FileEntry>& synapseParameters) override;
 };
 
 

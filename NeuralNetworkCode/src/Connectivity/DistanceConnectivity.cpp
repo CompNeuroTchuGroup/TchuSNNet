@@ -2,218 +2,214 @@
 #include "../Synapse/Synapse.hpp"
 #include "time.h"
 
-DistanceConnectivity::DistanceConnectivity(Synapse * syn,GlobalSimInfo  * info):Connectivity(syn,info){
-	PeakProbability = 0;
-	StdProbability = 1;
-	exact = 0;
-    SetSeed(0);
-	a = 1;
+DistanceConnectivity::DistanceConnectivity(Synapse* synapse,const GlobalSimInfo*  infoGlobal):Connectivity(synapse,infoGlobal){
 }
 
-void DistanceConnectivity::SaveParameters(std::ofstream * stream,std::string id_str){
-    Connectivity::SaveParameters(stream,id_str);
-    *stream << id_str << "connectivity_ConnectionProba\t\t\t" << std::to_string(this->PeakProbability) << "\n";
-	*stream << id_str << "connectivity_StdProbability\t" << std::to_string(this->StdProbability) << "\tmm\n";
-	*stream << id_str << "connectivity_ExactConnections\t" << std::to_string(this->exact) << "\t\t\t(0/1)\tIf 1, each neuron will receive exactly C connections. \n";
-	if (info->Dimensions == 2) {
-		*stream << id_str << "connectivity_AsymmetryFactor\t" << std::to_string(this->a) << "\t# sigma_y=sigma/AF. If AF is 1, the projection length is the same in all directions\n";}
-	if (info->globalSeed == -1) {
-		std::cout << "Please set globalseed >= 0 to use DistanceConnectivity";
-		throw "Globalseed is -1";
-	}
-	//*stream << "# If ExactConnections==1, neurons have a predefined number of connections randomly generatd from its neighbours . The number of connections is ConnectProba*N.\n";
-	//*stream << "# If ExactConnections==0, the connection probability between each pair of neurons is calculated independantly. There is no repeat, and the number of presynaptic connections is random. ConnectProba defines the peak probability of connection (at zero distance))\n";
-    //*stream << "# "<< str_distanceConnectivity << ": Each neuronal pair is connected with probability depending on their distance. (as used by [Chariker et al, 2016]). \n";
+void DistanceConnectivity::SaveParameters(std::ofstream& wParameterStream,std::string idString) const{
+    Connectivity::SaveParameters(wParameterStream,idString);
+    wParameterStream << idString << "connectivity_ConnectionProba\t\t\t" << std::to_string(this->peakProbability) << "\n";
+	wParameterStream << idString << "connectivity_StdProbability\t\t\t" << std::to_string(this->stdProbability) << " #mm\n";
+	wParameterStream << idString << "connectivity_ExactConnections\t\t\t" << std::to_string(this->isConnectionExact) << " #(0/1)\tIf 1, each neuron will receive exactly C connections. \n";
+	if (infoGlobal->dimensions == 2) {
+		wParameterStream << idString << "connectivity_AsymmetryFactor\t\t\t" << std::to_string(this->projectionLengthFactor) << " # sigma_y=sigma/AF. If AF is 1, the projection length is the same in all directions\n";}
+	// if (infoGlobal->globalSeed == -1) {
+	// 	std::cout << "Please set globalseed >= 0 to use DistanceConnectivity";
+	// 	throw "Globalseed is -1";
+	// }
+	//wParameterStream << "# If ExactConnections==1, neurons have a predefined number of connections randomly generatd from its neighbours . The number of connections is ConnectProba*N.\n";
+	//wParameterStream << "# If ExactConnections==0, the connection probability between each pair of neurons is calculated independantly. There is no repeat, and the number of presynaptic connections is random. ConnectProba defines the peak probability of connection (at zero distance))\n";
+    //wParameterStream << "# "<< stringDistanceConnectivity << ": Each neuronal pair is connected with probability depending on their distance. (as used by [Chariker et al, 2016]). \n";
     }
 
-void DistanceConnectivity::LoadParameters(std::vector<std::string> *input){
-    Connectivity::LoadParameters(input);
+void DistanceConnectivity::LoadParameters(const std::vector<FileEntry>& connectivityParameters){
+    Connectivity::LoadParameters(connectivityParameters);
 
-    std::string name;
-    std::vector<std::string> values;
-
-    for(std::vector<std::string>::iterator it = (*input).begin(); it != (*input).end(); ++it) {
-        SplitString(&(*it),&name,&values);
-		if(name.find("ConnectionProba") != std::string::npos || name.find("ConnectProba") != std::string::npos){
-            this->PeakProbability = std::stod(values.at(0));
-        }
-		else if(name.find("StdProbability") != std::string::npos) {
-			this->StdProbability = std::stod(values.at(0));
-		}
-		else if (name.find("ExactConnections") != std::string::npos) {
-			this->exact = std::stoi(values.at(0));
-		}
-		else if (name.find("AsymmetryFactor") != std::string::npos) {
-			this->a = std::stoi(values.at(0));
+    for(auto& [parameterName, parameterValues] : connectivityParameters) {
+		if(parameterName.find("ConnectionProba") != std::string::npos || parameterName.find("ConnectProba") != std::string::npos){
+            this->peakProbability = std::stod(parameterValues.at(0));
+        } else if(parameterName.find("StdProbability") != std::string::npos) {
+			this->stdProbability = std::stod(parameterValues.at(0));
+		} else if (parameterName.find("ExactConnections") != std::string::npos) {
+			this->isConnectionExact = std::stoi(parameterValues.at(0));
+		} else if (parameterName.find("AsymmetryFactor") != std::string::npos) {
+			this->projectionLengthFactor = std::stoi(parameterValues.at(0));
 		}
     }
+	// if (infoGlobal->globalSeed == -1) {
+	// 	std::cout << "Please set globalseed >= 0 to use DistanceConnectivity";
+	// 	throw "Globalseed is -1";
+	// }
 }
 
-void DistanceConnectivity::ConnectNeurons()
-{
-	if ((info->Dimensions != 2) && (info->Dimensions != 1)) {
+void DistanceConnectivity::ConnectNeurons() {
+	if ((infoGlobal->dimensions != 2) && (infoGlobal->dimensions != 1)) {
 		std::cout << "Dimensions is not valid for DistanceConnectivity !\n";
 		throw "Dimensions is not valid for DistanceConnectivity !\n";
-	}
-	if (exact==1) {
+	} else if (isConnectionExact==1) {
 		ConnectNeuronsExact();
 		return;
 	}
-	double  P;//probability of connecting neurons Source and Target
-	double  p;//randomly generated number to be compared with P
-	double dist;//Euclidian distance squared
-    long    noPost = synapse->GetNoNeuronsPost();
-	long    noPre = synapse->GetNoNeuronsPre();
-	double x_pr, y_pr, x_ps, y_ps;
-    long    output_Interval = noPost/10;
-	int c=0;
+	double  totalConnectionProbability;//probability of connecting neurons Source and Target
+	double  randomGeneratedFloat;//randomly generated number to be compared with totalConnectionProbability
+	double distance;//Euclidian distance squared
+    NeuronInt    noTargetNeurons = synapse->GetNoTargetNeurons();
+	NeuronInt    noSourceNeurons = synapse->GetNoSourceNeurons();
+	double xPositionSource, yPositionSource, xPositionTarget, yPositionTarget;
+    NeuronInt    outputInterval = noTargetNeurons/10;
+	signed long synapseCounter=0;
 
-    if(output_Interval == 0) {
-		output_Interval = 1;
+    if(outputInterval == 0) {
+		outputInterval = 1;
 	}
 
 	std::uniform_real_distribution<double> distribution(0,1);
 
-	if (StdProbability > 0.29*info->Lx*std::min(1.0, a))//with std=0.29, the periodic boundaries cause an increase in connection probability of 1% at the center of the domain
+	if (stdProbability > 0.29*infoGlobal->xAxisLength*std::min(1.0, projectionLengthFactor)){
+	//with std=0.29, the periodic boundaries cause an increase in connection probability of 1% at the center of the domain
 		std::cout << "\n \nWarning sigma_ConnectionProbability is high compared to the size of the system \n";
+	}
     //Iterate through all target neurons
 
-    for(long target = 0; target < noPost; target++){
-        //Iterate through all source neurons
-		x_ps = synapse->X_post(target);
-		y_ps = synapse->Y_post(target);
+    for(NeuronInt targetNeuron : std::ranges::views::iota(0, noTargetNeurons)){
+        //Iterate through all sourceNeuron neurons
+		xPositionTarget = synapse->GetTargetNeuronPop()->GetXPosition(targetNeuron);
+		yPositionTarget = synapse->GetTargetNeuronPop()->GetYPosition(targetNeuron);
 
-        for(long source = 0; source < noPre; source++){
+        for(NeuronInt sourceNeuron : std::ranges::views::iota(0,noSourceNeurons)){
             //Connect with given probability
-			x_pr = synapse->X_pre(source);
-			y_pr = synapse->Y_pre(source);
+			xPositionSource = synapse->GetSourceNeuronPop()->GetXPosition(sourceNeuron);
+			yPositionSource = synapse->GetSourceNeuronPop()->GetYPosition(sourceNeuron);
 
-            p = distribution(generator);
-			P = 0;
-			for (int x_repeat = -1 ; x_repeat<=1 ; x_repeat++) { //the motif in which neurons are located is repeated 8 other times to prevent boundary effects
-				if (info->Dimensions == 1) {
-					dist = pow((x_repeat*info->Lx) + x_pr - x_ps, 2);//d^2
-					P = P + PeakProbability * exp(-dist / (2 * pow(StdProbability,2)));
+            randomGeneratedFloat = distribution(generator);
+			totalConnectionProbability = 0;
+			for (int xRepeat : std::ranges::views::iota(-1,2)) { //the motif in which neurons are located is repeated 8 other times to prevent boundary effects
+				if (infoGlobal->dimensions == 1) {
+					distance = pow((xRepeat*infoGlobal->xAxisLength) + xPositionSource - xPositionTarget, 2);//d^2
+					totalConnectionProbability += peakProbability * exp(-distance / (2 * pow(stdProbability,2)));
 				}
-				else if (info->Dimensions == 2) {
-					for (int y_repeat = -1; y_repeat <= 1; y_repeat++) {
-						dist = pow((x_repeat * info->Lx) + x_pr - x_ps, 2) + pow(a,2)*pow((y_repeat*info->Ly) + y_pr - y_ps, 2);
-						P = P + PeakProbability * exp(-dist / (2 * pow(StdProbability, 2)));
+				else if (infoGlobal->dimensions == 2) {
+					for (int yRepeat : std::ranges::views::iota(-1,2)) {
+						distance = pow((xRepeat * infoGlobal->xAxisLength) + xPositionSource - xPositionTarget, 2) + pow(projectionLengthFactor,2)*pow((yRepeat*infoGlobal->yAxisLength) + yPositionSource - yPositionTarget, 2);
+						totalConnectionProbability = totalConnectionProbability + peakProbability * exp(-distance / (2 * pow(stdProbability, 2)));
 					}
 				}
 			}
-			if ((x_ps == x_pr) && (y_ps == y_pr) && (source==target)){
-				P = 0;
+			if ((xPositionTarget == xPositionSource) && (yPositionTarget == yPositionSource) && (sourceNeuron==targetNeuron)){
+				totalConnectionProbability = 0;
 			}
-            if(p <= P){
-                target_id[source].push_back(target);
-				c++;
+            if(randomGeneratedFloat <= totalConnectionProbability){
+				synapse->AllocateSynapse(targetNeuron, sourceNeuron);                // synapse->synapticTargets.at(sourceNeuron).push_back(target);
+				synapseCounter++;
             }
         }
-        if(target%output_Interval == 0)
-            std::cout << 100*(target)/noPost << "%-";
+        // if(targetNeuron%outputInterval == 0)
+        //     std::cout << 100*(targetNeuron)/noTargetNeurons << "%\n";
     }
-    std::cout << "100%\n";
-	std::cout << " Average Number of Presynaptic neurons : " << std::to_string(c / noPost) << "\n\n";
+        // std::cout << "100%\n";
+	std::cout << " Average Number of Presynaptic neurons : " << std::to_string(synapseCounter / noTargetNeurons) << "\n\n";
 
-	if (StdProbability > 0.29*info->Lx*std::min(1.0, a)) {
-		std::cout << "Expected number of presynaptic neurons :" << std::to_string(GetNumberAverageSourceNeurons());
-		std::cout << " | Actual result : " << std::to_string(c / noPost) << "\n\n";
+	if (stdProbability > 0.29*infoGlobal->xAxisLength*std::min(1.0, projectionLengthFactor)) {
+		std::cout << "Expected number of presynaptic neurons :" << std::to_string(GetExpectedConnections());
+		std::cout << " | Actual result : " << std::to_string(synapseCounter / noTargetNeurons) << "\n\n";
 	}
 }
 
-void DistanceConnectivity::ConnectNeuronsExact()
-{
+void DistanceConnectivity::ConnectNeuronsExact() {
 	//variation of Connect Neuron, in which the number of neurons connected is set
 	//Similar to RandomConnectivity vs BinaryConnectivity
 	//can only be used if the number of neurons is a square for each population (sqrt(N_pre) is integer and, sqrt(N_post) is integer)
 
-	unsigned long    noPost = synapse->GetNoNeuronsPost();
-	unsigned long    noPre = synapse->GetNoNeuronsPre();
-	long	connection;
-	double	x_pr, y_pr, x_ps, y_ps;
-	long	output_Interval = noPost / 10;
-	long	Xsource, Ysource;
-	unsigned long	source;
-	double	randdistance;
-	double	randtheta;
-	long	Nconnect = lround((noPre - 1) * PeakProbability);
-	long	NxPre = noPre;
-	double	DXsource=info->Lx/NxPre;
+	NeuronInt    noTargetNeurons = synapse->GetNoTargetNeurons();
+	NeuronInt    noSourceNeurons = synapse->GetNoSourceNeurons();
+	signed long	connectionCounter;
+	double	xPositionSource, yPositionSource, xPositionTarget, yPositionTarget;
+	NeuronInt	outputInterval = noTargetNeurons / 10;
+	long	xSource, ySource;
+	NeuronInt	sourceNeuron;
+	double	randDistance;
+	double	randTheta;//angle
+	long	nConnect = lround((noSourceNeurons - 1) * peakProbability);
+	long	xDivisionsSource = noSourceNeurons; //NxPre 
+	double	xDistanceSource=infoGlobal->xAxisLength/xDivisionsSource;//In one dimension this are the number of divisions //DXsource
 
-	if (info->Dimensions == 2) {
+	if (infoGlobal->dimensions == 2) {
 		//lround() returns a long integer
-		NxPre = lround(sqrt(noPre));//in 2D the distance between rows is different
-		DXsource = info->Lx / NxPre;
-		if (0.86*Nconnect > (4 * atan(1))*pow(2*StdProbability, 2)*noPre / (a*pow(info->Lx,2)))//86% of the Gaussian distribution should fall within the ellipse of radii 2sigma, 2sigma/a.
+		xDivisionsSource = lround(sqrt(noSourceNeurons));//in 2D the distance between rows is different
+		xDistanceSource = infoGlobal->xAxisLength / xDivisionsSource;
+		if (0.86*nConnect > (4 * atan(1))*pow(2*stdProbability, 2)*noSourceNeurons / (projectionLengthFactor*pow(infoGlobal->xAxisLength,2))){
+		//86% of the Gaussian distribution should fall within the ellipse of radii 2sigma, 2sigma/projectionLengthFactor.
 			std::cout << "WARNING !! \n Connectivity pattern cannot follow a Gaussian pdf: sigma too low, density too low or Connection_probability too high\n";
-	}else if (0.86*Nconnect > 3*StdProbability*noPre / info->Lx)//86% of the Gaussian distribution should fall within the boundary [-1.5sigma 1.5 sigma].
+		}
+	}else if (0.86*nConnect > 3*stdProbability*noSourceNeurons / infoGlobal->xAxisLength){
+	//86% of the Gaussian distribution should fall within the boundary [-1.5sigma 1.5 sigma].
 			std::cout << "WARNING !! \n Connectivity pattern cannot follow a Gaussian pdf: sigma too low, density too low or Connection_probability too high\n";
-
-	if (pow(NxPre, 2) != noPre && info->Dimensions == 2) {
+	}
+	if (pow(xDivisionsSource, 2) != noSourceNeurons && infoGlobal->dimensions == 2) {
 
 		std::cout << "N_pre and N_Post must be exact squares in order to put the neurons on a regular grid in 2D";
 		throw "N_pre and N_Post must be exact squares in order to put the neurons on a regular grid in 2D";
 	}
 
-	if (output_Interval == 0)
-		output_Interval = 1;
+	if (outputInterval == 0){
+		outputInterval = 1;
+	}
 
 	std::uniform_real_distribution<double> distribution(0, 1);
 
-	for (unsigned long target = 0; target < noPost; target++) {
-		//Iterate through all source neurons
-		x_ps = synapse->X_post(target);
-		y_ps = 0;
-		if (info->Dimensions==2)
-			y_ps = synapse->Y_post(target);
-		connection = 0;
-		while (connection < Nconnect) {
-
-			randdistance = distribution(generator);
-			randtheta = distribution(generator);
-			x_pr = StdProbability * sqrt(-2 * log(randdistance))*cos(2 * (4 * atan(1))*randtheta) + x_ps;//Box Muller transform
-			while (x_pr < 0)
-				x_pr = x_pr + info->Lx;
-			Xsource = lround(x_pr / DXsource);
-			while (Xsource >(NxPre - 1))
-				Xsource = Xsource - NxPre;
-			if (info->Dimensions == 2) {
-				y_pr = StdProbability/a * sqrt(-2 * log(randdistance))*sin(2 * (4 * atan(1))*randtheta) + y_ps;
-				while (y_pr < 0)
-					y_pr = y_pr + info->Lx;
-				Ysource = lround(y_pr / DXsource);
-				while (Ysource >(NxPre - 1))
-					Ysource = Ysource - NxPre;
-				source = Xsource + NxPre * Ysource;
+	for (NeuronInt targetNeuron : std::ranges::views::iota(0, noTargetNeurons)) {
+		//Iterate through all sourceNeuron neurons
+		xPositionTarget = synapse->GetTargetNeuronPop()->GetXPosition(targetNeuron);
+		yPositionTarget = 0;
+		if (infoGlobal->dimensions==2){
+			yPositionTarget = synapse->GetTargetNeuronPop()->GetYPosition(targetNeuron);
+		}
+		connectionCounter = 0;
+		while (connectionCounter < nConnect) {
+			randDistance = distribution(generator);
+			randTheta = distribution(generator);
+			xPositionSource = stdProbability * sqrt(-2 * log(randDistance))*cos(2 * (4 * atan(1))*randTheta) + xPositionTarget;//Box Muller transform
+			while (xPositionSource < 0){
+				xPositionSource += infoGlobal->xAxisLength;
 			}
-			else //1D
-				source = Xsource;
-
-			if ((synapse->IsRecurrent()) && (source == target))
+			xSource = lround(xPositionSource / xDistanceSource);
+			xSource %= xDivisionsSource;
+			if (infoGlobal->dimensions == 2) {
+				yPositionSource = stdProbability/projectionLengthFactor * sqrt(-2 * log(randDistance))*sin(2 * (4 * atan(1))*randTheta) + yPositionTarget;
+				while (yPositionSource < 0){
+					yPositionSource = yPositionSource + infoGlobal->xAxisLength;
+				}
+				ySource = lround(yPositionSource / xDistanceSource);
+				ySource %= xDivisionsSource;
+				sourceNeuron = xSource + xDivisionsSource * ySource;
+			} else{ //1D{
+				sourceNeuron = xSource;
+			}
+			if ((synapse->IsRecurrent()) && (sourceNeuron == targetNeuron)){
 				continue;
-
-			if (!target_id[source].empty() && target_id[source].back() == target)
+			}
+			if (!synapse->IsSourceVectorEmpty(sourceNeuron) && synapse->IsTargetLastInVector(targetNeuron,sourceNeuron)){
 				continue;
-
-			target_id[source].push_back(target);
-			connection++;
+			}
+			synapse->AllocateSynapse(targetNeuron, sourceNeuron);
+			connectionCounter++;
 		}
 
-		if (target%output_Interval == 0)
-			std::cout << 100 * (target) / noPost << "%-";
+		// if (targetNeuron%outputInterval == 0)
+		// 	std::cout << 100 * (targetNeuron) / noTargetNeurons << "%\n";
 	}
-	std::cout << "100%\n";
+	    // std::cout << "100%\n";
 }
 
-unsigned long  DistanceConnectivity::GetNumberAverageSourceNeurons() {
-	if (exact == 1)
-		return static_cast<unsigned long>(synapse->GetNoNeuronsPre() * PeakProbability);
-	else {
-		if (info->Dimensions == 2)
-			return static_cast<unsigned long>((synapse->GetNoNeuronsPre() / static_cast<double>(info->N)) * 2 * (4 * atan(1)) * info->density * PeakProbability * pow(StdProbability, 2) / a);//integral of density*probability(x,y)dxdy over the infinite 2D space
-		else if (info->Dimensions == 1)
-			return static_cast<unsigned long>((synapse->GetNoNeuronsPre() / static_cast<double>(info->N)) * sqrt(2 * (4 * atan(1))) * info->density * PeakProbability * StdProbability);//integral of density*probability(x,y)dxdy over the infinite 1D space
+double  DistanceConnectivity::GetExpectedConnections() const {
+	if (isConnectionExact == 1){
+		return (synapse->GetNoSourceNeurons() * peakProbability);
+	} else {
+		if (infoGlobal->dimensions == 2){
+			return ((synapse->GetNoSourceNeurons() / static_cast<double>(infoGlobal->totalNeurons)) * 2 * (4 * atan(1)) * infoGlobal->density * peakProbability * pow(stdProbability, 2) / projectionLengthFactor);//integral of density*probability(x,y)dxdy over the infinite 2D space
+		}
+		else if (infoGlobal->dimensions == 1){
+			return ((synapse->GetNoSourceNeurons() / static_cast<double>(infoGlobal->totalNeurons)) * sqrt(2 * (4 * atan(1))) * infoGlobal->density * peakProbability * stdProbability);//integral of density*probability(x,y)dxdy over the infinite 1D space
+		}
         else{
             throw "ERROR DistanceConnectivity::GetNumberAverageSourceNeurons";
         }

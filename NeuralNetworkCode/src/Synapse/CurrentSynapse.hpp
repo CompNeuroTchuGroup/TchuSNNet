@@ -1,36 +1,32 @@
-#ifndef CURRENTSYNAPSE
-#define CURRENTSYNAPSE
-
+#ifndef CURRENTSYNAPSE_HEADER_
+#define CURRENTSYNAPSE_HEADER_
+#include "Synapse.hpp"
+#include "../NeuronPop/NeuronPop.hpp"
+#include "../GlobalFunctions.hpp"
 #include <iostream>
 #include <vector>
 #include <random>
 #include <typeinfo>
-#include <valarray>
-#include "Synapse.hpp"
-#include "../NeuronPop/NeuronPop.hpp"
-#include "../GlobalFunctions.hpp"
 
-class CurrentSynapse : public Synapse
-{
+
+class CurrentSynapse : public Synapse {
 protected:
-    void advectSpikers (std::vector<double>& currents, long spiker) override;
-    //void advect_finalize(std::vector<double> * synaptic_dV, std::vector<std::vector<std::vector<double>>> * waiting_matrix){}
-    //void advect_finalize(std::vector<std::vector<double>> * waiting_matrix) override {}
+    std::vector<double> AdvectSpikers (NeuronInt spiker) override;
 
 public:
-    CurrentSynapse(NeuronPop * postNeurons,NeuronPop * preNeurons,GlobalSimInfo * info);
+    CurrentSynapse(PopPtr targetPop,PopPtr sourcePop,GlobalSimInfo* infoGlobal);
 
     //*****************************
     //******* Get Functions *******
     //*****************************
-    int GetNumberOfDataColumns() override { return 1;}
-    std::string GetDataHeader(int data_column) override;
-	std::string GetUnhashedDataHeader() override;
-    std::valarray<double> GetSynapticState(int pre_neuron) override;
-    const std::string GetTypeStr() override { return str_currentSynapse; }
+    int GetNoDataColumns() const override { return 1;}
+    std::string GetDataHeader(int dataColumn) override;
+	std::string GetUnhashedDataHeader() const override;
+    std::vector<double> GetSynapticState(NeuronInt sourceNeuron) const override;
+    std::string GetTypeStr() const override { return IDstringCurrentSynapse; }
 
-    void SaveParameters(std::ofstream * stream,std::string id_str) override;
-    void LoadParameters(std::vector<std::string> *input) override;
+    void SaveParameters(std::ofstream& wParameterStream,std::string idString) const override;
+    void LoadParameters(const std::vector<FileEntry>& parameters) override;
 };
 
 

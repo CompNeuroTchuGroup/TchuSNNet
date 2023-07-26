@@ -1,55 +1,49 @@
-#ifndef NeuralNetwork_HPP
-#define NeuralNetwork_HPP
+#ifndef NEURAL_NETWORK_HPP
+#define NEURAL_NETWORK_HPP
 
+#include "SynapseSample.hpp"
+#include "NeuronPopSample.hpp"
+#include "GlobalFunctions.hpp"
+#include "Stimulus/UncorrelatedPoissonLikeStimulus.hpp"
+#include "Stimulus/WhiteNoiseStimulus.hpp"
+#include "Stimulus/WhiteNoiseLinear.hpp"
+#include "Stimulus/SpatialGaussianStimulus.hpp"
+#include "Stimulus/SpatialPoissonStimulus.hpp"
+#include "Recorder.hpp"
+#include <sys/stat.h>
+#include <stdio.h>
 #include <vector>
 #include <fstream>
-#include <stdio.h>
 #include <string>
 #include <iostream>
 #include <cstring>
 #include <chrono>
 #include <random>
 #include <ctime>
-#include <sys/stat.h>
-//#include <unistd.h>
-#include "Recorder.hpp"
-#include "AdvancedRecorder.hpp"
-#include "SynapseSample.hpp"
-#include "GlobalFunctions.hpp"
-#include "NeuronPopSample.hpp"
-#include "Synapse/Synapse.hpp"
-#include "Stimulus/UncorrelatedPoissonLikeStimulus.hpp"
-#include "Stimulus/WhiteNoiseStimulus.hpp"
-#include "Stimulus/WhiteNoiseRescaled.hpp"
-#include "Stimulus/WhiteNoiseLinear.hpp"
-#include "Stimulus/SpatialGaussianStimulus.hpp"
-#include "Stimulus/SpatialPoissonStimulus.hpp"
 
-class NeuralNetwork
-{
+class NeuralNetwork {
 private:
 
-    GlobalSimInfo  info; //Simulation Parameters
+    GlobalSimInfo  infoGlobal; //Simulation Parameters
 
-    NeuronPopSample       *neurons;
-    SynapseSample         *synapses;
-    Recorder              *recorder;
-    Stimulus              *stimulus;
+    std::shared_ptr<NeuronPopSample>       neurons;
+    std::shared_ptr<SynapseSample>         synapses;
+    std::shared_ptr<Recorder>              recorder;
+    std::shared_ptr<Stimulus>              stimulus;
 
     void SaveParameters();
-    int  LoadParameters(std::string baseDir,std::vector<FileEntry> *parEntries);
-    int  WellDefined();
+    void  LoadParameters(std::string baseDirectory,std::vector<FileEntry>& parameterEntries);
+    bool  WellDefined();
 
     void SaveParameterOptions();
 public:
-    NeuralNetwork(std::string baseDir,std::vector<FileEntry> *parEntries);//std::string baseDir);
+    NeuralNetwork(std::string baseDirectory,std::vector<FileEntry> parameterEntries);
     ~NeuralNetwork()=default;
 
-    int  Simulate();
+    void  Simulate();
 
-    void makeInputCopy(const std::string&);
-    void outputHeteroEvents();
-    AdvancedRecorder& GetRecorder(){return *dynamic_cast<AdvancedRecorder*>(recorder);}
+    void makeInputCopies(const std::string&);
+    Recorder& GetRecorderReference(){return *recorder;}
 };
 
 #endif // NeuralNetwork_HPP

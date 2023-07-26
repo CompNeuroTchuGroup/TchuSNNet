@@ -1,4 +1,4 @@
-#HowTo
+# HowTo
 
 Here is an overview on how to get the simulation running.
 

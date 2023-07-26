@@ -1,11 +1,11 @@
-#ifndef POWERLAWSYNAPSE
-#define POWERLAWSYNAPSE
+#ifndef _POWER_LAW_SYNAPSE_HEADER_
+#define _POWER_LAW_SYNAPSE_HEADER_
 
 #include <iostream>
 #include <vector>
 #include <random>
 #include <typeinfo>
-#include <valarray>
+
 #include "Synapse.hpp"
 #include "../NeuronPop/NeuronPop.hpp"
 #include "../GlobalFunctions.hpp"
@@ -15,31 +15,31 @@ class PowerLawSynapse : public Synapse
 {
 protected:
 
-	double n;
-	int	Naveraging;
-	std::valarray<int> spike_count;
-	std::valarray<std::valarray<double>> ISI_table;
+	double kExponent_PLaw{1.0};
+	int	noSpikesForFiringRate{2}; //Number of spikes used to average ISI and invert for average frequency
+	std::vector<int> spikeCountVector;
+	std::vector<std::vector<double>> tableISI;
 
-	void advectSpikers(std::vector<double>& currents, long spiker) override;
+	std::vector<double> AdvectSpikers (NeuronInt spiker) override;
 	//void advect_finalize(std::vector<std::vector<double>> * waiting_matrix) override {};
 
 public:
-	PowerLawSynapse(NeuronPop * postNeurons, NeuronPop * preNeurons, GlobalSimInfo * info);
+	PowerLawSynapse(PopPtr targetPop, PopPtr sourcePop, GlobalSimInfo* infoGlobal);
 	~PowerLawSynapse() override = default;
 
 
 	//*****************************
 	//******* Get Functions *******
 	//*****************************
-	int GetNumberOfDataColumns() override { return 1; }
-	std::string GetDataHeader(int data_column) override;
-	std::string GetUnhashedDataHeader() override;
-	std::valarray<double> GetSynapticState(int pre_neuron) override;
-	const std::string GetTypeStr() override { return str_powerlawsynapse; };
+	int GetNoDataColumns() const override { return 1; }
+	std::string GetDataHeader(int dataColumn) override;
+	std::string GetUnhashedDataHeader() const override;
+	std::vector<double> GetSynapticState(NeuronInt sourceNeuron) const override;
+	std::string GetTypeStr() const override { return IDstringPowerLawSynapse; };
 
-	void SaveParameters(std::ofstream * stream, std::string id_str) override;
-	void LoadParameters(std::vector<std::string> *input) override;
+	void SaveParameters(std::ofstream& wParameterStream, std::string idString) const override;
+	void LoadParameters(const std::vector<FileEntry>& parameters) override;
 };
 
 
-#endif // POWERLAWSYNAPSE
+#endif // _POWER_LAW_SYNAPSE_HEADER_

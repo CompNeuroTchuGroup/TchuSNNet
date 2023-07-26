@@ -6,55 +6,96 @@
 //  Copyright © 2017 Andreas Nold. All rights reserved.
 //
 
-#ifndef GlobalFunctions_h
-#define GlobalFunctions_h
+//#define _NO_PARALLEL_COMPUTING_
+#ifdef _NO_PARALLEL_COMPUTING_
+#define PAR std::execution::seq
+#define PAR_UNSEQ std::execution::unseq
+#else
+#define PAR std::execution::par
+#define PAR_UNSEQ std::execution::par_unseq
+#endif
 
+#ifndef GLOBAL_FUNCTIONS_HEADER_
+#define GLOBAL_FUNCTIONS_HEADER_
+#define _CRT_SECURE_NO_WARNINGS
+#include <memory>
 #include <random>
+#include <ranges>
 #include <fstream>
-#include <assert.h>
-#include <valarray>
 #include <numeric>
 #include <deque>
+#include <iostream>
+#include <vector>
+#include <sstream>
+#include <algorithm>
+#include <iomanip>
+#include <string>
+#include <mutex>
+#include <ctime>
 
-#define assertm(exp, msg) assert(((void)msg, exp))
+//Type alias list
+
+using PopInt = signed int;
+using NeuronInt = signed long;
+using TStepInt = long;
+class Synapse;
+using SynapsePtr = std::unique_ptr<Synapse>;
+class NeuronPop;
+using PopPtr = std::shared_ptr<NeuronPop>;
+class BaseSynapseSpine;
+using BaseSpinePtr = BaseSynapseSpine*;
+class BranchedSynapseSpine;
+using BranchedSpinePtr = BranchedSynapseSpine*;
+class ResourceSynapseSpine;
+using ResourceSpinePtr = std::unique_ptr<ResourceSynapseSpine>;
+class CoopSynapseSpine;
+using CoopSpinePtr = std::unique_ptr<CoopSynapseSpine>;
+struct Branch;
+using BranchPtr = Branch*;
+struct ResourceTraceBranch;
+using RTBranchPtr =std::unique_ptr<ResourceTraceBranch>;
 
 struct GlobalSimInfo {
 
-    std::mt19937 globalGenerator{};
-    std::string pathTo_inputFile{};
-    int		globalSeed{};
-    long    time_step{};//long is long int
-    int     waiting_index{};
-    double  dt{};
+    std::mt19937 globalGenerator;
+    std::string pathToInputFile{""};
+    int		globalSeed{-1};
+    TStepInt    timeStep{};//long is long int
+    // int     waitingIndex{};
+    double  dtTimestep{};
+    double  dtSqrt{};
     int     density{};
-    double  Lx{}; //Always a positive quantity (number of neurons/dimensions)
-    double  Ly{}; //Always a positive quantity (number of neurons/dimensions)
-    int     Dimensions{};
+    double  xAxisLength{}; //Always a positive quantity (number of neurons/dimensions)
+    double  yAxisLength{}; //Always a positive quantity (number of neurons/dimensions)
+    int     dimensions{};
     double  simulationTime{};
     double  networkScaling_synStrength{};
-    int     networkScaling_extern{}; // 0: default (=1)
-    long    N{};
-} ;
+    int     networkScaling_mode{}; // 0: default (=1)
+    NeuronInt    totalNeurons{};
+    bool isMock{false};
+};
 
 struct FileEntry {
-    std::string name;
-    std::vector<std::string> values;
+    std::string parameterName;
+    std::vector<std::string> parameterValues;
 
-    FileEntry(std::string n, std::vector<std::string> v) : name(std::move(n)), values(std::move(v)) {
-    }
+    FileEntry(std::string parameterName, std::vector<std::string> parameterValues) : parameterName(std::move(parameterName)), parameterValues(std::move(parameterValues)) {}
     FileEntry(){}
+
+    void RemoveCommentsInValues(char commentCharacter='#');
+    bool parameterNameContains(std::string stringFilter) const {return parameterName.find(stringFilter) != std::string::npos;}
 };
 
 struct IterableFileEntry : FileEntry {
-    std::string iterate_id;
-    IterableFileEntry(std::string it_id, std::string n, std::vector<std::string> v) :  FileEntry(n, v), iterate_id(it_id){
+    std::string iterateID;
+    IterableFileEntry(std::string iterateID, std::string parameterName, std::vector<std::string> parameterValues) :  FileEntry(parameterName, parameterValues), iterateID(iterateID){
     }
 };
 
 
 
 struct RecorderOpenStreams {
-    std::ofstream heatmapFileStream;
+    std::vector<std::ofstream> heatmapStreamVector{};
     std::ofstream averagesFileStream;
     std::ofstream rasterplotFileStream;
     std::ofstream potentialFileStream;
@@ -64,99 +105,182 @@ struct RecorderOpenStreams {
     std::ofstream meanCorrFileStream;
     std::ofstream pairCorrFileStream;
     std::ofstream synStatesFileStream;
-    std::ofstream heteroSynapsesFileStream;
+    std::ofstream heteroSynFileStream;
     std::ofstream hSOverallFileStream;
     //std::vector<std::ofstream> neuronOuputFileStreams;
 };
-
-
-const std::string str_adjacencyMatrixConnectivity {"AdjacencyMatrixConnectivity"};
-const std::string str_randomConnectivity{"RandomConnectivity"};
-const std::string str_binaryrandomConnectivity{"BinaryRandomConnectivity"};
-const std::string str_distanceConnectivity{"DistanceConnectivity"};
-const std::string str_heteroRandomConnectivity{"HeteroRandomConnectivity"};
-//const std::string str_localConnectivity("LocalConnectivity");
-
-
-const std::string str_currentSynapse{"CurrentSynapse"};
-const std::string str_conductanceSynapse{"ConductanceSynapse"};
-const std::string str_mongilloSynapse{"MongilloSynapse"};
-const std::string str_mongilloSynapseContinuous{"MongilloSynapseContinuous"};
-const std::string str_probabilisticCurrentSynapse{"ProbabilisticCurrentSynapse"};
-const std::string str_prgSynapseContinuous{"PRGSynapseContinuous"};
-
-const std::string str_exponentialCurrentSynapse{"ExponentialCurrentSynapse"};
-const std::string str_powerlawsynapse{"PowerLawSynapse"};
-const std::string str_exponentialConductanceSynapse{"ExponentialConductanceSynapse"};
-const std::string str_exponentialMongilloSynapse{"ExponentialMongilloSynapse"};
-const std::string str_heteroSynapse{"HeteroCurrentSynapse"};
-
-const std::string str_exponentialSynapseAddon{"ExponentialSynapseAddon"};
-
-const std::string str_LIFNeuron{"LIFNeuron"};
-const std::string str_QIFNeuron{"QIFNeuron"};
-const std::string str_EIFNeuron{"EIFNeuron"};
-const std::string str_PoissonNeuron{"PoissonNeuron"};
-const std::string str_DictatNeuron{"DictatNeuron"};
-const std::string str_HeteroLIFNeuron{"HeteroLIFNeuron"};
-const std::string str_HeteroPoissonNeuron{"HeteroPoissonNeuron"};
-
-const std::string str_NOPNormalization{"NOPNormalization"};
-const std::string str_HardNormalization{"HardNormalization"};
-const std::string str_SoftMaxNormalization{"SoftMaxNormalization"};
-
-const std::string str_leanRecorder{"LeanRecorder"};
-const std::string str_advancedRecorder{"AdvancedRecorder"};
-
-const std::string str_uncorrelatedStimulus{"UncorrelatedStimulus"};
-const std::string str_whitenoiseStimulus{"WhiteNoiseStimulus"};
-const std::string str_whitenoiseRescaled{"WhiteNoiseRescaled"};
-const std::string str_Tims_sin_Stimulus{"TimsSinStimulus"};
-const std::string str_whitenoiseLinear{"WhiteNoiseLinear"};
-const std::string str_spatialgaussianStimulus{"SpatialGaussianStimulus"};
-const std::string str_spatialpoissonStimulus{"SpatialPoissonStimulus"};
-
-const std::string str_MonoDendriteSTDPTazerart{"MonoDendriteSTDPTazerart"};
-const std::string str_MonoDendriteSTDPTazerartRelative{"MonoDendriteSTDPTazerartRelative"};
-const std::string str_MonoDendriteSTDPBiWindow{"MonoDendriteSTDPBiWindow"};
-const std::string str_MonoDendriteSTDPBiExponential{"MonoDendriteSTDPBiExponential"};
-
-const std::string str_BranchedResourceHeteroSTDP{"BranchedResourceHeteroSTDP"};
-
-void MultiplyVector (std::vector<unsigned long> &vector, unsigned long value);
-void MultiplyVector (std::vector<double> &vector, double value);
-
-int ReduceCountStopAtZero(int count);
-
-void TestWritingFile(std::string filename);
-
-void FilterStringEntries(std::vector<FileEntry> *str_full,std::string token,std::vector<FileEntry> *str_filtered);
-void FilterStringVector(std::vector<std::string> *str_full,std::string token,std::vector<std::string> *str_filtered);
-void SplitString(std::string *full_str,std::string *name,std::vector<std::string> *values);
-void SplitString(std::string *full_str, std::string *iterate_id, std::string *name, std::vector<std::string> *values);
-void SplitString(std::string* full_str, std::vector<std::string>* values);
-
-std::string getPathToInputFile(std::string* inputFile, bool Windows);
-
-void SaveDoubleFile(std::ofstream *file,double val,int precision);
-void SaveTupleOfDoublesFile(std::ofstream *file, std::valarray<double>, int precision);
-void SaveTupleOfDoublesFile(std::ofstream *file, std::vector<double>, int precision);
-
-bool is_double(const std::string& s);
-
-FileEntry stringToFileEntry(std::string);
-IterableFileEntry stringToIterableFileEntry(std::string);
-
-void checkConsistencyOfIterationParameters(const std::vector<IterableFileEntry>&);
-
-struct noAllocatableSynapseException : std::exception {
-    char const* what() const noexcept override {
-        return "No synapses available on dendrite for new allocation.";
-    }
+struct DendriticSubRegion{ //Still under work
+    const char regionID;
+    const std::vector<int> branchesInRegion; //I will have to read this from the morphology LP, every DendriticSubRegion is a line, first input is ID, rest is branchIDs. Then in Synapse you put the DendriticSubRegion where the synapse goes. 
+    DendriticSubRegion(char regionID, std::vector<int> branchesInRegion);
 };
 
-void RemoveCommentInString(std::vector<std::string>* string, char commentCharacter='#');
-//int INTMAX = 2;
-//double PI = 3.14159265359;
+struct BranchTargeting{ //This is esentially a wrapper for HCS different targeting strategies of postsynaptic branches
+    int targetBranch{};
+    bool setTargetBranch{false};
+    bool randomTargetBranch{false};
+    bool orderedTargetBranch{false};
+    char DendriticSubRegion{'0'};
+};
+namespace threadsafe{
+    static std::mutex _timeMutex;
+    // tm* localtime(const time_t* timer);
+    void put_time(time_t timeObj, const char* formatString, std::stringstream& outputString);
+}
+const std::string IDstringAdjacencyMatrixConnectivity {"AdjacencyMatrixConnectivity"};
+const std::string IDstringRandomConnectivity{"RandomConnectivity"};
+const std::string IDstringPoissonConnectivity{"PoissonConnectivity"};
+const std::string IDstringDistanceConnectivity{"DistanceConnectivity"};
+const std::string IDstringHeteroRandomConnectivity{"HeteroRandomConnectivity"};
+//const std::string stringlocalConnectivity("LocalConnectivity");
+
+
+const std::string IDstringCurrentSynapse{"CurrentSynapse"};
+const std::string IDstringConductanceSynapse{"ConductanceSynapse"};
+const std::string IDstringMongilloSynapse{"MongilloSynapse"};
+const std::string IDstringMongilloSynapseContinuous{"MongilloSynapseContinuous"};
+const std::string IDstringProbabilisticCurrentSynapse{"ProbabilisticCurrentSynapse"};
+const std::string IDstringPRGSynapseContinuous{"PRGSynapseContinuous"};
+
+const std::string IDstringExponentialCurrentSynapse{"ExponentialCurrentSynapse"};
+const std::string IDstringPowerLawSynapse{"PowerLawSynapse"};
+const std::string IDstringExponentialConductanceSynapse{"ExponentialConductanceSynapse"};
+const std::string IDstringExponentialMongilloSynapse{"ExponentialMongilloSynapse"};
+const std::string IDstringHeteroSynapse{"HeteroCurrentSynapse"};
+const std::string IDstringPlasticityModelSynapse{"PModelSynapse"};
+
+const std::string IDstringExponentialSynapseAddon{"ExponentialSynapseAddon"};
+
+const std::string IDstringLIFNeuron{"LIFNeuron"};
+const std::string IDstringQIFNeuron{"QIFNeuron"};
+const std::string IDstringEIFNeuron{"EIFNeuron"};
+const std::string IDstringPoissonNeuron{"PoissonNeuron"};
+const std::string IDstringDictatNeuron{"DictatNeuron"};
+const std::string IDstringHeteroLIFNeuron{"HeteroLIFNeuron"};
+const std::string IDstringHeteroPoissonNeuron{"HeteroPoissonNeuron"};
+
+const std::string IDstringNOPNormalization{"NOPNormalization"};
+const std::string IDstringHardNormalization{"HardNormalization"};
+const std::string IDstringSoftMaxNormalization{"SoftMaxNormalization"};
+
+//const std::string stringLeanRecorder{"LeanRecorder"};
+//const std::string stringAdvancedRecorder{"AdvancedRecorder"};
+
+const std::string IDstringUncorrelatedStimulus{"UncorrelatedStimulus"};
+const std::string IDstringWhitenoiseStimulus{"WhiteNoiseStimulus"};
+const std::string IDstringWhitenoiseRescaled{"WhiteNoiseRescaled"};
+//const std::string stringTims_sin_Stimulus{"TimsSinStimulus"};
+const std::string IDstringWhiteNoiseLinear{"WhiteNoiseLinear"};
+const std::string IDstringSpatialGaussianStimulus{"SpatialGaussianStimulus"};
+const std::string IDstringSpatialPoissonStimulus{"SpatialPoissonStimulus"};
+
+const std::string IDstringMonoDendriteSTDPTazerart{"MonoDendriteSTDPTazerart"};
+const std::string IDstringMonoDendriteSTDPTazerartRelative{"MonoDendriteSTDPTazerartRelative"};
+const std::string IDstringMonoDendriteSTDPBiWindow{"MonoDendriteSTDPBiWindow"};
+const std::string IDstringMonoDendriteSTDPBiExponential{"MonoDendriteSTDPBiExponential"};
+
+const std::string IDstringTraceResourceHSTDP{"TraceRBranchedHSTDP"};
+
+// void MultiplyVector (std::vector<signed long> &vector, signed long value);
+// void MultiplyVector (std::vector<double> &vector, double value);
+
+// void TestWritingFile(std::string filename);
+
+std::vector<FileEntry> FilterStringEntries(const std::vector<FileEntry>& allParameterEntries,std::string filter);
+//void FilterStringVector(std::vector<std::string>& fullString,std::string token,std::vector<std::string>& filteredString);
+std::vector<std::string> SplitStringToValues(std::string fullString);
+FileEntry SplitStringToEntry(std::string fullString);
+IterableFileEntry SplitStringToIterableEntry(std::string fullString);
+//FileEntry SplitString(std::string& fullString, std::vector<std::string>& parameterValues);
+
+std::string getPathToInputFile(std::string& inputFileAddress, bool Windows);
+
+void SaveDoubleFile(std::ofstream& file,double value,int precision);
+// void SaveTupleOfDoublesFile(std::ofstream& file, std::valarray<double>, int precision);
+void SaveTupleOfDoublesFile(std::ofstream& file, std::vector<double>, int precision);
+
+bool isDouble(const std::string& readString);
+
+size_t IsIterateParamConsistent(FileEntry entry, IterableFileEntry iterateEntry);
+signed int MinIterateParameterSize(std::vector<IterableFileEntry> iterateEntries);
+// void CheckConsistencyOfIterationParameters(const std::vector<IterableFileEntry>& iterableEntryVector);
+
+// struct noAllocatableSynapseException : std::exception {
+//     char const* what() const noexcept override {
+//         return "No synapses available on dendrite for new allocation.";
+//     }
+// };
+
+
+//Template functions
+//Range()
+//V1
+//template <typename T>
+// auto pyrange(T start, T end, T step) {
+//     static_assert(std::is_integral<T>::value, "Integral required.");
+//     switch (((start<end) << 1) | (step>0)){
+//     case 0:
+//         std::swap(start, end);
+//         return std::views::iota(0, (end - start + step - 1) / step)
+//         | std::views::reverse
+//         | std::views::transform([start, step](T value) { return start + value * step; });
+//     case 1:
+//         std::swap(start, end);
+//         return std::views::iota(0, (end - start + step - 1) / step)
+//         | std::views::transform([start, step](T value) { return start + value * step; });
+//     case 2:
+//         continue;
+//     case 3:
+//         return std::views::iota(0, (end - start + step - 1) / step)
+//             | std::views::transform([start, step](T value) { return start + value * step; });
+//     case default:
+//         throw "Assumptions of ";
+//     }
+// }
+//V2
+//Is able to work when compile time evaluatio is not possible
+// template <typename T>
+// std::vector<T> pyrange(T begin, T end, T stepsize = 1) {
+//     std::vector<T> result{};
+//     if (begin < end) {
+//         for (T item: std::ranges::views::iota(begin, end)
+//                  | std::ranges::views::stride(stepsize)) {
+//             result.push_back(item);
+//         }
+//     } else {
+//         begin++;
+//         end++;
+//         stepsize *= -1;
+//         for (T item: std::ranges::views::iota(end, begin)         
+//                   | std::ranges::views::reverse 
+//                   | std::ranges::views::stride(stepsize)) {
+//             result.push_back(item);
+//         }
+//     }
+//     return result;
+// }
+//V3
+// template <typename T>
+// std::vector<T> pyrange(T begin, T end) {
+//     std::vector<T> result{};
+//     if (begin < end) {
+//         for (T item: std::ranges::views::iota(begin, end)) {
+//             result.push_back(item);
+//         }
+//     } else {
+//         begin++;
+//         end++;
+//         for (T item: std::ranges::views::iota(end, begin)         
+//                   | std::ranges::views::reverse ) {
+//             result.push_back(item);
+//         }
+//     }
+//     return result;
+// }
+//V4
+//The three dots signal accepting variadic arguments and passing them to iota.
+//auto range = [](auto... args) { return std::views::iota(args...); };
+//range imitates the behaviour of python's range() with 2 arguments, always with step stride of 1 or -1
 
 #endif /* GlobalFunctions_h */
+

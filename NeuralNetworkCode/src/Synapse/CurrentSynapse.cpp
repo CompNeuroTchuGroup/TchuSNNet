@@ -1,48 +1,46 @@
 #include "CurrentSynapse.hpp"
 
-CurrentSynapse::CurrentSynapse(NeuronPop * postNeurons,NeuronPop * preNeurons,GlobalSimInfo * info):Synapse(postNeurons,preNeurons,info) {}
+CurrentSynapse::CurrentSynapse(PopPtr targetPop, PopPtr sourcePop, GlobalSimInfo* infoGlobal):Synapse(targetPop,sourcePop,infoGlobal){
 
-void CurrentSynapse::advectSpikers (std::vector<double>& currents, long spiker)
-{
-    std::vector<unsigned long> *tL = geometry->GetTargetList(spiker);
+}
 
-    for(unsigned int target = 0; target < tL->size(); target++){
-        double c = GetCouplingStrength(spiker, target);
-        currents[target] += c;
-        this->cumulatedDV   += c;
+std::vector<double> CurrentSynapse::AdvectSpikers (NeuronInt spiker) {
+    NeuronInt noTargets{GetNoTargetedNeurons(spiker)};
+    std::vector<double> currents(noTargets,0.0);
+    for(NeuronInt targetNeuronIndex : std::ranges::views::iota (0, noTargets)){
+        double calcCurrent =  GetCouplingStrength(targetNeuronIndex, spiker); //If confused about syntax, talk to Antoni
+        currents.at(targetNeuronIndex)+=calcCurrent;
+        this->cumulatedDV   += calcCurrent;
     }
-
+    return currents;
 }
 
-std::string CurrentSynapse::GetDataHeader(int data_column)
-{
-    return "#" + std::to_string(data_column) + " J_"+ GetIdStr() + " (mV)\n";
+std::string CurrentSynapse::GetDataHeader(int dataColumn) {
+    return "#" + std::to_string(dataColumn) + " J_"+ GetIdStr() + " (mV)\n";
 }
 
-std::string CurrentSynapse::GetUnhashedDataHeader()
-{
+std::string CurrentSynapse::GetUnhashedDataHeader() const {
 	return "J_" + GetIdStr() + "\t";
 }
 
-std::valarray<double> CurrentSynapse::GetSynapticState(int pre_neuron)
-{
-    std::valarray<double> val(1);
+std::vector<double> CurrentSynapse::GetSynapticState(NeuronInt sourceNeuron) const {
+    std::vector<double> value(1);
     double Jsum = 0;
     // get average coupling strength
-    for(unsigned int target=0; target < this->GetNumberOfPostsynapticTargets(pre_neuron); target++){
-        Jsum += *(geometry->GetDistributionJ(pre_neuron,target));
+    for(NeuronInt targetNeuron : std::ranges::views::iota(0,GetNoTargetedNeurons(sourceNeuron))){
+        Jsum += GetDistributionJ(targetNeuron,sourceNeuron);
     }
-    val[0] = Jsum/double(this->GetNumberOfPostsynapticTargets(pre_neuron));
-    //val[0] = GetCouplingStrength()*double(this->GetNumberOfPostsynapticTargets(pre_neuron));
-    return val;
+    value.at(0) = Jsum/static_cast<double>(this->GetNoTargetedNeurons(sourceNeuron));
+    //value[0] = GetCouplingStrength()*static_cast<double>(this->GetNumberOfPostsynapticTargets(pre_neuron));
+    return value;
 }
 
 
-void CurrentSynapse::LoadParameters(std::vector<std::string> *input){
-    Synapse::LoadParameters(input);
+void CurrentSynapse::LoadParameters(const std::vector<FileEntry>& synapseParameters){
+    Synapse::LoadParameters(synapseParameters);
 }
 
 
-void CurrentSynapse::SaveParameters(std::ofstream * stream,std::string id_str){
-    Synapse::SaveParameters(stream,id_str);
+void CurrentSynapse::SaveParameters(std::ofstream& wParameterStream,std::string idString) const{
+    Synapse::SaveParameters(wParameterStream,idString);
 }

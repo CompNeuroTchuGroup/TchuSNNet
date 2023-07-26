@@ -74,7 +74,7 @@ Put the ten generated folders from the simulation's iteration in the same folder
 ## Test 11: DictatNeuronPop
 This test acts as a unit test of the DictatNeuronPop feature, allowing the user to dictate the activity of the population through an external text file. The test requires an extra file apart from Parameters.txt, which contains the neuron instructions for spiking. The analysis is performed by the script found in the test's folder in Test_Results/.
 
-## Test 12: Pairing-based heterosynaptic plasticity with STDP and limited branch resources
+## Test 12: Cooperativity-based heterosynaptic plasticity with STDP and limited branch resources
 This test acts as a unit test of the model named BranchedResourcesHeteroSTDP (name subject to change), a model that attempts to repoduce the logic found empirically in heterosynaptic plasticity experiments from a pairing framework, while retaining regular STDP in the model. This test also uses the DictatNeuronPop feature, which could be a source of error if Test 11 has not been reproduced. 
 
 The model consists of pairing of synapses through presynaptic spikes (effect decays in time and space) and a potentiation of the pairing by the postsynaptic spike. STDP is identical but without the time and space decay of the synaptic spine pairing. The weights are also constrained following the equation:

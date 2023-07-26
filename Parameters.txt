@@ -1,9 +1,9 @@
 #*****************************************************************
-Title                       Test11_DeathByAThousandCuts
+Title                       Test1
 #*****************************************************************
-simulationTime              15.000000 		seconds
+simulationTime              2.000000 		seconds
 dt_timestep                          0.000100 		seconds
-globalSeed                  -1 				#overrides all other seeds if unequal -1
+globalSeed                  5102020 				#overrides all other seeds if unequal -1
 #*****************************************************************
 #****************        Spatial parameters        ***************
 #*****************************************************************
@@ -20,156 +20,170 @@ scaling_C_N                 0				# Set = 0 to scale with number of presynaptic n
 #***********************************************
 #************** Neuron Parameters **************
 #***********************************************
-neurons_noPopulations                 2
-neurons_generalNeuronSeed             0
-#generalNeuronSeed = -1: seeds are defined at individual population level.
-#generalNeuronSeed >= 0: general seed overrides individual seeds.
+neurons_noPopulations                 3
 #***********************************************
-neurons_0_noNeurons                       50
-neurons_0_type                            HeteroLIFNeuron
-neurons_0_morphology_type				MonoDendriteSTDPTazerart
-neurons_0_morphology_weight_normalization	NOPNormalization
-neurons_0_tauM                            0.020000 seconds #This is the time constant of decay of the membrane potential
-neurons_0_vReset                          10.000000 mV     #This is the voltage that is set for the neuron after an AP
-neurons_0_vThresh                         20.000000 mV     #Potential necessary for a spike
-neurons_0_refractoryTime                  0.0002000 seconds #Time of no firing, but because of implementation, membrane potential is also frozen (no decay, no input)
-neurons_0_seedInitialPotentials           524636540
-neurons_0_seedInitialPrevSpike            1015961569
-#From here on is all Heterostuff
-neurons_0_dendritic_length                100 μm	     #Length of the dendritic arm
-neurons_0_synaptic_gap                    0.005 μm	     #Forced distance between synapses
-neurons_0_heterosynaptic_theta_decay      25.0		     #Or tauTheta, decay constant of heterosynaptic effects in spines for cooperativity calculation
-neurons_0_intersynapse_distance_decay     50.0		     #Or lambdaDist, spatial decay constant of heterosynaptic boost between synapses for cooperativity calculation
-neurons_0_intersynapse_spike_timing_decay 0.05		     #Or tauDelay, decay constant of heterosynaptic effects over inter-synapse spike timing difference
-neurons_0_mu_LTP                          0.007		     #This is the time difference between spikes for the potentiation to happen
-neurons_0_sigma_LTP                       0.005		     #Std of the distribution of LTP effects.
-neurons_0_alpha_LTP                       1.0		     #used in aLTP, scaling factor for spatial cooperativity
-neurons_0_pre_factor_LTP			1.0		     #Base factor that is multiplied by the spatio-temporal effects in LTP. If set to zero, LTP will be zero
-neurons_0_base_ltp				0.0		     #Default increase per check
-neurons_0_incr_ltp				1.0		     #Base that multiplies sth
-neurons_0_mu_LTD                          0.013		     #This is the time difference between spikes for the depression to happen
-neurons_0_sigma_LTD                       0.005		     #Std of the distribution of LTP effects.
-neurons_0_beta_LTD                        1.0		     #used in aLTD, scaling factor for spatial cooperativity
-neurons_0_pre_factor_LTD			1.0		     #Base factor that is multiplied by the spatio-temporal effects in LTD. If set to zero, LTD will be zero
-neurons_0_base_ltd				0.05		     #Default increase per check
-neurons_0_decr_ltd				1.0		     #Base that multiplies sth
-
+neurons_0_noNeurons                   30
+neurons_0_type                        LIFNeuron
+neurons_0_tauM                        0.010000 #seconds
+neurons_0_vReset                      0.000000 #mV 
+neurons_0_vThresh                     1.000000 mV
+neurons_0_refractoryTime              0.000000 #seconds
 #		Note: Resting potential is 0 by definition.
-neurons_0_resetType                   1
+neurons_0_resetType                   0
 #		LIF neuron: dV/dt = -V/tau_m + RI/tau_m 
 #		resetType 0: v = v_reset
 #		resetType 1: v = v_reset + (v - v_thresh) 
 #***********************************************
-neurons_1_noNeurons                       50
-neurons_1_type                            HeteroLIFNeuron
-neurons_1_morphology_type					  MonoDendriteSTDPTazerart
-neurons_1_morphology_weight_normalization		NOPNormalization
-neurons_1_tauM                            0.020000 seconds
-neurons_1_vReset                          10.000000 mV 
-neurons_1_vThresh                         20.000000 mV
-neurons_1_refractoryTime                  0.000200 seconds
-neurons_1_seedInitialPotentials           978382936
-neurons_1_seedInitialPrevSpike            2029044002
+neurons_1_noNeurons                   10
+neurons_1_type                        LIFNeuron
+neurons_1_tauM                        0.010000 #seconds
+neurons_1_vReset                      0.000000 #mV 
+neurons_1_vThresh                     1.000000 mV
+neurons_1_refractoryTime              0.000000 #seconds
 #		Note: Resting potential is 0 by definition.
-neurons_1_resetType                   1
+neurons_1_resetType                   0
 #		LIF neuron: dV/dt = -V/tau_m + RI/tau_m 
 #		resetType 0: v = v_reset
 #		resetType 1: v = v_reset + (v - v_thresh) 
-#From here on is all Heterostuff
-neurons_1_dendritic_length                100 μm	     #Length of the dendritic arm
-neurons_1_synaptic_gap                    0.005 μm	     #Forced distance between synapses
-neurons_1_heterosynaptic_theta_decay      25.0		     #Or tauTheta, decay constant of heterosynaptic effects in spines.
-neurons_1_intersynapse_distance_decay     50.0		     #Or lambdaDist, spatial decay constant of heterosynaptic boost between synapses
-neurons_1_intersynapse_spike_timing_decay 0.05		     #Or tauDelay, decay constant of heterosynaptic effects over inter-synapse spike timing difference
-neurons_1_mu_LTP                          0.007		     #
-neurons_1_sigma_LTP                       0.005		     #used in gLTP, denominator squared and multiplied by 2, inside an exponent.
-neurons_1_alpha_LTP                       1.0		     #used in aLTP, multiplied in the exponent by theta
-neurons_1_pre_factor_LTP			1.0		     #Base factor that is multiplied by the spatio-temporal effects in LTP. If set to zero, LTP will be zero
-neurons_1_base_ltp				0.0		     #Default increase per check
-neurons_1_incr_ltp				1.0		     #Base that multiplies sth
-neurons_1_mu_LTD                          0.013		     #
-neurons_1_sigma_LTD                       0.005		     #used in gLTD, denominator squared and multiplied by 2, inside an exponent.
-neurons_1_beta_LTD                        1.0		     #used in aLTD, multiplied in the exponent by theta
-neurons_1_pre_factor_LTD			1.0		     #Base factor that is multiplied by the spatio-temporal effects in LTD. If set to zero, LTD will be zero
-neurons_1_base_ltd				0.05		     #Default increase per check
-neurons_1_decr_ltd				1.0		     #Base that multiplies sth
+#***********************************************
+neurons_2_noNeurons                   10
+neurons_2_type                        PoissonNeuron
+#		Poisson neuron: produces Poisson spiking with rate r_target (defined under stimulus) 
 #**************************************************
 #************** Stimulus Parameters ***************
 #**************************************************
-stimulus_type                        UncorrelatedStimulus
-stimulus_noExternalNeurons           1000
-stimulus_seed                        135
-stimulus_PoissonTableEntries         100000
-stimulus_J_X                         0.200000	0.200000	 dmV/Spike #The synaptic strengths are for each population
-stimulus_step                        15.000000	10.000000	 [t (secs.) -- Hz]
-stimulus_step                        0.000000	10.000000	 [t (secs.) -- Hz]
-#		UncorrelatedStimulus: noExternalNeurons external neurons with (poisson) firing rate defined in stimulus_step are connected with population X with strength J_X.
+stimulus_type                        WhiteNoiseLinear
+stimulus_meanCurrent                 108.000	0.000000	 0.000000	 108.9000	 0.000000	 40.00000	 0.000000 	1.000000 	 [col 1: input to pop0 at t_0, col 2: pop1 at t_0, ... colP+1: pop1 t_f, ... col2P: popN t_f, t0, tf. Dimensions: [mV/sec , secs.]
+stimulus_meanCurrent                 20000.0	0.000000	 40.00000	 108.9000	 0.000000	 40.00000	 1.000000 	1.001000 	 [col 1: input to pop0 at t_0, col 2: pop1 at t_0, ... colP+1: pop1 t_f, ... col2P: popN t_f, t0, tf. Dimensions: [mV/sec , secs.]
+stimulus_meanCurrent                 108.000	0.000000	 40.00000	 108.9000	 0.000000	 40.00000	 1.001000 	2.000000 	 [col 1: input to pop0 at t_0, col 2: pop1 at t_0, ... colP+1: pop1 t_f, ... col2P: popN t_f, t0, tf. Dimensions: [mV/sec , secs.]
+stimulus_sigmaCurrent                3.00000	3.000000	 0.000000	 3.000000	 3.000000	 0.000000	 0.000000 	1.000000 	 [col 1: input to pop0 at t_0, col 2: pop1 at t_0, ... colP+1: pop1 t_f, ... col2P: popN t_f, t0, tf. Dimensions: [mV/sqrt(sec) , secs.]
+stimulus_sigmaCurrent                0.00000	0.000000	 0.000000	 0.000000	 0.000000	 0.000000	 1.000000 	1.500000 	 [col 1: input to pop0 at t_0, col 2: pop1 at t_0, ... colP+1: pop1 t_f, ... col2P: popN t_f, t0, tf. Dimensions: [mV/sqrt(sec) , secs.]
+stimulus_sigmaCurrent                0.00000	0.000000	 0.000000	 3.000000	 0.000000	 0.000000	 1.500000 	2.000000 	 [col 1: input to pop0 at t_0, col 2: pop1 at t_0, ... colP+1: pop1 t_f, ... col2P: popN t_f, t0, tf. Dimensions: [mV/sqrt(sec) , secs.]
+#		RI_{i,ext}/tau_m*dt = meanCurrent_i*dt + sqrt(dt)*sigmaCurrent_i*NormalDistribution(0,1)
 #*************************************************
 #************** Recorder Parameters **************
 #*************************************************
 recorder_type                      AdvancedRecorder
-recorder_noNeuronsConnectivity     0					#saves connectivity matrices for the first x neurons of each populations
-recorder_noNeuronsDelay            0					#saves delay connectivity matrices for the first x neurons of each populations
-recorder_noNeuronsJPot             0					#saves Jpot connectivity matrices for the first x neurons of each populations
-recorder_binSize                   0.000100 seconds 	#Bin size over which data saved in main recording data file is average over
-recorder_noRasterPlotNeurons       50 	50 	0.000000	#Record spike times of x neurons for (i-th column is x for the i-th population). The i+1-th column sets the initial recording time
-recorder_notrackNeuronProfiles     2 	2 				#Record currents and potentials at all time steps of the first x_p neurons, p = population index. [column 1: track #neurons in pop1, column 2: track #neurons in pop2, .. ]
-recorder_noCorrNeurons             0 	0 				#Record correlations between first x_p neurons for each bin size. p = population index. [column 1: #neurons in pop1, column 2: track #neurons in pop2, .. ]
-recorder_CurrentContributions      0	0	0.000000	#Record the sources of input current to x neurons. (i-th column is x for the i-th population). The i+1-th column sets the initial recording time
+recorder_noNeuronsConnectivity     100					#saves connectivity matrices for the first x neurons of each populations
+recorder_noNeuronsDelay            100					#saves delay connectivity matrices for the first x neurons of each populations
+recorder_noNeuronsJPot             100					#saves Jpot connectivity matrices for the first x neurons of each populations
+recorder_binSize                   0.010000 #seconds 	#Bin size over which data saved in main recording data file is average over
+recorder_noRasterPlotNeurons       30 	1 	10 	0.0		#Record spike times of x neurons for (i-th column is x for the i-th population). The i+1-th column sets the initial recording time
+recorder_notrackNeuronProfiles     0 	1 	0 			#Record currents and potentials at all time steps of the first x_p neurons, p = population index. [column 1: track #neurons in pop1, column 2: track #neurons in pop2, .. ]
+recorder_noCorrNeurons             0 	0 	0 			#Record correlations between first x_p neurons for each bin size. p = population index. [column 1: #neurons in pop1, column 2: track #neurons in pop2, .. ]
+recorder_CurrentContributions      0	0	0	0.0		#Record the sources of input current to x neurons. (i-th column is x for the i-th population). The i+1-th column sets the initial recording time
 recorder_trackSynapses             0					#Set = 1 to track averaged data from synapes, Set = 0 to ignore.
 recorder_Heatmap                   0					#Number of bins used to represent each dimension of the spatial domain in the firing rates Heatmap
-recorder_notrackHeteroSynapticProfiles 1	1   1				#Number of heterosynaptic profiles tracked per population. Extra number is required for recording every N timesteps. 
 #*************************************************
 #************** Synaptic Parameters **************
 #*************************************************
-synapses_generalSynapseSeed                0
-#generalSynapseSeed = -1: seeds are defined at individual synapse level.
-#generalSynapseSeed >= 0: general seed overrides individual seeds.
 #*************************************************
-synapses_0_0_type							HeteroCurrentSynapse
-synapses_0_0_D_min							0.001500 seconds
-synapses_0_0_D_max							0.001500 seconds
-synapses_0_0_J								0.000000 dmV/Spike
-synapses_0_0_J_pot							0.000000 dmV/Spike
+synapses_0_0_type							CurrentSynapse
+synapses_0_0_D_min							0.000000 #seconds
+synapses_0_0_D_max							0.000000 #seconds
+synapses_0_0_J								0.000000 #dmV/Spike
+synapses_0_0_Sigma_j							0.000000 #dmV/Spike
+synapses_0_0_J_pot							0.000000 #dmV/Spike
 synapses_0_0_P_pot							0.000000
-synapses_0_0_connectivity_type				HeteroRandomConnectivity
-synapses_0_0_connectivity_ConnectionProba	1.000000
-synapses_0_0_connectivity_seed				1015961569
-#		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
+synapses_0_0_connectivity_type				RandomConnectivity
+synapses_0_0_connectivity_seed				174061735
+#		IndividualRandomConnectivity: Each pre and post neurons have individual connection probability.
 #*************************************************
-synapses_0_1_type							HeteroCurrentSynapse
-synapses_0_1_D_min							0.001500 seconds
-synapses_0_1_D_max							0.001500 seconds
-synapses_0_1_J								0.200000 dmV/Spike
-synapses_0_1_J_pot							0.000000 dmV/Spike
+synapses_0_1_type							CurrentSynapse
+synapses_0_1_D_min							0.000000 #seconds
+synapses_0_1_D_max							0.000000 #seconds
+synapses_0_1_J								0.000000 #dmV/Spike
+synapses_0_1_Sigma_j							0.000000 #dmV/Spike
+synapses_0_1_J_pot							0.000000 #dmV/Spike
 synapses_0_1_P_pot							0.000000
-synapses_0_1_connectivity_type				HeteroRandomConnectivity
-synapses_0_1_connectivity_ConnectionProba	1.000000
-synapses_0_1_connectivity_seed				524636540
+synapses_0_1_connectivity_type				RandomConnectivity
+synapses_0_1_connectivity_seed				1618772598
+synapses_0_1_connectivity_ConnectionProba	0.000000
 #		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
 #*************************************************
-synapses_1_0_type							HeteroCurrentSynapse
-synapses_1_0_D_min							0.001500 seconds
-synapses_1_0_D_max							0.001500 seconds
-synapses_1_0_J								0.000000 dmV/Spike
-synapses_1_0_J_pot							0.000000 dmV/Spike
-synapses_1_0_P_pot							0.000000
-synapses_1_0_connectivity_type				HeteroRandomConnectivity
-synapses_1_0_connectivity_ConnectionProba	1.000000
-synapses_1_0_connectivity_seed				2029044002
+synapses_0_2_type							CurrentSynapse
+synapses_0_2_D_min							0.000000 #seconds
+synapses_0_2_D_max							0.000000 #seconds
+synapses_0_2_J								0.000000 #dmV/Spike
+synapses_0_2_Sigma_j							0.000000 #dmV/Spike
+synapses_0_2_J_pot							0.000000 #dmV/Spike
+synapses_0_2_P_pot							0.000000
+synapses_0_2_connectivity_type				RandomConnectivity
+synapses_0_2_connectivity_seed				384881901
+synapses_0_2_connectivity_ConnectionProba	0.000000
 #		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
 #*************************************************
-synapses_1_1_type							HeteroCurrentSynapse
-synapses_1_1_D_min							0.001500 seconds
-synapses_1_1_D_max							0.001500 seconds
-synapses_1_1_J								0.000000 dmV/Spike
-synapses_1_1_J_pot							0.000000 dmV/Spike
+synapses_1_0_type							CurrentSynapse
+synapses_1_0_D_min							0.005000 #seconds
+synapses_1_0_D_max							0.020000 #seconds
+synapses_1_0_J								0.130000 #dmV/Spike
+synapses_1_0_Sigma_j							0.025000 #dmV/Spike
+synapses_1_0_J_pot							0.230000 #dmV/Spike
+synapses_1_0_P_pot							0.500000
+synapses_1_0_connectivity_type				RandomConnectivity
+synapses_1_0_connectivity_seed				183427039
+synapses_1_0_connectivity_ConnectionProba	0.666667
+#		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
+#*************************************************
+synapses_1_1_type							CurrentSynapse
+synapses_1_1_D_min							0.000000 #seconds
+synapses_1_1_D_max							0.000000 #seconds
+synapses_1_1_J								0.000000 #dmV/Spike
+synapses_1_1_Sigma_j							0.000000 #dmV/Spike
+synapses_1_1_J_pot							0.000000 #dmV/Spike
 synapses_1_1_P_pot							0.000000
-synapses_1_1_connectivity_type				HeteroRandomConnectivity
-synapses_1_1_connectivity_ConnectionProba	1.000000
-synapses_1_1_connectivity_seed				978382936
+synapses_1_1_connectivity_type				RandomConnectivity
+synapses_1_1_connectivity_seed				921206234
+synapses_1_1_connectivity_ConnectionProba	0.000000
 #		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
-
+#*************************************************
+synapses_1_2_type							CurrentSynapse
+synapses_1_2_D_min							0.000000 #seconds
+synapses_1_2_D_max							0.000000 #seconds
+synapses_1_2_J								0.000000 #dmV/Spike
+synapses_1_2_Sigma_j							0.000000 #dmV/Spike
+synapses_1_2_J_pot							0.000000 #dmV/Spike
+synapses_1_2_P_pot							0.000000
+synapses_1_2_connectivity_type				RandomConnectivity
+synapses_1_2_connectivity_seed				454094062
+synapses_1_2_connectivity_ConnectionProba	0.000000
+#		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
+#*************************************************
+synapses_2_0_type							CurrentSynapse
+synapses_2_0_D_min							0.000000 #seconds
+synapses_2_0_D_max							0.000000 #seconds
+synapses_2_0_J								0.000000 #dmV/Spike
+synapses_2_0_Sigma_j							0.000000 #dmV/Spike
+synapses_2_0_J_pot							0.000000 #dmV/Spike
+synapses_2_0_P_pot							0.000000
+synapses_2_0_connectivity_type				RandomConnectivity
+synapses_2_0_connectivity_seed				1183041433
+synapses_2_0_connectivity_ConnectionProba	0.000000
+#		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
+#*************************************************
+synapses_2_1_type							CurrentSynapse
+synapses_2_1_D_min							0.000000 #seconds
+synapses_2_1_D_max							0.000000 #seconds
+synapses_2_1_J								0.000000 #dmV/Spike
+synapses_2_1_Sigma_j							0.000000 #dmV/Spike
+synapses_2_1_J_pot							0.000000 #dmV/Spike
+synapses_2_1_P_pot							0.000000
+synapses_2_1_connectivity_type				RandomConnectivity
+synapses_2_1_connectivity_seed				291843115
+synapses_2_1_connectivity_ConnectionProba	0.000000
+#		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
+#*************************************************
+synapses_2_2_type							CurrentSynapse
+synapses_2_2_D_min							0.000000 #seconds
+synapses_2_2_D_max							0.000000 #seconds
+synapses_2_2_J								0.000000 #dmV/Spike
+synapses_2_2_Sigma_j							0.000000 #dmV/Spike
+synapses_2_2_J_pot							0.000000 #dmV/Spike
+synapses_2_2_P_pot							0.000000
+synapses_2_2_connectivity_type				RandomConnectivity
+synapses_2_2_connectivity_seed				2068992024
+synapses_2_2_connectivity_ConnectionProba	0.000000
+#		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
 #*****************************************************************
-#Comp. finalized: Wed Oct 14 12:12:46 2020
-#Comp. time: 181.1 secs.
+#Comp. finalized: Mon Nov 14 15:48:34 2022
+#Comp. time: 3.49033 secs.

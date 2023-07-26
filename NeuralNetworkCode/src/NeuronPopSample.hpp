@@ -5,60 +5,55 @@
 //  Created by Andreas Nold on 20.11.17.
 //  Copyright © 2017 Andreas Nold. All rights reserved.
 //
-
 #ifndef NeuronPopSample_hpp
 #define NeuronPopSample_hpp
 
-#include "NeuronPop/FundamentalNeuronPop/DictatNeuronPop.hpp"
-
-#include <iostream>
-#include <vector>
-#include <random>
-#include <typeinfo>
-#include <cstring>
-#include <valarray>
-#include <fstream>
 #include "GlobalFunctions.hpp"
 #include "NeuronPop/NeuronPop.hpp"
 #include "NeuronPop/FundamentalNeuronPop/LIFNeuronPop.hpp"
 #include "NeuronPop/FundamentalNeuronPop/EIFNeuronPop.hpp"
 #include "NeuronPop/FundamentalNeuronPop/QIFNeuronPop.hpp"
 #include "NeuronPop/FundamentalNeuronPop/PoissonNeuronPop.hpp"
-#include "NeuronPop/HeterosynapticNeuronPop/HeteroLIFNeuronPop.hpp"
-#include "NeuronPop/HeterosynapticNeuronPop/HeteroPoissonNeuronPop.hpp"
+#include "./NeuronPop/FundamentalNeuronPop/DictatNeuronPop.hpp"
 
-class NeuronPopSample
-{
+#include <iostream>
+#include <vector>
+#include <random>
+#include <typeinfo>
+#include <cstring>
+#include <fstream>
+#include <execution>
+
+class NeuronPopSample {
 protected:
 
-    int generalNeuronSeed;
+    GlobalSimInfo* infoGlobal;
 
-    GlobalSimInfo * info;
-
-    unsigned int noPopulations;
-    NeuronPop** neuronPops;//OPTIMIZATION. This should be arranged in a vector, properly with unique_ptrs
+    PopInt noPopulations{};
+    std::vector<PopPtr> neuronPops;
 
 public:
-    NeuronPopSample(std::vector<std::string> *input,GlobalSimInfo * info);
+    NeuronPopSample(std::vector<FileEntry> neuronParameters, GlobalSimInfo* infoGlobal);
 
     //*******************
     //Get-Functions
     //*******************
-    unsigned long GetTotalNeurons() { return info->N; }
-    unsigned int  GetTotalPopulations() const { return this->noPopulations; }
-    unsigned long GetNeuronsPop(int popId) { return neuronPops[popId]->GetNoNeurons(); }
-    NeuronPop* GetPop(int popId) { return neuronPops[popId]; }
-    //bool IsPopHeteroSynaptic(int popId) {return neuronPops[popId]->HasHeterosynapticPlasticity();}
-    std::vector<long> * GetSpikers(int pop) { return neuronPops[pop]->GetSpikers(); }
-	double GetX_Pos(int pop, long i) { return neuronPops[pop]->get_Xpos(i); }
-	double GetY_Pos(int pop, long i) { return neuronPops[pop]->get_Ypos(i); }
-	double GetPotential(int pop, long i) { return neuronPops[pop]->GetPotential(i); }
+    NeuronInt GetTotalNeurons() const { return infoGlobal->totalNeurons; }
+    PopInt  GetTotalPopulations() const { return this->noPopulations; }
+    NeuronInt GetNeuronsPop(PopInt popId) const { return neuronPops.at(popId)->GetNoNeurons(); }
+    PopPtr GetPop(PopInt popId) const { return neuronPops.at(popId); }
+    const std::vector<NeuronInt>& GetSpikers(PopInt neuronPop) const { return neuronPops.at(neuronPop)->GetSpikers();}//This function is called in RecordRasterplot()
+    const std::vector<NeuronInt>& GetSpikersPrevDt(PopInt neuronPop) const { return neuronPops.at(neuronPop)->GetSpikersPrevDt();}
+	double GetXPosition(PopInt neuronPop, NeuronInt neuron) const { return neuronPops.at(neuronPop)->GetXPosition(neuron); }
+	double GetYPosition(PopInt neuronPop, NeuronInt neuron) const { return neuronPops.at(neuronPop)->GetYPosition(neuron); }
+	double GetPotential(PopInt neuronPop, NeuronInt neuron) const { return neuronPops.at(neuronPop)->GetPotential(neuron); }
     //*******************
     //Set-Functions
     //*******************
-    void advect(std::vector<std::vector<double> > * synaptic_dV);
-    void LoadParameters(std::vector<std::string> *input);
-    void SaveParameters(std::ofstream * stream);
+    void Advect(std::vector<std::vector<double>>& synaptic_dV);
+    void LoadParameters(const std::vector<FileEntry>& neuronParameters);
+    void LoadNeuronPop(std::string neuronPopType, PopInt popID, std::vector<FileEntry> neuronParameters);
+    void SaveParameters(std::ofstream& wParameterStream) const;
 };
 
 #endif /* NeuronPopSample_hpp */

@@ -1,32 +1,29 @@
 #ifndef EIFNeuronPop_HPP
 #define EIFNeuronPop_HPP
 
-
+#include "../NeuronPop.hpp"
+#include <memory>
 #include <iostream>
 #include <vector>
 #include <cmath>
 #include <random>
-#include "../NeuronPop.hpp"
 
-// sharpness > 0
-// 0 < v_critical < v_thresh
 
 class EIFNeuronPop : public NeuronPop
 {
 protected:    
-    double v_critical{};
+    double criticalV{};
     double sharpness{};
-    double V_lowerbound{};
-    double Vleak{};
+    double lowerBoundPotential{};
+    double leakPotential{};
 public:
-    //EIFNeuronPop(double tm, double vr, double vc, double s, double vt, double t);
-    EIFNeuronPop(GlobalSimInfo * info,int id) : NeuronPop(info,id) {}
+    EIFNeuronPop(GlobalSimInfo* infoGlobal,NeuronInt neuronID) : NeuronPop(infoGlobal,neuronID) {}
     
-    void advect(std::vector<double> * synaptic_dV);
-	void LoadParameters(std::vector<std::string>* input);
-    void SaveParameters(std::ofstream * stream);
+    void Advect(const std::vector<double>& synaptic_dV);
+	void LoadParameters(const std::vector<FileEntry>& neuronParameters);
+    void SaveParameters(std::ofstream& wParameterStream) const;
 
-    std::string GetType(){return str_EIFNeuron;}
+    std::string GetType() const override{return IDstringEIFNeuron;}
 };
 
 #endif // EIFNeuronPop_HPP
