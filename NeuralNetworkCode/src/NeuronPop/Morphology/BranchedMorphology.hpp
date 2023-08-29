@@ -36,6 +36,7 @@ protected:
 
     bool orderedSpineAllocationB{false};// If not properly loaded from LP, exception
     bool randomSpineAllocationB{false};
+    bool firstSlotTrueLastSlotFalse{true};//Choice of first vs last synapse slot (only relevant in ordered allocation)
 
     /*bool setBranchAllocationB{false};
     bool OrderedBranchAllocationB{false};// If not properly loaded from LP, exception
@@ -79,6 +80,7 @@ public:
     //virtual int orderedGuidedBranchAllocation(const char DendriticSubRegionID);
     void RandomSynapseAllocation(BranchPtr branch);
     void OrderedSynapseAllocation(BranchPtr branch);//These two are coming from the SetUpSynapseSlots already, called depending on a bool. 
+    int PopSynapseSlotFromBranch(int branch);
     //virtual void AlternatedSynapseAllocation(BranchPtr branch);
     //
     int GenerateBranchId(){return branchIdGenerator++;}

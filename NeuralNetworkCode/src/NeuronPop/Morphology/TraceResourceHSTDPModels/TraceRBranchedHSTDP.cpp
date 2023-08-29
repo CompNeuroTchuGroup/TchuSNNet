@@ -424,12 +424,7 @@ BaseSpinePtr TraceRBranchedHSTDP::AllocateNewSynapse(const BranchTargeting& bran
     newSpine->SetIdInMorpho(this->spineIdGenerator++);
     //Branch
     int branch {AllocateBranch(branchTarget)};
-    if (branches.at(branch)->openSpineSlots.empty()){
-        throw "No allocatable exception";
-    }
-    //Position
-    int position{branches.at(branch)->openSpineSlots.front()};
-    branches.at(branch)->openSpineSlots.pop_front();
+    int position{PopSynapseSlotFromBranch(branch)};
     newSpine->SetBranchPositionId(position);
     newSpine->SetBranchId(branch);
     newSpine->SetDistanceFromNode(position*branches.at(branch)->synapticGap);//This has to be updated if we switch to double 

@@ -64,6 +64,12 @@ void BranchedMorphology::LoadParameters(const std::vector<FileEntry>& morphology
             }else if (parameterValues.at(0).find("random") != std::string::npos){
                 this->randomSpineAllocationB=true;
             }
+        }else if (parameterName.find("slotOrder") != std::string::npos){
+            if (parameterValues.at(0).find("first") != std::string::npos){
+                this->firstSlotTrueLastSlotFalse=true;
+            }else if (parameterValues.at(0).find("last") != std::string::npos){
+                this->firstSlotTrueLastSlotFalse=false;
+            }
         } /*else if (parameterName.find("branch_allocation") != std::string::npos){
             if (parameterValues.at(0).find("ordered") != std::string::npos){
                 OrderedBranchAllocationB=true;
@@ -119,6 +125,7 @@ void BranchedMorphology::CheckParameters(const std::vector<FileEntry> &parameter
                 }
             }
         }
+        //Slot order is not checked, because we want it to be different by itself!
     }
 }
 void BranchedMorphology::SetUpBranchedMorphology() {
@@ -169,6 +176,14 @@ void BranchedMorphology::SaveParameters(std::ofstream& wParameterFile, std::stri
         wParameterFile<<"random\t";
     }
     wParameterFile << "\t"<<"#'ordered' synapse allocation will allocate synapses from the branch node to the end of the branch. 'random' will allocate random positions in each branch\n";
+    
+    wParameterFile << neuronIdentificator<<"slotOrder\t\t";
+    if (this->firstSlotTrueLastSlotFalse){
+        wParameterFile << "first\t";
+    }else if (this->firstSlotTrueLastSlotFalse){
+        wParameterFile<<"last\t";
+    }
+    wParameterFile << "\t"<<"#'first' synapse allocation will allocate synapses from the beggining to the end of the available slots. 'last' will do the opposite. This only makes sense in ordered allocation\n";
 
     //wParameterStream << neuronIdentificator<<"seed\t\t\t"<<std::to_string(this->seed)<<"\n";//Missing comments
     /*
@@ -267,6 +282,19 @@ void BranchedMorphology::OrderedSynapseAllocation(BranchPtr branch) {
     //Then I will have to pop_front() in AllocateNewSynapse
 }
 
+int BranchedMorphology::PopSynapseSlotFromBranch(int branch) {
+    if (branches.at(branch)->openSpineSlots.empty()){
+        throw "No allocatable exception";
+    }
+    //Position
+    int position{(firstSlotTrueLastSlotFalse)?branches.at(branch)->openSpineSlots.front():branches.at(branch)->openSpineSlots.back()};
+    if(firstSlotTrueLastSlotFalse){
+        branches.at(branch)->openSpineSlots.pop_front();
+    } else {
+        branches.at(branch)->openSpineSlots.pop_back();
+    }
+    return position;
+}
 
 void BranchedMorphology::SetUpBranchings(int remainingBranchingEvents, std::vector<int> anteriorBranches) {
     //This is a recursive function that sets up the branched dendritic tree and is generalized for 0 branchings (1 branch). This function has been unit tested by Antoni.
