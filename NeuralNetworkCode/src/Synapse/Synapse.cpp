@@ -97,6 +97,12 @@ void Synapse::LoadParameters(const std::vector<FileEntry>& synapseParameters){
             }
         } else if(parameterName.find("subregion") != std::string::npos){
             this->branchTarget.DendriticSubRegion = parameterValues.at(0).at(0); //Re-think this char array wacky stuff
+        } else if (parameterName.find("slotOrder") != std::string::npos){
+            if (parameterValues.at(0).find("first") != std::string::npos){
+                this->branchTarget.firstSlotTrueLastSlotFalse=true;
+            }else if (parameterValues.at(0).find("last") != std::string::npos){
+                this->branchTarget.firstSlotTrueLastSlotFalse=false;
+            }
         } else if(parameterName.find("relativeCoupling") != std::string::npos){
             this->relativeCouplingStrength = std::stod(parameterValues.at(0));
         } else if(parameterName.find("seed") != std::string::npos){

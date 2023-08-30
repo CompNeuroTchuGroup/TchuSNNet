@@ -46,11 +46,20 @@ void PModelSynapse::SaveParameters(std::ofstream &wParameterStream, std::string 
             wParameterStream<<"none";//Missing comments on what this is supposed to do
         }
         wParameterStream << "\t\t\t#You can target branches in an 'ordered' manner (0,1,2...), 'random', or set (if you input a number). Put none if the HS does not used branched morphology\n";
+        wParameterStream << idString+"pmodel_"<<"slotOrder\t\t";
+        if (this->branchTarget.firstSlotTrueLastSlotFalse){
+            wParameterStream << "first\t";
+        } else {
+            wParameterStream<<"last\t";
+        }
+        wParameterStream << "\t"<<"#'first' synapse allocation will allocate synapses from the beggining to the end of the available slots. 'last' will do the opposite. This only makes sense in ordered allocation\n";
+
     }
     if (this->ignoreJDistribution){
         wParameterStream << idString << "relativeCoupling\t\t\t\t\t" << std::to_string(relativeCouplingStrength)<< "\t#Relative coupling strength (only non-J plasticity models)\n";
     }
     targetPop->SavePlasticityModel(wParameterStream, idString+"pmodel_");//!!!!
+
     targetPop->ModelSaved();
     if (geometry != nullptr){
         wParameterStream << "########### Connectivity ################\n";

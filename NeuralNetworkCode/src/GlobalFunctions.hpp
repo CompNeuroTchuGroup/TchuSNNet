@@ -117,10 +117,11 @@ struct DendriticSubRegion{ //Still under work
 
 struct BranchTargeting{ //This is esentially a wrapper for HCS different targeting strategies of postsynaptic branches
     int targetBranch{};
+    char DendriticSubRegion{'0'};
     bool setTargetBranch{false};
     bool randomTargetBranch{false};
     bool orderedTargetBranch{false};
-    char DendriticSubRegion{'0'};
+    bool firstSlotTrueLastSlotFalse{true};
 };
 namespace threadsafe{
     static std::mutex _timeMutex;

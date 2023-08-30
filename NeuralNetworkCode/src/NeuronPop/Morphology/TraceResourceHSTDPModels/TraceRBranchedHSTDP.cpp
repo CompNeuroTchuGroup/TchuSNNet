@@ -424,7 +424,7 @@ BaseSpinePtr TraceRBranchedHSTDP::AllocateNewSynapse(const BranchTargeting& bran
     newSpine->SetIdInMorpho(this->spineIdGenerator++);
     //Branch
     int branch {AllocateBranch(branchTarget)};
-    int position{PopSynapseSlotFromBranch(branch)};
+    int position{PopSynapseSlotFromBranch(branch, branchTarget.firstSlotTrueLastSlotFalse)};
     newSpine->SetBranchPositionId(position);
     newSpine->SetBranchId(branch);
     newSpine->SetDistanceFromNode(position*branches.at(branch)->synapticGap);//This has to be updated if we switch to double 
