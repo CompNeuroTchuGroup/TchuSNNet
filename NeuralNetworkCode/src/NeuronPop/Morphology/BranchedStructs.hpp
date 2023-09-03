@@ -61,8 +61,8 @@ struct ResourceTraceBranch : public Branch {
     ResourceTraceBranch(double gap, double branchLength, std::vector<int>anteriorBranches, int branchId, double preSynTraceDecay, double coopTraceDecay);
     void PostConnectSetUp(std::vector<BranchedSpinePtr> spineData) override;
         //Count related functions
-    void ApplyTracesOnSpinesLTP(double potDepRatio);
-    void ApplyTracesOnSpinesLTD(double postSynapticTrace);
+    void ApplyTracesOnSpinesLTP();
+    void ApplyTracesOnSpinesLTD(double postSynapticTrace, double biasLTD);
     void DecayAllTraces();//Use ternary operator. Called in Reset()
     //void TickCounts(std::vector<int>& countVector);
     //void CheckIncreaseInBetaResources(); //Here I have to add current, delete last, sum and check against threshold. Called in Reset()

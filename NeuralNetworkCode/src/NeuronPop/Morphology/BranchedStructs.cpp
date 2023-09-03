@@ -27,24 +27,24 @@ void ResourceTraceBranch::PostConnectSetUp(std::vector<BranchedSpinePtr> spineDa
     //std::sort(resouceBranchSpineData.begin(), resouceBranchSpineData.end(), BranchIDCompare); //This allows to do indexing of the synapse data using the branch ID
 }
 
-void ResourceTraceBranch::ApplyTracesOnSpinesLTP(double potDepRatio) {
+void ResourceTraceBranch::ApplyTracesOnSpinesLTP() {
     //This function exclusively performs LTP, as it is called during a postspike. The cooperativity trace will be added to the presynaptic trace to elicit heterosynaptic plasticity
     //As it is trace-based, all synapses are updated according to the trace.
     //The idea behind the equation is to make the trace heavily dependant on the presynaptic trace as no glutamate means no calcium on postspike.
     for (size_t preSynIndex : std::ranges::views::iota(0u, branchSlots)){
         if (rBranchSpineData.at(preSynIndex)!=nullptr){
-            rBranchSpineData.at(preSynIndex)->AddTraceToAlpha((1+cooperativityTraces.at(preSynIndex))*preSynapticTraces.at(preSynIndex)*potDepRatio);//1 can be substituted with presynTrace
+            rBranchSpineData.at(preSynIndex)->AddTraceToAlpha((1+cooperativityTraces.at(preSynIndex))*preSynapticTraces.at(preSynIndex));//1 can be substituted with presynTrace
         }
     }
 }
 
-void ResourceTraceBranch::ApplyTracesOnSpinesLTD(double postSynapticTrace) {
+void ResourceTraceBranch::ApplyTracesOnSpinesLTD(double postSynapticTrace, double biasLTD) {
     //This function exclusively performs LTD, as it is called during a prespike. The cooperativity trace will be added to the presynaptic trace to elicit heterosynaptic plasticity
     //As it is trace-based, all synapses are updated according to the trace.
     //The idea behind the equation is to make the trace heavily dependant on the presynaptic trace as no glutamate means no calcium on postspike.
     for (int preSynIndex : spikedSpinesInTheBranch){
         if (rBranchSpineData.at(preSynIndex)!=nullptr){
-            rBranchSpineData.at(preSynIndex)->AddTraceToAlpha(-(1-cooperativityTraces.at(preSynIndex))*postSynapticTrace);//Negative to get LTD//1 can be substituted with postsynTrace
+            rBranchSpineData.at(preSynIndex)->AddTraceToAlpha(-(biasLTD-cooperativityTraces.at(preSynIndex))*postSynapticTrace);//Negative to get LTD//1 can be substituted with postsynTrace
         }
     }
 }

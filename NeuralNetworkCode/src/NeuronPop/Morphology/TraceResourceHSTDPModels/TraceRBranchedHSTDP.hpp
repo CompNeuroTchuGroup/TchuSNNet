@@ -43,7 +43,7 @@ protected:
     double baseAlphaStimBump{1.0};//LP and SP
 
     //STDP and STDD parameters (MAKE SURE TO TUNE STDD, AS NEGATIVE WEIGHTS MUST BE AVOIDED)
-    double potDepRatio{1.0};//Diagnose later negative weights //LP and SP (for now it can be ignored)
+    double biasLTD{1.0};
 
     //PostSynaptic trace
     double postSynapticTrace{};
@@ -77,7 +77,7 @@ public:
     //Plasticity events functions
     // void ApplyEffects();//Here we increase the plasticity count of synapse and branch
     double GetPostSynapticTrace(){return postSynapticTrace;}
-    double GetPotDepRatio(){return potDepRatio;}
+    double GetLTDBias(){return biasLTD;}
     // void STDPPotentiation(ResourceSpinePtr synapse);
     // void STDPDepression(ResourceSpinePtr synapse);
     //Reset methods

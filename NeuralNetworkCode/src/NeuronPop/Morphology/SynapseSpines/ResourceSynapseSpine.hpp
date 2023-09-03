@@ -36,8 +36,7 @@ class ResourceSynapseSpine : public BranchedSynapseSpine {
     double alphaResources{};
 
     //Morpho-copies
-    double potDepRatio{1.0};
-
+    double biasLTD{1.0};
 
 // If I have to go back here, an unordered_map<index, pair<count<pair<double, double>>>>, and find how to delete or vector
     // std::vector<double> kStimulusTempEffect{};//These need to be here for non-matrix management. 
@@ -72,7 +71,7 @@ class ResourceSynapseSpine : public BranchedSynapseSpine {
     // void SetKExponentialDecay(int kStimulusExpDecayCalc){kStimulusExpDecay=kStimulusExpDecayCalc;}//Input is supposed to be exp(-dt/tau)
     // void SetNExponentialDecay(int nStimulusExpDecayCalc){nStimulusExpDecay=nStimulusExpDecayCalc;}
     // void SetMaxCount(int maxCountnew) {maxCount=maxCountnew;} //UNRESOLVED  Call in AllocateNewSynapse
-    void SetPotentiationRatio(double ratio) {this->potDepRatio=ratio;}
+    void SetBiasLTD(double bias) {this->biasLTD=bias;}
     // void SetDepressionFlag(bool booleanFlag) {depressionFlagSTDP=booleanFlag;}
     // void SetPotentiationFlag(bool booleanFlag) {potentiationFlagSTDP=booleanFlag;}
     // void SetUpdatedFlag(bool flag){updated=flag;}

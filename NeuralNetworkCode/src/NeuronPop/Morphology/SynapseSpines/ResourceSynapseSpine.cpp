@@ -53,7 +53,7 @@ void ResourceSynapseSpine::ComputeWeight(double resourceFactor){
 //     //The next line goes over all the pairs in the potentiation vector and adds their stored alpha stimulus (stored there by pairing events) and adds them to the alphaStimulus variable
 //     //In addition, it multiplies with the decay to postspike of those effects and multiplies by the potentiation/depression ratio (a parameter from .txt)
 //     alphaStim=std::accumulate(potAlphaTempCount.begin(), potAlphaTempCount.end(), alphaStim, [this, STDPdecayMap](double accumulator, const std::pair<double, int>& alphaStemp){
-//         return accumulator + alphaStemp.first*potDepRatio*STDPdecayMap.at(alphaStemp.second);
+//         return accumulator + alphaStemp.first**STDPdecayMap.at(alphaStemp.second);
 //         });
 //     // if (alphaStimulus+alphaBasal<0.0){
 //     //     alphaStimulus= (-alphaBasal);

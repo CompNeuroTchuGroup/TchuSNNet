@@ -142,7 +142,7 @@ synapses_1_0_pmodel_betaResourcePool		200.000000	#Multiplication factor of the d
 synapses_1_0_pmodel_coopTau			0.002000 #secs	#Time decay constant for the alpha stimulus increase in the pairing kernel
 synapses_1_0_pmodel_coopProfile			7.000000 #μm	#Exponential decay that characterizes the spatial profile of cooperativity
 synapses_1_0_pmodel_tauSTDP			0.010000 #secs	#Exponential decay constant for the STDP kernel. Affects both pre and post synaptic traces
-synapses_1_0_pmodel_potdepRatio			2.000000	#Factor that multiplies potentiation
+synapses_1_0_pmodel_biasLTD			0.500000	#Factor that multiplies potentiation
 ##### The weight of this model is defined as wI=beta*alphaI/(omega+branch-sum(alpha)), where alphaI= alphaBasal + alphaStimulus*exp(-dt/alphaStimTau) 
 ########### Connectivity ################
 synapses_1_0_connectivity_type					RandomConnectivity

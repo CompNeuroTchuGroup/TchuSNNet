@@ -35,8 +35,8 @@ void TraceRBranchedHSTDP::LoadParameters(const std::vector<FileEntry>& morpholog
         } else if (parameterName.find("tauSTDP") != std::string::npos){
             this->tauSTDP = std::stod(parameterValues.at(0));
             this->STDPExpDecay = std::exp(-infoGlobal->dtTimestep/tauSTDP);
-        } else if (parameterName.find("potdepRatio") != std::string::npos){
-            this->potDepRatio = std::stod(parameterValues.at(0));
+        } else if (parameterName.find("biasLTD") != std::string::npos){
+            this->biasLTD = std::stod(parameterValues.at(0));
         // } else if (parameterName.find("STDP_time_window") != std::string::npos){
         //     this->MaxCountSTDP = static_cast<int>(std::stod(parameterValues.at(0))/this->infoGlobal->dtTimestep);
         //     this->STDPDepressionCount=MaxCountSTDP;
@@ -85,9 +85,9 @@ void TraceRBranchedHSTDP::CheckParameters(const std::vector<FileEntry> &paramete
             if(!(this->tauSTDP == std::stod(parameterValues.at(0)))){
                 throw "tauSTDP was not consistent in plasticity model parameters.";
             }
-        } else if (parameterName.find("potdepRatio") != std::string::npos){
-            if(!(this->potDepRatio == std::stod(parameterValues.at(0)))){
-                throw "potdepRatio was not consistent in plasticity model parameters.";
+        } else if (parameterName.find("biasLTD") != std::string::npos){
+            if(!(this->biasLTD == std::stod(parameterValues.at(0)))){
+                throw "biasLTD was not consistent in plasticity model parameters.";
             }
         // } else if (parameterName.find("STDP_time_window") != std::string::npos){
         //     this->MaxCountSTDP = static_cast<int>(std::stod(parameterValues.at(0))/this->infoGlobal->dtTimestep);
@@ -131,8 +131,8 @@ void TraceRBranchedHSTDP::SaveParameters(std::ofstream& wParameterFile, std::str
     // wParameterFile << neuronIdentificator<<"STDP_time_window\t\t"<<std::to_string(this->MaxCountSTDP*this->infoGlobal->dtTimestep);//CHANGE
     // wParameterFile << " #secs\t"<<"#Max time where STDP potentiation/depression can happen\n";
 
-    wParameterFile << neuronIdentificator<<"potdepRatio\t\t\t"<<std::to_string(this->potDepRatio);//CHANGE
-    wParameterFile << "\t"<<"#Factor that multiplies potentiation\n";
+    wParameterFile << neuronIdentificator<<"biasLTD\t\t\t"<<std::to_string(this->biasLTD);//CHANGE
+    wParameterFile << "\t"<<"#Factor that biases the resting STDP towards potentiation or depression. 1 is symmetric, lower is potentiating, higher is depressing\n";
 
     wParameterFile <<"##### The weight of this model is defined as wI=beta*alphaI/(omega+branch-sum(alpha)), where alphaI= alphaBasal + alphaStimulus*exp(-dt/alphaStimTau) \n";
 }
@@ -189,7 +189,7 @@ void TraceRBranchedHSTDP::Advect() {
          //If post spike, apply all stimms on positive mode (remember the coded function in spines) with the decay from STDP pot count. 
         //Use the count in the effects of synapses for the actual decay for STDP, but the branch vector for detecting the updatable ones
         //WITH DECAY (of alpha, STDP-like)
-        std::for_each(rTBranches.begin(), rTBranches.end(), [this](RTBranchPtr& branch){branch->ApplyTracesOnSpinesLTP(this->GetPotDepRatio());});
+        std::for_each(rTBranches.begin(), rTBranches.end(), [this](RTBranchPtr& branch){branch->ApplyTracesOnSpinesLTP();});
         // for (const ResourceTraceBranch* const branch : rTBranches){
         //     for (ResourceSpinePtr spine : branch->rBranchSpineData){
         //         if (spine==nullptr){
@@ -201,7 +201,7 @@ void TraceRBranchedHSTDP::Advect() {
         //     }
         // }
     } else if (CheckIfPreSpikeHappened()){ //Checks if all are empty or some are not. MAy be redundant if frequency is high enough.
-        std::for_each(rTBranches.begin(), rTBranches.end(), [this](RTBranchPtr& branch){branch->ApplyTracesOnSpinesLTD(this->GetPostSynapticTrace());});
+        std::for_each(rTBranches.begin(), rTBranches.end(), [this](RTBranchPtr& branch){branch->ApplyTracesOnSpinesLTD(this->GetPostSynapticTrace(), this->GetLTDBias());});
     }
     // ApplyEffects();
     Reset();
@@ -429,7 +429,7 @@ BaseSpinePtr TraceRBranchedHSTDP::AllocateNewSynapse(const BranchTargeting& bran
     newSpine->SetBranchId(branch);
     newSpine->SetDistanceFromNode(position*branches.at(branch)->synapticGap);//This has to be updated if we switch to double 
     newSpine->SetAlphaStimBump(baseAlphaStimBump);
-    newSpine->SetPotentiationRatio(potDepRatio);
+    newSpine->SetBiasLTD(biasLTD);
     newSpine->SetAlphaBasal(alphaBasal);
     newSpine->SetAlphaExpDecay(alphaStimulusExpDecay);
     branches.at(branch)->synapseSlotClosedIndex.push_back(position);

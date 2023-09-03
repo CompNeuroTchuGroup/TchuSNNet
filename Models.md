@@ -44,14 +44,22 @@ Which aim to reproduce heterosynaptic plasticity behaviour. There is an assumpti
 #### Alpha (resource) traces
 Each spine's alpha (or resource) trace is defined as:
 $$ \frac{d\alpha_{i}}{dt}=-\frac{\alpha_{i}-\alpha_{basal}}{\tau_{\alpha}}+F_i(t)$$
-$$F_i(t) = 
-     \begin{cases}
-       \alpha_{st}*T_{i}*(1+C_i) &\quad S_p(t)=1
-       \\-\alpha_{st}*T_{i}*(1-C_i)&\quad S_p(t)=0 \wedge S_i(t)=1 \\
-        0 &\quad S_p(t)=0 \wedge S_i(t)=0
-     \end{cases}
+
+$$F_i(t) =
+
+     \begin{cases}
+
+       \alpha_{st}*T_{i}*(1+C_i) &\quad S_p(t)=1
+
+       \\-\alpha_{st}*T_{i}*(b-C_i)&\quad S_p(t)=0 \wedge S_i(t)=1 \\
+
+        0 &\quad S_p(t)=0 \wedge S_i(t)=0
+
+     \end{cases}
+
 $$
-where $\alpha_{basal}$ is the basal value, defined by `synapses_N_N_pmodel_basalAlpha`. $\alpha_{st}$ is the constant amount by which the trace increases or decreases per event, defined by `synapses_N_N_pmodel_baseAlphaIncrease`. the decay constant $\tau_{\alpha}$ is the trace decay to the basal value, defined by `synapses_N_N_pmodel_alphaTau`.
+
+where $\alpha_{basal}$ is the basal value, defined by `synapses_N_N_pmodel_basalAlpha`. $\alpha_{st}$ is the constant amount by which the trace increases or decreases per event, defined by `synapses_N_N_pmodel_baseAlphaIncrease`. the decay constant $\tau_{\alpha}$ is the trace decay to the basal value, defined by `synapses_N_N_pmodel_alphaTau`. $b$ is the LTD bias, making STDP symmetric if it is equal to 1, and defined by `synapses_N_N_pmodel_biasLTD`.
 These traces represent the spine's access to resources in the neuron, and they will be used in the resource normalization of weights. Changes in these traces are not capped upwards but are not allowed to become negative, as the excitatory-inhibitory inversion is undesirable in this model
 
 ### Resource normalization of weights
