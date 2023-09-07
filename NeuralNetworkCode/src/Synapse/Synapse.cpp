@@ -134,6 +134,8 @@ void Synapse::SaveParameters(std::ofstream& wParameterStream,std::string idStrin
         wParameterStream << idString << "Sigma_j\t\t\t\t\t\t" << std::to_string(this->sigmaJ) << " #dmV/Spike\n";
         wParameterStream << idString << "J_pot\t\t\t\t\t\t" << std::to_string(this->Jpot) << " #dmV/Spike\n";
         wParameterStream << idString << "P_pot\t\t\t\t\t\t" << std::to_string(this->Ppot) << "\n";
+    } else {
+        wParameterStream << idString << "relativeCoupling\t\t\t\t" << std::to_string(relativeCouplingStrength)<< "\t#Relative coupling strength (only non-J plasticity models)";
     }
     if (userSeed){
         wParameterStream << idString << "seed\t\t\t\t\t\t" << std::to_string(this->seed)  << "\n";
@@ -152,9 +154,6 @@ void Synapse::SaveParameters(std::ofstream& wParameterStream,std::string idStrin
             wParameterStream<<"none";//Missing comments on what this is supposed to do
         }
         wParameterStream << "\t\t\t#You can target branches in an 'ordered' manner (0,1,2...), 'random', or set (if you input a number). Put none if the HS does not used branched morphology\n";
-    }
-    if (this->ignoreJDistribution){
-        wParameterStream << idString << "relativeCoupling\t\t\t\t" << std::to_string(relativeCouplingStrength)<< "\t#Relative coupling strength (only non-J plasticity models)";
     }
     if (geometry != nullptr){
         geometry->SaveParameters(wParameterStream,idString);
@@ -227,13 +226,7 @@ void Synapse::FillWaitingMatrix(NeuronInt spiker, std::vector<double>&& currents
 
 double Synapse::GetCouplingStrength(NeuronInt targetNeuronIndex, NeuronInt sourceNeuron) const {
     //Here goes everything inside GetCouplingStrength, but plasticity models will not work hand in hand with network scaling (local or global)
-    if(infoGlobal->networkScaling_mode == 0){
-        return GetDistributionJ(targetNeuronIndex, sourceNeuron)*localScalingFactor;
-    } else if(infoGlobal->networkScaling_mode == 1){
-        return GetDistributionJ(targetNeuronIndex, sourceNeuron)*globalScalingFactor;
-    } else {
-        throw "error in Synapse::PostCOnnectNeurons()";
-    }
+    return GetDistributionJ(targetNeuronIndex, sourceNeuron)*scalingFactor;
 }
 
 void Synapse::SetSeed(int inputSeed) {
@@ -262,8 +255,13 @@ void Synapse::ConnectNeurons(){
     } else {
         std::cout<< "Connection skipped." <<"\n";
     }
-    localScalingFactor=pow(geometry->GetExpectedConnections(),infoGlobal->networkScaling_synStrength);
-    globalScalingFactor=pow(infoGlobal->totalNeurons,infoGlobal->networkScaling_synStrength);
+    if(infoGlobal->networkScaling_mode == 0){
+        scalingFactor=pow(geometry->GetExpectedConnections(),infoGlobal->networkScaling_synStrength);
+    } else if(infoGlobal->networkScaling_mode == 0){
+        scalingFactor=pow(infoGlobal->totalNeurons,infoGlobal->networkScaling_synStrength);
+    } else {
+        throw "error in Synapse::PostConnectNeurons()";
+    }
 }
 
 void Synapse::PostConnectNeurons() {

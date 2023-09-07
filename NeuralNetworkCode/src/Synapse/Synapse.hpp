@@ -51,8 +51,7 @@ protected:
     double        Jpot{};
     double        Ppot{0.0};
     //Scaling exponentials
-    double globalScalingFactor{1.0};
-    double localScalingFactor{1.0};
+    double scalingFactor{1.0};
 	//Synaptic delay
     int                 Dmin{};
     int                 Dmax{};
