@@ -8,12 +8,12 @@ std::vector<double> PModelSynapse::AdvectSpikers(NeuronInt spiker) {
     std::vector<double> currents(noTargets,0.0);
     for(NeuronInt targetNeuronIndex : std::ranges::views::iota (0, noTargets)){
     // for(NeuronInt targetNeuronIndex{0};targetNeuronIndex<noTargets;targetNeuronIndex++){
-        double calcCurrent =  targetSpineList.at(spiker).at(targetNeuronIndex).second->GetWeight(); //If confused about syntax, talk to Antoni
+        double current =  targetSpineList.at(spiker).at(targetNeuronIndex).second->GetWeight(); //If confused about syntax, talk to Antoni
 
         this->targetPop->RecordExcitatorySynapticSpike(targetSpineList.at(spiker).at(targetNeuronIndex).first, targetSpineList.at(spiker).at(targetNeuronIndex).second->GetIdInMorpho());
         
-        currents.at(targetNeuronIndex)+=calcCurrent;
-        this->cumulatedDV   += calcCurrent;
+        currents.at(targetNeuronIndex)+=current;
+        this->cumulatedDV   += current;
     }
     return currents;
 }
