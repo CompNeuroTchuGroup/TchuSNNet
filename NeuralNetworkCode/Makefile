@@ -34,8 +34,6 @@ OPTIMIZE    = -O3 -ffast-math -msse4.2 -mavx -mavx2 -march=native
 
 COMPILE_FLAGS = -std=c++2a -Wall $(OPTIMIZE)
 
-LIBS += -ltbb
-
 .PHONY: default_target
 default_target: release
 
