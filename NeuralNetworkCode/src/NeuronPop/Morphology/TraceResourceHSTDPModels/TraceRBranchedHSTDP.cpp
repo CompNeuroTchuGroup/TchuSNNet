@@ -42,7 +42,9 @@ void TraceRBranchedHSTDP::LoadParameters(const std::vector<FileEntry>& morpholog
         //     this->STDPDepressionCount=MaxCountSTDP;
         }
     }
-    BranchedMorphology::LoadParameters(morphologyParameters);
+    BranchedMorphology::LoadParameters(morphologyParameters);//Branchings are set up inside this call
+    //Here branchings are already set up
+    this->betaResourcePool/=branches.size();
     SetUpHashTable();
 }
 
@@ -111,7 +113,7 @@ void TraceRBranchedHSTDP::SaveParameters(std::ofstream& wParameterFile, std::str
     wParameterFile << "\t"<<"#Offset factor in the weight definition.\n";
 
     wParameterFile << neuronIdentificator<<"betaResourcePool\t\t"<<std::to_string(this->betaResourcePool);
-    wParameterFile << "\t"<<"#Multiplication factor of the definition of weight, representing the available 'total resources'.\n";
+    wParameterFile << "\t"<<"#Multiplication factor of the definition of weight, representing the available 'total resources'. Evenly split among branches\n";
 
     // wParameterFile << neuronIdentificator<<"kernel_spatial_length\t"<<std::to_string(this->kernelGapNumber*this->synapticGap);
     // wParameterFile << " #μm\t"<<"#Limit distance between two spines to be considered for synaptic spine pairing.\n";
