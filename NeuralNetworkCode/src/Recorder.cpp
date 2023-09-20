@@ -357,7 +357,7 @@ void Recorder::WriteDataHeaderHeatmap() {
 		}
 		fileStreams.heatmapStreamVector.at(neuronPop) << "\n#************************************\n";
 		for (int kIndex : std::ranges::views::iota (1, static_cast<int>(2 + pow(recordedHeatmap, dim)))){
-			fileStreams.heatmapStreamVector.at(neuronPop) << "#" + std::to_string(kIndex) << "  \t";
+			fileStreams.heatmapStreamVector.at(neuronPop) << "# " + std::to_string(kIndex) << "  \t";
         }
 		fileStreams.heatmapStreamVector.at(neuronPop) << "\n";
 	}
@@ -393,7 +393,7 @@ void Recorder::WriteDataHeaderAverages(){
 
     for(PopInt targetPop : std::ranges::views::iota(0, totalNeuronPops)){
         for(PopInt sourcePop : std::ranges::views::iota(0, totalNeuronPops)){
-            this->fileStreams.averagesFileStream << "#" +std::to_string(columnTotal)+ " mu_" << targetPop << "_" << sourcePop << "/tau_m (dmV/sec) \n"; 
+            this->fileStreams.averagesFileStream << "# " +std::to_string(columnTotal)+ " mu_" << std::to_string(targetPop) << "_" << std::to_string(sourcePop) << "/tau_m (dmV/sec) \n"; 
             columnTotal++;
         }
     }
