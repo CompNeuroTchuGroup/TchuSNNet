@@ -243,7 +243,7 @@ void TraceRBranchedHSTDP::ApplyCoopTraceSpatialProfile(int branchSpineID, Resour
     // ResourceSynapseSpine* spikedSpine = currentBranch->rBranchSpineData.at(branchSpineID);
     std::vector<double>::iterator forwardBegin = currentBranch->cooperativityTraces.begin() + (branchSpineID+1);
     std::vector<double>::iterator forwardEnd = currentBranch->cooperativityTraces.end();
-    std::transform(PAR_UNSEQ, forwardEnd, spatialProfile.begin(), forwardBegin, std::plus<double>());
+    std::transform(PAR_UNSEQ,forwardBegin, forwardEnd, spatialProfile.begin(), forwardBegin, std::plus<double>());
     //Foward loop
     // for (int positionIndex : std::ranges::views::iota(1,branchSlots-branchSpineID)){//We loop from contiguous spine to the end of the branch, as represented by branchID-branchID+branchSlots-1=branchSlots-1, last index
     //     spinePositionBranchIndex = branchSpineID+positionIndex;
