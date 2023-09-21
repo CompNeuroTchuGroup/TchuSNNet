@@ -53,7 +53,7 @@ void BranchedMorphology::LoadParameters(const std::vector<FileEntry>& morphology
             }
         } else if (parameterName.find("dendriteBranchings") != std::string::npos) {
             this->branchings = std::stoi(parameterValues.at(0));
-            if (this->branchings>28){
+            if (this->branchings>30){
                 //EXCEPTION, integer overflow.
                 throw "Dendrite branching causing integer overflow";
             }
@@ -161,7 +161,7 @@ void BranchedMorphology::SaveParameters(std::ofstream& wParameterFile, std::stri
     // wParameterStream << "\t"<<"#The bool corresponds to distributing weight between min and max uniformally. The number will be the weight assigned to all synapses if bool is false (do not confuse with implementation in MonoDendriteSTDP).\n";
     
     wParameterFile << neuronIdentificator<<"dendriteBranchings\t\t"<<std::to_string(this->branchings);
-    wParameterFile << "\t\t"<<"#This specifies the number of branchings in the dendritic tree FOR EVERY EXISTING BRANCH. Total isolated branches are 2^n. More than 28 will cause integer overflow\n";
+    wParameterFile << "\t\t"<<"#This specifies the number of branchings in the dendritic tree FOR EVERY EXISTING BRANCH. Total isolated branches are sum_n(2^n). More than 30 will cause integer overflow\n";
     
     wParameterFile << neuronIdentificator<<"synapseAllocation\t\t";
     if (this->orderedSpineAllocationB){

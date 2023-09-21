@@ -573,7 +573,7 @@ void Recorder::WriteDataHeaderHeteroSynapses(){
 
     for(PopInt neuronPop : std::ranges::views::iota(0, totalNeuronPops)){
         BindNoHeteroSynapsesPerPop(neuronPop);
-        if (heteroSynTracker.at(neuronPop).first != 0 &&heteroSynTracker.at(neuronPop).second != 0 && this->neurons->GetPop(neuronPop)->HasPlasticityModel()){
+        if (heteroSynTracker.at(neuronPop).first != 0 && heteroSynTracker.at(neuronPop).second != 0 && this->neurons->GetPop(neuronPop)->HasPlasticityModel()){
             this->fileStreams.heteroSynFileStream << "#Pop. "<< neuronPop << " profile -> "<<this->neurons->GetPop(neuronPop)->GetIndividualSynapticProfileHeaderInfo() <<" \n";
         }
     }

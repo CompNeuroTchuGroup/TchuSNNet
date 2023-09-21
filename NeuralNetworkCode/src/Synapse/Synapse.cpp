@@ -188,7 +188,7 @@ void Synapse::AllocateSynapseWithPlasticity(NeuronInt targetNeuron, NeuronInt so
 
 void Synapse::Advect(std::vector<double>& synaptic_dV, std::mutex& _syndVMutex) {
     //REWRITE this function. There is no need to resize and refill, simply input as rvalue in FillWaitingMatrix. This requires a re-write of all advectSpikers sadly
-    ResetcumulatedDV();//Does this do something ?
+    ResetcumulatedDV();
 
 
     //Get list of spikers
