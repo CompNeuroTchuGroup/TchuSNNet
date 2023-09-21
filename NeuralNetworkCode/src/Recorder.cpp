@@ -619,11 +619,11 @@ void Recorder::WriteDataHeaderHeteroSynapsesOverall(){
     this->fileStreams.hSOverallFileStream << "t\t";
 
     for(PopInt neuronPop : std::ranges::views::iota(0, totalNeuronPops)){
-        if (!this->neurons->GetPop(neuronPop)->HasPlasticityModel() || heteroSynTracker.at(neuronPop).second == 0 ||heteroSynTracker.at(neuronPop).first == 0) {
+        if ( heteroSynTracker.at(neuronPop).second == 0 ||heteroSynTracker.at(neuronPop).first ==0|| !this->neurons->GetPop(neuronPop)->HasPlasticityModel()) {
             continue;
         }
-        for(NeuronInt neuron : std::ranges::views::iota(0,neuronPotentialsToRecord.at(neuronPop))) {
-                this->fileStreams.hSOverallFileStream << "OverallProfile_" << neuronPop << "_" << neuron <<  "\t";
+        for(NeuronInt neuron : std::ranges::views::iota(0,heteroSynTracker.at(neuronPop).first)) {
+            this->fileStreams.hSOverallFileStream << "OverallProfile_" << neuronPop << "_" << neuron <<  "\t";
         }
     }
 
@@ -919,7 +919,7 @@ void Recorder::RecordHeteroSynapsesOverall() {
         if (!this->neurons->GetPop(neuronPop)->HasPlasticityModel() || heteroSynTracker.at(neuronPop).second == 0|| heteroSynTracker.at(neuronPop).first == 0) {
             continue;
         }
-        for(NeuronInt neuron : std::ranges::views::iota(0,neuronPotentialsToRecord.at(neuronPop))) {
+        for(NeuronInt neuron : std::ranges::views::iota(0,heteroSynTracker.at(neuronPop).first)) {
             SaveTupleOfDoublesFile(this->fileStreams.hSOverallFileStream, this->neurons->GetPop(neuronPop)->GetOverallSynapticProfile(neuron), 5);
             //Here is selecting only the average weight per neuron, with precision 5 digits.
         }
