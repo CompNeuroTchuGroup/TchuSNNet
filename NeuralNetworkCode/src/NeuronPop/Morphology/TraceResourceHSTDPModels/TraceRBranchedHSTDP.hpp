@@ -8,7 +8,7 @@
 // class BranchedMorphology;
 struct BranchTargeting;
 #include "../BranchedMorphology.hpp"
-#include "../../GlobalFunctions.hpp"
+#include "../../../GlobalFunctions.hpp"
 #include <numeric>
 // #include <map>
 #include <unordered_set>
