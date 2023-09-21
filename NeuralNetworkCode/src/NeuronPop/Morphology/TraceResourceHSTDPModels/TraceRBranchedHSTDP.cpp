@@ -179,7 +179,7 @@ void TraceRBranchedHSTDP::SetUpHashTable() {
     //     DecayHashTableSTDP[STDPindex]=std::exp(-(STDPindex*infoGlobal->dtTimestep)/tauSTDP);
     // }
     spatialProfile.resize(std::round(branchLength/synapticGap));
-    for (int spaceIndex : std::ranges::views::iota(0, static_cast<int>(spatialProfile.size()))){
+    for (int spaceIndex : std::ranges::views::iota(1, static_cast<int>(spatialProfile.size()))){
         spatialProfile.at(spaceIndex) = std::exp((-synapticGap*spaceIndex)/spaceProfileLambda);
     }
 }
@@ -236,14 +236,14 @@ bool TraceRBranchedHSTDP::CheckIfPreSpikeHappened() {
 void TraceRBranchedHSTDP::ApplyCoopTraceSpatialProfile(int branchSpineID, ResourceTraceBranch* const currentBranch) {
     //This function will evaluate all spines within kernel distance of the synapse spine and queue the alpha stimm effects for each pairing found (queue waiting for postspike)
     //All reference declarations are to reduce indexing times in containers
-    int spinePositionBranchIndex;//,absDistance,timeStepDifference;
+    //int spinePositionBranchIndex;//,absDistance,timeStepDifference;
     // double alphaStimulusEffect;
     //std::set<int>& kernelizedSynapses = currentBranch->updatedSynapseSpines;
-    int branchSlots{static_cast<int>(currentBranch->branchSlots)};
+    //int branchSlots{static_cast<int>(currentBranch->branchSlots)};
     // ResourceSynapseSpine* spikedSpine = currentBranch->rBranchSpineData.at(branchSpineID);
     std::vector<double>::iterator forwardBegin = currentBranch->cooperativityTraces.begin() + (branchSpineID+1);
     std::vector<double>::iterator forwardEnd = currentBranch->cooperativityTraces.end();
-    std::transform(PAR_UNSEQ, forwardEnd, spatialProfile.begin()++, forwardBegin, std::plus<double>());
+    std::transform(PAR_UNSEQ, forwardEnd, spatialProfile.begin(), forwardBegin, std::plus<double>());
     //Foward loop
     // for (int positionIndex : std::ranges::views::iota(1,branchSlots-branchSpineID)){//We loop from contiguous spine to the end of the branch, as represented by branchID-branchID+branchSlots-1=branchSlots-1, last index
     //     spinePositionBranchIndex = branchSpineID+positionIndex;
@@ -297,7 +297,7 @@ void TraceRBranchedHSTDP::ApplyCoopTraceSpatialProfile(int branchSpineID, Resour
     // }
     std::vector<double>::reverse_iterator reverseBegin = currentBranch->cooperativityTraces.rbegin() + (currentBranch->cooperativityTraces.size()-branchSpineID);
     std::vector<double>::reverse_iterator reverseEnd = currentBranch->cooperativityTraces.rend();
-    std::transform(PAR_UNSEQ,reverseBegin, reverseEnd, spatialProfile.begin()++, reverseBegin, std::plus<double>());
+    std::transform(PAR_UNSEQ,reverseBegin, reverseEnd, spatialProfile.begin(), reverseBegin, std::plus<double>());
     // for (int positionIndex : std::ranges::views::iota(1,branchSpineID+1)){ //And then use branchSynapseID+gapindex
     // //We loop from contiguous spine until spine 0, from the index being branchID-branchID
     //     spinePositionBranchIndex = branchSpineID-positionIndex;

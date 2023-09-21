@@ -980,7 +980,7 @@ void Recorder::Record(const std::vector<std::vector<double>>& synaptic_dV) {
 			for (PopInt targetPop : std::ranges::views::iota(0, totalNeuronPops)) {
                 if (synapses->GetConnectedState(targetPop, sourcePop)){
                     std::vector<double> synapticState {this->synapses->GetSynapticState(targetPop, sourcePop, spiker)};
-                    std::transform(std::execution::unseq,currentBin.synapticState.at(targetPop).at(sourcePop).begin(), currentBin.synapticState.at(targetPop).at(sourcePop).end(),synapticState.begin(), currentBin.synapticState.at(targetPop).at(sourcePop).begin(), std::plus<double>());
+                    std::transform(PAR_UNSEQ,currentBin.synapticState.at(targetPop).at(sourcePop).begin(), currentBin.synapticState.at(targetPop).at(sourcePop).end(),synapticState.begin(), currentBin.synapticState.at(targetPop).at(sourcePop).begin(), std::plus<double>());
                     //currentBin.synapticState.at(targetPop).at(sourcePop) += this->synapses->GetSynapticState(targetPop, sourcePop, spiker);//not valid with vectors 
                     currentBin.noRecordedSynapses.at(targetPop).at(sourcePop) += this->synapses->GetNoTargetedNeurons(targetPop, sourcePop, spiker);
                 }
