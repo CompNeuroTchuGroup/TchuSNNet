@@ -8,8 +8,8 @@
 // class BranchedMorphology;
 struct BranchTargeting;
 #include "../BranchedMorphology.hpp"
+#include "../../GlobalFunctions.hpp"
 #include <numeric>
-#include <unordered_map>
 // #include <map>
 #include <unordered_set>
 
@@ -35,7 +35,7 @@ protected:
     double tauSTDP{1.0};//LP and SP
     double STDPExpDecay{1.0};
 
-    std::unordered_map<int, double> spatialProfile{};//This is more efficient than the map, but we need a hash function. TEST whether this is faster than vector<vector> or map<>
+    std::vector<double> spatialProfile{};//This is more efficient than the map, but we need a hash function. TEST whether this is faster than vector<vector> or map<>
     // std::unordered_map<int, double> decayHashTableSTDP{};//??Should STDP not decay? unordered_map? looks like vector is more ideal
 
     // double baseKStimulusBump{1.0};//LP and SP

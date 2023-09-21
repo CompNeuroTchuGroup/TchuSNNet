@@ -178,8 +178,9 @@ void TraceRBranchedHSTDP::SetUpHashTable() {
     // for (int STDPindex : std::ranges::views::iota (0, MaxCountSTDP+1)){
     //     DecayHashTableSTDP[STDPindex]=std::exp(-(STDPindex*infoGlobal->dtTimestep)/tauSTDP);
     // }
-    for (int spaceIndex : std::ranges::views::iota(0, static_cast<int>(std::round(branchLength/synapticGap)))){
-        spatialProfile[spaceIndex]= std::exp((-synapticGap*spaceIndex)/spaceProfileLambda);
+    spatialProfile.resize(std::round(branchLength/synapticGap));
+    for (int spaceIndex : std::ranges::views::iota(0, static_cast<int>(spatialProfile.size()))){
+        spatialProfile.at(spaceIndex) = std::exp((-synapticGap*spaceIndex)/spaceProfileLambda);
     }
 }
 
@@ -240,64 +241,69 @@ void TraceRBranchedHSTDP::ApplyCoopTraceSpatialProfile(int branchSpineID, Resour
     //std::set<int>& kernelizedSynapses = currentBranch->updatedSynapseSpines;
     int branchSlots{static_cast<int>(currentBranch->branchSlots)};
     // ResourceSynapseSpine* spikedSpine = currentBranch->rBranchSpineData.at(branchSpineID);
-
+    std::vector<double>::iterator forwardBegin = currentBranch->cooperativityTraces.begin() + (branchSpineID+1);
+    std::vector<double>::iterator forwardEnd = currentBranch->cooperativityTraces.end();
+    std::transform(PAR_UNSEQ, forwardEnd, spatialProfile.begin()++, forwardBegin, std::plus<double>());
     //Foward loop
-    for (int positionIndex : std::ranges::views::iota(1,branchSlots-branchSpineID)){//We loop from contiguous spine to the end of the branch, as represented by branchID-branchID+branchSlots-1=branchSlots-1, last index
-        spinePositionBranchIndex = branchSpineID+positionIndex;
-        // alphaStimulusEffect = baseAlphaStimBump;
-        currentBranch->cooperativityTraces.at(spinePositionBranchIndex)+=spatialProfile.at(positionIndex);
-        // if (spinePositionBranchIndex<0){//Condition to avoid illegal indexing
-        //     continue;
-        // } else if (spinePositionBranchIndex >= branchSlots) {//Condition to avoid illegal indexing
-        //     break;
-        // } else if (spinePositionBranchIndex == branchSpineID){
-        //     spikedSpine->AddTempResourcesToSpine(alphaStimulusEffect);
-        //     updatedSpines.push_back(branchSpineID);
-        //     continue;//This essentially does regular STDP
-        // } else {
-        //     ResourceSpinePtr neighbourSynapseSpine = currentBranch->rBranchSpineData.at(spinePositionBranchIndex);
-        //     if (neighbourSynapseSpine == nullptr) {
-        //         continue; //To jump empty synapse slots
-        //     }
-        //     absDistance = std::abs(positionIndex);
-        //     timeStepDifference=currentBranch->triggerCount.at(spinePositionBranchIndex);
-        //     //timeStepDifference == triggerCount of first spine
-        //     // if (timeStepDifference<=STDPDepressionCount){//Indicates depression region with no conflict. If the spike is far away, but too far for depression, nothing will happen. If a postspike happens, these flags are ignored.
-        //     //     //The boolean is <= to classify the pairing where the postspike and first prespike are on the same timestep as depression.
-        //     //     // centralSynapseSpine->SetDepressionFlag(true);
-        //     //     // neighbourSynapseSpine->SetDepressionFlag(true);
-        //     //     //alphaStimulusEffect *= -DecayHashTableSTDP.at(STDPDepressionCount-timeStepDifference);//This is to apply a decay equivalent to the STDP kernel to the first pre-spike with depression (*-1) (calcium accumulation oriented)
-        //     // } else { //Knowing depression region, indicates conflict that is skewed towards potentiation according to STDP kernel
-        //     //     if (timeStepDifference<=2*STDPDepressionCount){//We set the boolean to equal too to solve the conflict in favor of potentiation, as depression has the other fringe case
-        //     //         centralSynapseSpine->SetPotentiationFlag(true);
-        //     //         neighbourSynapseSpine->SetPotentiationFlag(true);
-        //     //         alphaStimulusEffect *= DecayHashTableSTDP.at(timeStepDifference-STDPDepressionCount);//This is to apply a decay equivalent to the STDP kernel to the first pre-spike  (calcium accumulation oriented)
-        //     //     } else {
-        //     //         centralSynapseSpine->SetDepressionFlag(true);
-        //     //         neighbourSynapseSpine->SetDepressionFlag(true);
-        //     //     }//These flags are only here to solve 
-        //     //}
-        //     // if (STDPDepressionCount<MaxCountSTDP){
-        //     //     alphaStimulusEffect=(-alphaStimulusEffect);
-        //     // }
-        //     if(timeStepDifference+timeStepsPerSynGap*absDistance<=kernelRadiusArea){ //&& (kernelizedSynapses.find(synapsePositionIndexInBranch) == kernelizedSynapses.end())){        //triggercount+distance gap*spaceTimeStepRelation<maxCountTime + 1*spaceTimeStepRelation (what should constrain the triangular matrix)
-        //         //The postspiked condition is because the STDP kernel is discretized, in the case the postspike happens at the same time as the pairing of a synapse, the pairing does not happen (as the potentiation and depression would counteract themselves)
-        //         //Avoiding the check of whether the neighbour was already updated assumes that no two spines will fire the same dt.
-        //         //This assumption is necessary due to implementation limitations.
-        //         alphaStimulusEffect *= CallKernelHashTable(absDistance, timeStepDifference);
-        //         spikedSpine->AddTempResourcesToSpine(alphaStimulusEffect); //Removing this line (plus updated alpha effects) will change the model from pairing to cooperativity only.
-        //         neighbourSynapseSpine->AddTempResourcesToSpine(alphaStimulusEffect);
-        //         updatedSpines.push_back(spinePositionBranchIndex);
-        //         updatedSpines.push_back(branchSpineID);
-        //     }
-        // }
-    }
-    for (int positionIndex : std::ranges::views::iota(1,branchSpineID+1)){ //And then use branchSynapseID+gapindex
-    //We loop from contiguous spine until spine 0, from the index being branchID-branchID
-        spinePositionBranchIndex = branchSpineID-positionIndex;
-        // alphaStimulusEffect = baseAlphaStimBump;
-        currentBranch->cooperativityTraces.at(spinePositionBranchIndex)+=spatialProfile.at(positionIndex);
-    }
+    // for (int positionIndex : std::ranges::views::iota(1,branchSlots-branchSpineID)){//We loop from contiguous spine to the end of the branch, as represented by branchID-branchID+branchSlots-1=branchSlots-1, last index
+    //     spinePositionBranchIndex = branchSpineID+positionIndex;
+    //     // alphaStimulusEffect = baseAlphaStimBump;
+    //     currentBranch->cooperativityTraces.at(spinePositionBranchIndex)+=spatialProfile.at(positionIndex);
+    //     // if (spinePositionBranchIndex<0){//Condition to avoid illegal indexing
+    //     //     continue;
+    //     // } else if (spinePositionBranchIndex >= branchSlots) {//Condition to avoid illegal indexing
+    //     //     break;
+    //     // } else if (spinePositionBranchIndex == branchSpineID){
+    //     //     spikedSpine->AddTempResourcesToSpine(alphaStimulusEffect);
+    //     //     updatedSpines.push_back(branchSpineID);
+    //     //     continue;//This essentially does regular STDP
+    //     // } else {
+    //     //     ResourceSpinePtr neighbourSynapseSpine = currentBranch->rBranchSpineData.at(spinePositionBranchIndex);
+    //     //     if (neighbourSynapseSpine == nullptr) {
+    //     //         continue; //To jump empty synapse slots
+    //     //     }
+    //     //     absDistance = std::abs(positionIndex);
+    //     //     timeStepDifference=currentBranch->triggerCount.at(spinePositionBranchIndex);
+    //     //     //timeStepDifference == triggerCount of first spine
+    //     //     // if (timeStepDifference<=STDPDepressionCount){//Indicates depression region with no conflict. If the spike is far away, but too far for depression, nothing will happen. If a postspike happens, these flags are ignored.
+    //     //     //     //The boolean is <= to classify the pairing where the postspike and first prespike are on the same timestep as depression.
+    //     //     //     // centralSynapseSpine->SetDepressionFlag(true);
+    //     //     //     // neighbourSynapseSpine->SetDepressionFlag(true);
+    //     //     //     //alphaStimulusEffect *= -DecayHashTableSTDP.at(STDPDepressionCount-timeStepDifference);//This is to apply a decay equivalent to the STDP kernel to the first pre-spike with depression (*-1) (calcium accumulation oriented)
+    //     //     // } else { //Knowing depression region, indicates conflict that is skewed towards potentiation according to STDP kernel
+    //     //     //     if (timeStepDifference<=2*STDPDepressionCount){//We set the boolean to equal too to solve the conflict in favor of potentiation, as depression has the other fringe case
+    //     //     //         centralSynapseSpine->SetPotentiationFlag(true);
+    //     //     //         neighbourSynapseSpine->SetPotentiationFlag(true);
+    //     //     //         alphaStimulusEffect *= DecayHashTableSTDP.at(timeStepDifference-STDPDepressionCount);//This is to apply a decay equivalent to the STDP kernel to the first pre-spike  (calcium accumulation oriented)
+    //     //     //     } else {
+    //     //     //         centralSynapseSpine->SetDepressionFlag(true);
+    //     //     //         neighbourSynapseSpine->SetDepressionFlag(true);
+    //     //     //     }//These flags are only here to solve 
+    //     //     //}
+    //     //     // if (STDPDepressionCount<MaxCountSTDP){
+    //     //     //     alphaStimulusEffect=(-alphaStimulusEffect);
+    //     //     // }
+    //     //     if(timeStepDifference+timeStepsPerSynGap*absDistance<=kernelRadiusArea){ //&& (kernelizedSynapses.find(synapsePositionIndexInBranch) == kernelizedSynapses.end())){        //triggercount+distance gap*spaceTimeStepRelation<maxCountTime + 1*spaceTimeStepRelation (what should constrain the triangular matrix)
+    //     //         //The postspiked condition is because the STDP kernel is discretized, in the case the postspike happens at the same time as the pairing of a synapse, the pairing does not happen (as the potentiation and depression would counteract themselves)
+    //     //         //Avoiding the check of whether the neighbour was already updated assumes that no two spines will fire the same dt.
+    //     //         //This assumption is necessary due to implementation limitations.
+    //     //         alphaStimulusEffect *= CallKernelHashTable(absDistance, timeStepDifference);
+    //     //         spikedSpine->AddTempResourcesToSpine(alphaStimulusEffect); //Removing this line (plus updated alpha effects) will change the model from pairing to cooperativity only.
+    //     //         neighbourSynapseSpine->AddTempResourcesToSpine(alphaStimulusEffect);
+    //     //         updatedSpines.push_back(spinePositionBranchIndex);
+    //     //         updatedSpines.push_back(branchSpineID);
+    //     //     }
+    //     // }
+    // }
+    std::vector<double>::reverse_iterator reverseBegin = currentBranch->cooperativityTraces.rbegin() + (currentBranch->cooperativityTraces.size()-branchSpineID);
+    std::vector<double>::reverse_iterator reverseEnd = currentBranch->cooperativityTraces.rend();
+    std::transform(PAR_UNSEQ,reverseBegin, reverseEnd, spatialProfile.begin()++, reverseBegin, std::plus<double>());
+    // for (int positionIndex : std::ranges::views::iota(1,branchSpineID+1)){ //And then use branchSynapseID+gapindex
+    // //We loop from contiguous spine until spine 0, from the index being branchID-branchID
+    //     spinePositionBranchIndex = branchSpineID-positionIndex;
+    //     // alphaStimulusEffect = baseAlphaStimBump;
+    //     currentBranch->cooperativityTraces.at(spinePositionBranchIndex)+=spatialProfile.at(positionIndex);
+    // }
     //Reverse loop
     //kernelizedSynapses.insert(branchSynapseID);//Used to avoid double potentiation in same timestep
     //Here for every synapse inside the synapse's kernel that has an active counter (count!=countMax) we get the time kernel and then apply the space kernel
@@ -394,7 +400,7 @@ void TraceRBranchedHSTDP::RecordExcitatoryPreSpike(int spikedSpineId) {
     //Here only record, afterwards we do the checks
     //Not going down the virtual path because inefficient
     ResourceSynapseSpine* synapseSpine = resourceSpineData.at(spikedSpineId).get();
-    ResourceTraceBranch* const branch = rTBranches.at(synapseSpine->GetBranchId()).get();
+    ResourceTraceBranch* branch = rTBranches.at(synapseSpine->GetBranchId()).get();
     int branchSpinePosition{synapseSpine->GetBranchPositionId()};
     branch->spikedSpinesInTheBranch.push_back(branchSpinePosition);
     branch->preSynapticTraces.at(branchSpinePosition)+=1;
