@@ -295,6 +295,8 @@ void BranchedMorphology::SetUpBranchings(int remainingBranchingEvents, std::vect
             std::vector<int> anteriorBranchesCopy(anteriorBranches);
             anteriorBranchesCopy.push_back(branchId);
             this->SetUpBranchings(remainingBranchingEvents, anteriorBranchesCopy);
+        } else if (remainingBranchingEvents<0){
+            break;
         }
     }
     //Here we can create the node pointers:

@@ -112,7 +112,7 @@ void TraceRBranchedHSTDP::SaveParameters(std::ofstream& wParameterFile, std::str
     wParameterFile << neuronIdentificator<<"omegaOffset\t\t\t"<<std::to_string(this->omegaOffset);
     wParameterFile << "\t"<<"#Offset factor in the weight definition.\n";
 
-    wParameterFile << neuronIdentificator<<"betaResourcePool\t\t"<<std::to_string(this->betaResourcePool);
+    wParameterFile << neuronIdentificator<<"betaResourcePool\t\t"<<std::to_string(this->betaResourcePool*branchings);
     wParameterFile << "\t"<<"#Multiplication factor of the definition of weight, representing the available 'total resources'. Evenly split among branches\n";
 
     // wParameterFile << neuronIdentificator<<"kernel_spatial_length\t"<<std::to_string(this->kernelGapNumber*this->synapticGap);
@@ -143,6 +143,7 @@ void TraceRBranchedHSTDP::SetUpBranchings(int remainingBranchingEvents, std::vec
     //This is a recursive function that sets up the branched dendritic tree and is generalized for 0 branchings (1 branch). This function has been unit tested by Antoni.
     remainingBranchingEvents-=1;
     //First call is done with an empty int vector
+    
     for (int index : std::ranges::views::iota(0,2)) {
         (void)index;
         int branchId{this->GenerateBranchId()};
@@ -153,6 +154,8 @@ void TraceRBranchedHSTDP::SetUpBranchings(int remainingBranchingEvents, std::vec
             std::vector<int> anteriorBranchesCopy(anteriorBranches);
             anteriorBranchesCopy.push_back(branchId);
             this->SetUpBranchings(remainingBranchingEvents, anteriorBranchesCopy);
+        } else if (remainingBranchingEvents<0){
+            break;
         }
     }
 }
@@ -459,7 +462,7 @@ std::vector<double> TraceRBranchedHSTDP::GetOverallSynapticProfile() const {
      * item 3: totalLTP Events
      * item 4: average plasticity events
      * */
-    std::vector<double> dataArray(3);
+    std::vector<double> dataArray(4);
     size_t noSpines{this->baseSpineData.size()};
     //size_t sizeOfSpineData {this->baseSpineData.size()};
     // double weightSum = std::accumulate(this->baseSpineData.begin(), this->baseSpineData.end(), 0.0, [] (double accumulator, const BaseSpinePtr syn) {
@@ -471,11 +474,12 @@ std::vector<double> TraceRBranchedHSTDP::GetOverallSynapticProfile() const {
        return accumulator + syn->GetWeightUncoupled();}) / noSpines;
    dataArray.at(1) = this->totalPostSpikes;
    dataArray.at(2) = this->totalPreSpikes;
+   dataArray.at(3) = noSpines;
    return dataArray;
 }
 
 std::string TraceRBranchedHSTDP::GetOverallSynapticProfileHeaderInfo() const {
-    return std::string("{<average weight>, <total post spikes> ,<total pre spikes>}");
+    return std::string("{<average weight>, <total post spikes> ,<total pre spikes>, <total number of spines>}");
 }
 
 // void BranchedResourceHeteroSTDP::CalcMorphoPlasticityEvents()
