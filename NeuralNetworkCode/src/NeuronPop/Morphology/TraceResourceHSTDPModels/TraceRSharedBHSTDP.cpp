@@ -1,13 +1,13 @@
 //
 // Created by Antoni Bertolin on 14.06.23
 //
-#include "./TraceRBranchedHSTDP.hpp"
-#include "TraceRBranchedHSTDP.hpp"
+#include "./TraceRSharedBHSTDP.hpp"
+#include "TraceRSharedBHSTDP.hpp"
 
-TraceRBranchedHSTDP::TraceRBranchedHSTDP(GlobalSimInfo* infoGlobal):BranchedMorphology(infoGlobal) {
+TraceRSharedBHSTDP::TraceRSharedBHSTDP(GlobalSimInfo* infoGlobal):BranchedMorphology(infoGlobal) {
 }
 
-void TraceRBranchedHSTDP::LoadParameters(const std::vector<FileEntry>& morphologyParameters) {
+void TraceRSharedBHSTDP::LoadParameters(const std::vector<FileEntry>& morphologyParameters) {
     
     // BranchedMorphology::LoadParameters(morphologyParameters);
 
@@ -44,11 +44,10 @@ void TraceRBranchedHSTDP::LoadParameters(const std::vector<FileEntry>& morpholog
     }
     BranchedMorphology::LoadParameters(morphologyParameters);//Branchings are set up inside this call
     //Here branchings are already set up
-    this->betaResourcePool/=branches.size();
     SetUpHashTable();
 }
 
-void TraceRBranchedHSTDP::CheckParameters(const std::vector<FileEntry> &parameters) {
+void TraceRSharedBHSTDP::CheckParameters(const std::vector<FileEntry> &parameters) {
     BranchedMorphology::CheckParameters(parameters);
     for (auto& [parameterName, parameterValues] : parameters) {
         if (parameterName.find("basalAlpha") != std::string::npos){
@@ -98,8 +97,8 @@ void TraceRBranchedHSTDP::CheckParameters(const std::vector<FileEntry> &paramete
     }
 }
 
-void TraceRBranchedHSTDP::SaveParameters(std::ofstream& wParameterFile, std::string neuronIdentificator) const {
-    BranchedMorphology::SaveParameters(wParameterFile, neuronIdentificator);
+void TraceRSharedBHSTDP::SaveParameters(std::ofstream& wParameterFile, std::string neuronIdentificator) const {
+    TraceRSharedBHSTDP::SaveParameters(wParameterFile, neuronIdentificator);
     wParameterFile << neuronIdentificator<<"basalAlpha\t\t\t"<<std::to_string(this->alphaBasal);
     wParameterFile << "\t"<<"#Alpha at rest, where alpha decays towards\n";
 
@@ -139,7 +138,7 @@ void TraceRBranchedHSTDP::SaveParameters(std::ofstream& wParameterFile, std::str
     wParameterFile <<"##### The weight of this model is defined as wI=beta*alphaI/(omega+branch-sum(alpha)), where alphaI= alphaBasal + alphaStimulus*exp(-dt/alphaStimTau) \n";
 }
 
-void TraceRBranchedHSTDP::SetUpBranchings(int remainingBranchingEvents, std::vector<int> anteriorBranches) {
+void TraceRSharedBHSTDP::SetUpBranchings(int remainingBranchingEvents, std::vector<int> anteriorBranches) {
     //This is a recursive function that sets up the branched dendritic tree and is generalized for 0 branchings (1 branch). This function has been unit tested by Antoni.
     remainingBranchingEvents-=1;
     //First call is done with an empty int vector
@@ -160,7 +159,7 @@ void TraceRBranchedHSTDP::SetUpBranchings(int remainingBranchingEvents, std::vec
     }
 }
 
-void TraceRBranchedHSTDP::SetUpHashTable() {
+void TraceRSharedBHSTDP::SetUpHashTable() {
 //Statement 2 of second for loop is done thinking about time steps being in the order of magnitude of 0.1 ms, while the gap is 1 um. 
 //If we make the kernel triangular, every "step" is one gap in space and in time it can be any amount of timesteps. To calculate the step relationship, we do:
     // if ((static_cast<double>(timeKernelLength)/kernelGapNumber)<1.0){
@@ -187,7 +186,7 @@ void TraceRBranchedHSTDP::SetUpHashTable() {
     }
 }
 
-void TraceRBranchedHSTDP::Advect() {
+void TraceRSharedBHSTDP::Advect() {
     // std::for_each(rTBranches.begin(), rTBranches.end(), [this](const ResourceTraceBranch* const branch){
     //     UpdateCoopTrace(branch);
     // });
@@ -226,7 +225,7 @@ void TraceRBranchedHSTDP::Advect() {
 //     });
 // }
 
-bool TraceRBranchedHSTDP::CheckIfPreSpikeHappened() {
+bool TraceRSharedBHSTDP::CheckIfPreSpikeHappened() {
     return std::any_of(PAR_UNSEQ,rTBranches.begin(), rTBranches.end(), [](const RTBranchPtr& branch){return !branch->spikedSpinesInTheBranch.empty();});
 }
 
@@ -236,7 +235,7 @@ bool TraceRBranchedHSTDP::CheckIfPreSpikeHappened() {
 //     return std::count_if(std::max(branch->triggerCount.begin(), std::next(branch->triggerCount.begin(),synapseIDinBranch-kernelGapNumber)),std::min(branch->triggerCount.end(), std::next(branch->triggerCount.begin(),synapseIDinBranch+kernelGapNumber+1)), [this](int pairingCounter){return pairingCounter<this->timeKernelLength;})>2;
 // }
 
-void TraceRBranchedHSTDP::ApplyCoopTraceSpatialProfile(int branchSpineID, ResourceTraceBranch* const currentBranch) {
+void TraceRSharedBHSTDP::ApplyCoopTraceSpatialProfile(int branchSpineID, ResourceTraceBranch* const currentBranch) {
     //This function will evaluate all spines within kernel distance of the synapse spine and queue the alpha stimm effects for each pairing found (queue waiting for postspike)
     //All reference declarations are to reduce indexing times in containers
     //int spinePositionBranchIndex;//,absDistance,timeStepDifference;
@@ -323,7 +322,7 @@ void TraceRBranchedHSTDP::ApplyCoopTraceSpatialProfile(int branchSpineID, Resour
 //     return kernelHashTable.at(distanceToCenterInGaps).at(timeDifference);
 // }
 
-void TraceRBranchedHSTDP::Reset() {
+void TraceRSharedBHSTDP::Reset() {
     BranchedMorphology::Reset();
     // this->postSpiked=false;
     //Wrapper plus clearing some of the vectors. Last method to run in chronological order, where we call the ticks and the general upkeep
@@ -331,40 +330,31 @@ void TraceRBranchedHSTDP::Reset() {
     //Clear both sets in every branch DONE
     //REVIEW if there are any remaining things to put in this function
     // ClearSynapseSets();
-    std::for_each(rTBranches.begin(), rTBranches.end(), [this](RTBranchPtr& branch){
-        ComputeWeights(branch.get());
-    });
+    ComputeWeights();
     DecayAllTraces();
     // DeleteEffects();
 }
 
-void TraceRBranchedHSTDP::ComputeAlphas(const ResourceTraceBranch* const branch) {
+void TraceRSharedBHSTDP::ComputeAlphas() {
     //Here we just need to apply all delta alphas, decay them (before makes more sense, the bump has delta t zero.), sum the result to stationary alpha, then update alpha sums? Yes
-    std::for_each(branch->rBranchSpineData.begin(), branch->rBranchSpineData.end(), [](ResourceSynapseSpine* const spine){
-        if (spine != nullptr) {
-            spine->ComputeAlphaResources();
-        }
+    std::for_each(resourceSpineData.begin(), resourceSpineData.end(), [](ResourceSpinePtr& const spine){
+        spine->ComputeAlphaResources();
     });    
 }
 
-void TraceRBranchedHSTDP::ComputeWeights(ResourceTraceBranch* const branch) { //This one is the one we call for every branch {
-    ComputeAlphaSums(branch);
-    branch->resourceFactor=betaResourcePool/(omegaOffset+branch->alphaTotalSum);//IMPORTANT, if we make beta non-constant, beta must be referenced from the branch
-    std::for_each(branch->rBranchSpineData.begin(), branch->rBranchSpineData.end(), [branch](ResourceSynapseSpine* const spine){
-        if (spine != nullptr) {
-            spine->ComputeWeight(branch->resourceFactor);
-        }
+void TraceRSharedBHSTDP::ComputeWeights() { //This one is the one we call for every branch {
+    ComputeAlphaSums();
+    resourceMultiplier=betaResourcePool/(omegaOffset+alphaSum);//IMPORTANT, if we make beta non-constant, beta must be referenced from the branch
+    std::for_each(resourceSpineData.begin(), resourceSpineData.end(), [this](ResourceSpinePtr& const spine){
+            spine->ComputeWeight(resourceMultiplier);
     });
 }
 
-void TraceRBranchedHSTDP::ComputeAlphaSums(ResourceTraceBranch* const branch) {
-    ComputeAlphas(branch);
-    branch->alphaTotalSum=std::accumulate(branch->rBranchSpineData.begin(), branch->rBranchSpineData.end(), 0.0, [](double accumulator, const ResourceSynapseSpine* const spine) {
-        if (spine != nullptr) {
-            return accumulator + spine->GetAlphaResources();
-        } else {
-            return accumulator;
-    }});
+void TraceRSharedBHSTDP::ComputeAlphaSums() {
+    ComputeAlphas();
+    alphaSum=std::accumulate(resourceSpineData.begin(), resourceSpineData.end(), 0.0, [](double accumulator, const ResourceSpinePtr& const spine) {
+        return accumulator + spine->GetAlphaResources();
+    });
 }
 // void TraceRBranchedHSTDP::DeleteEffects() {
 //     std::for_each(resourceSpineData.begin(), resourceSpineData.end(), [](ResourceSpinePtr spine){
@@ -372,7 +362,7 @@ void TraceRBranchedHSTDP::ComputeAlphaSums(ResourceTraceBranch* const branch) {
 //         spine->SetUpdatedFlag(false);
 //     });
 // }
-void TraceRBranchedHSTDP::DecayAllTraces(){
+void TraceRSharedBHSTDP::DecayAllTraces(){
     std::for_each(rTBranches.begin(), rTBranches.end(), [](RTBranchPtr& branch){
         branch->DecayAllTraces();
     });
@@ -392,13 +382,13 @@ void TraceRBranchedHSTDP::DecayAllTraces(){
 //     });
 // }
 
-void TraceRBranchedHSTDP::RecordPostSpike() {
+void TraceRSharedBHSTDP::RecordPostSpike() {
     this->totalPostSpikes++;
     this->postSpiked = true;
     postSynapticTrace+=1;
 }
 
-void TraceRBranchedHSTDP::RecordExcitatoryPreSpike(int spikedSpineId) {
+void TraceRSharedBHSTDP::RecordExcitatoryPreSpike(int spikedSpineId) {
     //This function is NOT DELAY COMPATIBLE (careful with the delays in synapse objects)
     //Here only record, afterwards we do the checks
     //Not going down the virtual path because inefficient
@@ -412,7 +402,7 @@ void TraceRBranchedHSTDP::RecordExcitatoryPreSpike(int spikedSpineId) {
     this->totalPreSpikes++;
 }
 
-void TraceRBranchedHSTDP::PostConnectSetUp() {
+void TraceRSharedBHSTDP::PostConnectSetUp() {
     BranchedMorphology::PostConnectSetUp();
     if (distributeWeights){
         std::uniform_real_distribution<double> weightDistribution(-alphaBasal, alphaBasal);
@@ -422,7 +412,7 @@ void TraceRBranchedHSTDP::PostConnectSetUp() {
     }
 }
 
-BaseSpinePtr TraceRBranchedHSTDP::AllocateNewSynapse(const BranchTargeting& branchTarget) {
+BaseSpinePtr TraceRSharedBHSTDP::AllocateNewSynapse(const BranchTargeting& branchTarget) {
     //here I have to set the maxcount of the spine to maxCount too 
     //Here sum over the branches.????
     //And cast the proper pointers to the proper baseSpineData vectors.
@@ -454,7 +444,7 @@ BaseSpinePtr TraceRBranchedHSTDP::AllocateNewSynapse(const BranchTargeting& bran
     return this->baseSpineData.back();
 }
 
-std::vector<double> TraceRBranchedHSTDP::GetOverallSynapticProfile() const {
+std::vector<double> TraceRSharedBHSTDP::GetOverallSynapticProfile() const {
     /*
      * returned array organised as follows:
      * item 1: average synaptic weight
@@ -478,7 +468,7 @@ std::vector<double> TraceRBranchedHSTDP::GetOverallSynapticProfile() const {
    return dataArray;
 }
 
-std::string TraceRBranchedHSTDP::GetOverallSynapticProfileHeaderInfo() const {
+std::string TraceRSharedBHSTDP::GetOverallSynapticProfileHeaderInfo() const {
     return std::string("{<average weight>, <total post spikes> ,<total pre spikes>, <total number of spines>}");
 }
 
