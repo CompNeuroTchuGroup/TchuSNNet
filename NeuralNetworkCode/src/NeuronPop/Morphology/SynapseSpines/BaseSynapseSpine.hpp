@@ -18,6 +18,7 @@ class BaseSynapseSpine {
     signed long idInMorpho{}; // id for synapse within its population
     NeuronInt preNeuronId{};
     NeuronInt postNeuronId{};
+    PopInt prePopId{};
     double couplingStrength{1};
     double weight{}; //The negative weight comes from J, weight is just a factor to multiply (for now)
     //double lastSpike{};
@@ -48,6 +49,7 @@ class BaseSynapseSpine {
     void SetWeight(double weightIn){weight=weightIn;};
     void SetIdInMorpho(signed long idIn){idInMorpho=idIn;};
     void SetRelativeCouplingStrength(double rCouplingStrength);
+    void SetPreNeuronPop(PopInt population){prePopId=population;}
     //Misc
     void AddToWeight(double change){weight+=change;}
 

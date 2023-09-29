@@ -216,7 +216,7 @@ void SpatialPoissonStimulus::SetSignalMatrix() {
 	UpdatePoissonTable();
 
 	std::for_each(signalMatrix.begin(), signalMatrix.end(), [this](std::vector<double>& signalVector){
-		std::transform(std::execution::unseq,signalVector.begin(), signalVector.end(), signalVector.begin(),std::bind(std::multiplies<double>(),std::placeholders::_1, this->attenuation));
+		std::transform(PAR_UNSEQ,signalVector.begin(), signalVector.end(), signalVector.begin(),std::bind(std::multiplies<double>(),std::placeholders::_1, this->attenuation));
 	});
 	// for (PopInt neuronPop : std::ranges::views::iota(0,totalNeuronPops)) {
 	// 	for (signed long cell : std::ranges::views::iota(0,neurons->GetNeuronsPop(neuronPop))) {

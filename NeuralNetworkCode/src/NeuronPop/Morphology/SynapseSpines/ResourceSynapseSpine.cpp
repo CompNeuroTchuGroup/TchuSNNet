@@ -7,16 +7,17 @@
 
 std::vector<double> ResourceSynapseSpine::GetIndividualSynapticProfile() const
 {
-    std::vector<double> dataArray(4);
+    std::vector<double> dataArray(5);
     dataArray.at(0) = this->branchId;
     dataArray.at(1) = this->weight;
     dataArray.at(2) = this->alphaResources;
     dataArray.at(3) = this->distanceFromNode;
+    dataArray.at(4) = this->prePopId;
     return dataArray;
 }
 
 std::string ResourceSynapseSpine::GetIndividualSynapticProfileHeaderInfo() const{
-    return std::string("{<branch ID>, <weight>, <alpha resources>, <distance to node>}");
+    return std::string("{<branch ID>, <weight>, <alpha resources>, <distance to node>, <presynaptic population ID>}");
 }
 
 void ResourceSynapseSpine::ComputeAlphaResources(){

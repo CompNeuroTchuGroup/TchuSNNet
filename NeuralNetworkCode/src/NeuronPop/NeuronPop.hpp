@@ -6,7 +6,7 @@
 #include "./Morphology/TimingDependentModels/MonoDendriteSTDPBiWindow.hpp"
 #include "./Morphology/TimingDependentModels/MonoDendriteSTDPTazerart.hpp"
 #include "./Morphology/TimingDependentModels/MonoDendriteSTDPTazerartRelative.hpp"
-#include "./Morphology/TraceResourceHSTDPModels/TraceRBranchedHSTDP.hpp"
+#include "./Morphology/HybridModels/TraceRBranchedHSTDP.hpp"
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -101,7 +101,7 @@ public:
     //Dyn_casting optimization methods
     bool HasPlasticityModel() const {return hasPlasticity;}
     bool IsBranchedBool() const {return isBranched;}
-    bool ignoreJDistribution(){if(morphology.empty()){throw "Logical error jdis";} else {return morphology.at(0)->IgnoreJDistribution();}}
+    bool ignoreJDParameters(){if(morphology.empty()){throw "Logical error jdis";} else {return morphology.at(0)->IgnoreJDParameters();}}
     
     //All of the following functions throw to ease the virtualization, but it is a bad coding practice
 
