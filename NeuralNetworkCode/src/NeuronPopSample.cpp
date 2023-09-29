@@ -85,6 +85,8 @@ void NeuronPopSample::LoadNeuronPop(std::string neuronPopType, PopInt popID, std
             neuronPops.push_back(std::make_shared<QIFNeuronPop>(infoGlobal, popID));
         }else if (neuronPopType == IDstringDictatNeuron) {
             neuronPops.push_back(std::make_shared<DictatNeuronPop>(infoGlobal, popID));
+        }else if (neuronPopType == IDstringCorrelatedPoissonNeuron) {
+            neuronPops.push_back(std::make_shared<CorrelatedPoissonNeuronPop>(infoGlobal, popID));
         }else {
             throw ">>>Undefined type of NeuronPop.\n>>>Check Parameters.txt.";
         }

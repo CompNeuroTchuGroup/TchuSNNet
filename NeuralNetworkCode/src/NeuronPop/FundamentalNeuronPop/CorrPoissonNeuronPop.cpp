@@ -1,12 +1,12 @@
 #include "CorrPoissonNeuronPop.hpp"
 
-CorrPoissonNeuronPop::CorrPoissonNeuronPop(GlobalSimInfo* infoGlobal,NeuronInt neuronID):NeuronPop(infoGlobal,neuronID) {
+CorrelatedPoissonNeuronPop::CorrelatedPoissonNeuronPop(GlobalSimInfo* infoGlobal,NeuronInt neuronID):NeuronPop(infoGlobal,neuronID) {
         //targetRate = 0; seed = 2;
         // generator = std::mt19937(seed);
     uniformDistribution = std::uniform_real_distribution<double>(0.0,1.0);
 }
 
-void CorrPoissonNeuronPop::Advect(const std::vector<double>& synaptic_dV) {
+void CorrelatedPoissonNeuronPop::Advect(const std::vector<double>& synaptic_dV) {
     // double dtTimestep           = infoGlobal->dtTimestep;
     ClearSpikerVector();
     if (uniformDistribution(generator) < corrLambda){//this is essentially bernoulli trial, we call Poisson because low prob of 1, negligible of >1 and small timesteps
@@ -20,7 +20,7 @@ void CorrPoissonNeuronPop::Advect(const std::vector<double>& synaptic_dV) {
     this->AdvectPlasticityModel();
 }
 
-void CorrPoissonNeuronPop::LoadParameters(const std::vector<FileEntry>& neuronParameters) {
+void CorrelatedPoissonNeuronPop::LoadParameters(const std::vector<FileEntry>& neuronParameters) {
     NeuronPop::LoadParameters(neuronParameters);
 
     for(auto& [parameterName, parameterValues] : neuronParameters) {
@@ -49,12 +49,12 @@ void CorrPoissonNeuronPop::LoadParameters(const std::vector<FileEntry>& neuronPa
     uncorrBinomialDistribution=std::binomial_distribution<>(noNeurons, uncorrLambda);
 }
 
-void CorrPoissonNeuronPop::PreCalcLambdas() {
+void CorrelatedPoissonNeuronPop::PreCalcLambdas() {
     corrLambda = correlationCoefficient * totalLambda;
     uncorrLambda = totalLambda - corrLambda;
 }
 
-void CorrPoissonNeuronPop::SaveParameters(std::ofstream& wParameterStream) const {
+void CorrelatedPoissonNeuronPop::SaveParameters(std::ofstream& wParameterStream) const {
 
     std::string idString = "neurons_" + std::to_string(GetId());
 

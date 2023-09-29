@@ -156,6 +156,7 @@ const std::string IDstringLIFNeuron{"LIFNeuron"};
 const std::string IDstringQIFNeuron{"QIFNeuron"};
 const std::string IDstringEIFNeuron{"EIFNeuron"};
 const std::string IDstringPoissonNeuron{"PoissonNeuron"};
+const std::string IDstringCorrelatedPoissonNeuron{"CorrelatedPoissonNeuron"};
 const std::string IDstringDictatNeuron{"DictatNeuron"};
 const std::string IDstringHeteroLIFNeuron{"HeteroLIFNeuron"};
 const std::string IDstringHeteroPoissonNeuron{"HeteroPoissonNeuron"};

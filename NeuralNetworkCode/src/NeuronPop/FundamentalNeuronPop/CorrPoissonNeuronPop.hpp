@@ -1,6 +1,6 @@
 
-#ifndef _POISSON_NEURONPOP_HEADER_
-#define _POISSON_NEURONPOP_HEADER_
+#ifndef _CORRELATED_POISSON_NEURONPOP_HEADER_
+#define _CORRELATED_POISSON_NEURONPOP_HEADER_
 
 #include "../NeuronPop.hpp"
 #include "../../GlobalFunctions.hpp"
@@ -12,7 +12,7 @@
 
 
 
-class CorrPoissonNeuronPop : public NeuronPop {
+class CorrelatedPoissonNeuronPop : public NeuronPop {
 protected:
     double finalTargetRate{}; // target firing rate
     double correlationCoefficient{};
@@ -29,12 +29,12 @@ protected:
     std::binomial_distribution<> uncorrBinomialDistribution;
 
 public:
-    CorrPoissonNeuronPop(GlobalSimInfo* infoGlobal,NeuronInt id);
-    ~CorrPoissonNeuronPop() override = default;
+    CorrelatedPoissonNeuronPop(GlobalSimInfo* infoGlobal,NeuronInt id);
+    ~CorrelatedPoissonNeuronPop() override = default;
 
     void Advect(const std::vector<double>& synaptic_dV);
 
-    std::string GetType() const override{return IDstringPoissonNeuron;}
+    std::string GetType() const override{return IDstringCorrelatedPoissonNeuron;}
     void SaveParameters(std::ofstream& wParameterStream) const;
     void LoadParameters(const std::vector<FileEntry>& parameters);
     void PreCalcLambdas();

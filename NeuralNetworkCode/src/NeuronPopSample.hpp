@@ -15,6 +15,7 @@
 #include "NeuronPop/FundamentalNeuronPop/QIFNeuronPop.hpp"
 #include "NeuronPop/FundamentalNeuronPop/PoissonNeuronPop.hpp"
 #include "./NeuronPop/FundamentalNeuronPop/DictatNeuronPop.hpp"
+#include "./NeuronPop/FundamentalNeuronPop/CorrPoissonNeuronPop.hpp"
 
 #include <iostream>
 #include <vector>
