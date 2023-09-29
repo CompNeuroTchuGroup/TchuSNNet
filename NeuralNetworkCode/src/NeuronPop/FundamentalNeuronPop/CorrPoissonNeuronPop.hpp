@@ -12,7 +12,8 @@
 
 
 
-class CorrelatedPoissonNeuronPop : public NeuronPop {
+class CorrPoissonNeuronPop : public NeuronPop {
+//Poisson neuron pop where all neurons fire with certain correlation to each other (the correlation is global)
 protected:
     double finalTargetRate{}; // target firing rate
     double correlationCoefficient{};
@@ -29,8 +30,8 @@ protected:
     std::binomial_distribution<> uncorrBinomialDistribution;
 
 public:
-    CorrelatedPoissonNeuronPop(GlobalSimInfo* infoGlobal,NeuronInt id);
-    ~CorrelatedPoissonNeuronPop() override = default;
+    CorrPoissonNeuronPop(GlobalSimInfo* infoGlobal,NeuronInt id);
+    ~CorrPoissonNeuronPop() override = default;
 
     void Advect(const std::vector<double>& synaptic_dV);
 
