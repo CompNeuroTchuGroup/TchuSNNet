@@ -4,7 +4,6 @@
 Branch::Branch(double gap, double branchLength, std::vector<int> anteriorBranches, int branchId):branchId{branchId},anteriorBranches{anteriorBranches},synapticGap{gap}, branchLength{branchLength}, branchSlots{static_cast<size_t>(std::round(branchLength/gap))}{//,morphoSynapseIDs(static_cast<size_t>(branchSlots), -1),branchSynapseIDs(static_cast<size_t>(branchSlots), -1), , spikedSyn(branchSlots, false) {
     //std::iota(uniqueSynapsePositionIDs.begin(),uniqueSynapsePositionIDs.end() , branchId*(branchSlots));
     //Constructor
-    spikedSpinesInTheBranch.reserve(branchSlots);
 }
 
 void Branch::PostConnectSetUp(std::vector<BranchedSpinePtr> spineData) {

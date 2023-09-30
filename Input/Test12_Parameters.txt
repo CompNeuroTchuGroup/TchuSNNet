@@ -126,7 +126,7 @@ synapses_1_0_D_min						0.005000 #secs
 synapses_1_0_D_max						0.020000 #secs
 synapses_1_0_seed						183427039
 synapses_1_0_targetBranch					0			#You can target branches in an 'ordered' manner (0,1,2...), 'random', or set (if you input a number). Put none if the HS does not used branched morphology
-synapses_1_0_relativeCoupling					1.000000	#Relative coupling strength (only non-J plasticity models)
+synapses_1_0_relative_coupling					1.000000	#Relative coupling strength (only non-J plasticity models)
 #########From here on is all Heterosynaptic plasticity###########
 synapses_1_0_pmodel_type			TraceRBranchedHSTDP
 synapses_1_0_pmodel_branchLength		4.000000 #μm	#Length of each branch.
@@ -155,7 +155,7 @@ synapses_1_1_D_min						0.000000 #secs
 synapses_1_1_D_max						0.000000 #secs
 synapses_1_1_seed						921206234
 synapses_1_1_targetBranch					none			#You can target branches in an 'ordered' manner (0,1,2...), 'random', or set (if you input a number). Put none if the HS does not used branched morphology
-synapses_1_1_relativeCoupling					1.000000	#Relative coupling strength (only non-J plasticity models)
+synapses_1_1_relative_coupling					1.000000	#Relative coupling strength (only non-J plasticity models)
 ########### Connectivity ################
 synapses_1_1_connectivity_type					RandomConnectivity
 synapses_1_1_connectivity_ConnectionProba			1.000000
@@ -167,7 +167,7 @@ synapses_1_2_D_min						0.005000 #secs
 synapses_1_2_D_max						0.020000 #secs
 synapses_1_2_seed						183427039
 synapses_1_2_targetBranch					1			#You can target branches in an 'ordered' manner (0,1,2...), 'random', or set (if you input a number). Put none if the HS does not used branched morphology
-synapses_1_2_relativeCoupling					1.000000	#Relative coupling strength (only non-J plasticity models)
+synapses_1_2_relative_coupling					1.000000	#Relative coupling strength (only non-J plasticity models)
 ########### Connectivity ################
 synapses_1_2_connectivity_type					RandomConnectivity
 synapses_1_2_connectivity_ConnectionProba			1.000000

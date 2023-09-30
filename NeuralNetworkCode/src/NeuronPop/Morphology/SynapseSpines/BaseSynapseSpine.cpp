@@ -14,6 +14,6 @@
 //}
 
 void BaseSynapseSpine::SetRelativeCouplingStrength(double rCouplingStrength){
-    std::lock_guard<std::mutex> _guardedMutexLock(_relativeCouplingMutex);    
+    std::lock_guard<std::mutex> _guardedMutexLock(_relativeCouplingMutex);//I do not remember why this is necessary. There should be no data race conditions 
     couplingStrength=rCouplingStrength;
 }

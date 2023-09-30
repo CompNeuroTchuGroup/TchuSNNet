@@ -80,10 +80,12 @@ public:
     //virtual void CalcMorphoPlasticityEvents() {return;};
     //friend std::vector<signed long> getSpikedSynapsesFromMorphology(const Morphology&); // This function is not necessary as the spikedSynapses is not used outside of the class
     // signed long GetSynapseCount() const;
+    virtual int GetMaxGapDelay(int delayPerMicroMeter){return 0;}
     double GetWeight(signed long synapseId) const;
+    virtual double GetSynapticDistanceToSoma(int synapseId)=0;
     virtual void PostConnectSetUp(){};
 
-    virtual bool IgnoreJDistribution() const {return false;}
+    virtual bool IgnoreJDParameters() const {return false;}
 };
 
 #endif //NEURALNETWORK_MORPHOLOGY_H

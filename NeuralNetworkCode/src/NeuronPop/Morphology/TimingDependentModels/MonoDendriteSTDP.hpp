@@ -90,6 +90,8 @@ public:
     virtual BaseSpinePtr AllocateNewSynapse(const BranchTargeting& bTargeting) override;
 
 
+    int GetMaxGapDelay(int delayPerMicroMeter) override {return dendriticLength*delayPerMicroMeter;};
+    double GetSynapticDistanceToSoma(int synapseID) override {return spineDataCoop.at(synapseID)->GetDistToSoma();};
     //Revirtualization
 
 };

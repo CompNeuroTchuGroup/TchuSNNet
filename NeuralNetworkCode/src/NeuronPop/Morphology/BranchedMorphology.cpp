@@ -283,6 +283,10 @@ int BranchedMorphology::PopSynapseSlotFromBranch(int branch, bool firstSlotTrueL
     return position;
 }
 
+double BranchedMorphology::GetSynapticDistanceToSoma(int synapseID) {
+    return branches.at(branchedSpineData.at(synapseID)->GetBranchId())->anteriorBranches.size()*branchLength+branchedSpineData.at(synapseID)->GetBranchPositionId()*synapticGap;
+}
+
 void BranchedMorphology::SetUpBranchings(int remainingBranchingEvents, std::vector<int> anteriorBranches) {
     //This is a recursive function that sets up the branched dendritic tree and is generalized for 0 branchings (1 branch). This function has been unit tested by Antoni.
     remainingBranchingEvents-=1;

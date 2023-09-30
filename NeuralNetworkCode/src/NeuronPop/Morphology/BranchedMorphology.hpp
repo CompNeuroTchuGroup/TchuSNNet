@@ -84,6 +84,8 @@ public:
     //virtual void AlternatedSynapseAllocation(BranchPtr branch);
     //
     int GenerateBranchId(){return branchIdGenerator++;}
+    double GetSynapticDistanceToSoma(int synapseID) override;
+    int GetMaxGapDelay(int delayPerMicroMeter) override{return branchings*delayPerMicroMeter*branchLength;};
 
 };
 

@@ -57,6 +57,8 @@ void Synapse::LoadParameters(const std::vector<FileEntry>& synapseParameters){
             this->Dmin = static_cast<int>(std::round(std::stod(parameterValues.at(0)) / infoGlobal->dtTimestep));
         } else if(parameterName.find("D_max") != std::string::npos){
             this->Dmax = static_cast<int>(std::round(std::stod(parameterValues.at(0)) / infoGlobal->dtTimestep));
+        }else if(parameterName.find("distance_delay") != std::string::npos){
+            this->delayPerMicrometer = static_cast<int>(std::round(std::stod(parameterValues.at(0)) / infoGlobal->dtTimestep));
         } else if(parameterName.find("connectivity_type") != std::string::npos){
             if(parameterValues.at(0) == IDstringRandomConnectivity || parameterValues.at(0) == IDstringHeteroRandomConnectivity){
                 geometry = std::make_unique<RandomConnectivity>(this,infoGlobal);
@@ -103,7 +105,7 @@ void Synapse::LoadParameters(const std::vector<FileEntry>& synapseParameters){
             }else if (parameterValues.at(0).find("last") != std::string::npos){
                 this->branchTarget.firstSlotTrueLastSlotFalse=false;
             }
-        } else if(parameterName.find("relativeCoupling") != std::string::npos){
+        } else if(parameterName.find("relative_coupling") != std::string::npos){
             this->relativeCouplingStrength = std::stod(parameterValues.at(0));
         } else if(parameterName.find("seed") != std::string::npos){
             SetSeed(std::stoi(parameterValues.at(0)));
@@ -127,15 +129,16 @@ void Synapse::LoadParameters(const std::vector<FileEntry>& synapseParameters){
 void Synapse::SaveParameters(std::ofstream& wParameterStream,std::string idString) const{
     wParameterStream << idString << "type\t\t\t\t\t\t" << GetTypeStr() << "\n";
     wParameterStream << idString << "connected\t\t\t\t\t\t" << std::boolalpha << this->isConnectedBool <<std::noboolalpha<< "\n";
-    wParameterStream << idString << "D_min\t\t\t\t\t\t" << std::to_string(this->Dmin*infoGlobal->dtTimestep) << " #secs\n";
-    wParameterStream << idString << "D_max\t\t\t\t\t\t" << std::to_string(this->Dmax*infoGlobal->dtTimestep) << " #secs\n";
-    if (!this->ignoreJDistribution){
+    if (!this->ignoreJDParameters){
+        wParameterStream << idString << "D_min\t\t\t\t\t\t" << std::to_string(this->Dmin*infoGlobal->dtTimestep) << " #secs\n";
+        wParameterStream << idString << "D_max\t\t\t\t\t\t" << std::to_string(this->Dmax*infoGlobal->dtTimestep) << " #secs\n";
         wParameterStream << idString << "J\t\t\t\t\t\t\t" << std::to_string(this->J) << " #dmV/Spike\n";
         wParameterStream << idString << "Sigma_j\t\t\t\t\t\t" << std::to_string(this->sigmaJ) << " #dmV/Spike\n";
         wParameterStream << idString << "J_pot\t\t\t\t\t\t" << std::to_string(this->Jpot) << " #dmV/Spike\n";
         wParameterStream << idString << "P_pot\t\t\t\t\t\t" << std::to_string(this->Ppot) << "\n";
     } else {
-        wParameterStream << idString << "relativeCoupling\t\t\t\t" << std::to_string(relativeCouplingStrength)<< "\t#Relative coupling strength (only non-J plasticity models)";
+        wParameterStream << idString << "relative_coupling\t\t\t\t\t" << std::to_string(relativeCouplingStrength)<< "\t#Relative coupling strength (only non-J plasticity models)\n";
+        wParameterStream << idString << "distance_delay\t\t\t\t\t\t" << std::to_string(this->delayPerMicrometer*infoGlobal->dtTimestep) << " #secs/micrometer\n";
     }
     if (userSeed){
         wParameterStream << idString << "seed\t\t\t\t\t\t" << std::to_string(this->seed)  << "\n";
@@ -154,6 +157,14 @@ void Synapse::SaveParameters(std::ofstream& wParameterStream,std::string idStrin
             wParameterStream<<"none";//Missing comments on what this is supposed to do
         }
         wParameterStream << "\t\t\t#You can target branches in an 'ordered' manner (0,1,2...), 'random', or set (if you input a number). Put none if the HS does not used branched morphology\n";
+        wParameterStream << idString+"pmodel_"<<"slotOrder\t\t";
+        if (this->branchTarget.firstSlotTrueLastSlotFalse){
+            wParameterStream << "first\t";
+        } else {
+            wParameterStream<<"last\t";
+        }
+        wParameterStream << "\t"<<"#'first' synapse allocation will allocate synapses from the beggining to the end of the available slots. 'last' will do the opposite. This only makes sense in ordered allocation\n";
+
     }
     if (geometry != nullptr){
         geometry->SaveParameters(wParameterStream,idString);
@@ -167,13 +178,14 @@ void Synapse::AllocateSynapseWithPlasticity(NeuronInt targetNeuron, NeuronInt so
     BaseSpinePtr synapseSpinePtr = targetPop->AllocateNewSynapse(targetNeuron, branchTarget);//everything except first var can be moved to syn ref
 
     if (synapseSpinePtr != nullptr) {
-        if (ignoreJDistribution){
+        if (ignoreJDParameters){
             synapseSpinePtr->SetRelativeCouplingStrength(relativeCouplingStrength);
         } else {
             //The SetRelativeCouplingStrength is already done in the PostConnectFunction (unscaled as of now), as J distribution is not written yet in flow
         }
         synapseSpinePtr->SetPreNeuronId(sourceNeuron);
         synapseSpinePtr->SetPostNeuronId(targetNeuron);
+        synapseSpinePtr->SetPreNeuronPop(this->GetSourcePopID());
 
     } else {
         throw "AllocateNewSynapseWithPlasticity returned a nullptr";
@@ -269,39 +281,22 @@ void Synapse::PostConnectNeurons() {
         //Here we sort the subentries of targetlist so that multiple synapses do not generate conflicts
         std::sort(singleSourceList.begin(), singleSourceList.end(), [](std::pair<NeuronInt, BaseSpinePtr> pair1,std::pair<NeuronInt, BaseSpinePtr> pair2){return pair1.first<pair2.first;});
     }
-    // if (HasJDistribution){
-    //     if(infoGlobal->networkScaling_mode == 0){
-    //         for (NeuronInt sourceNeuron : std::ranges::views::iota(0,sourcePop->GetNoNeurons())){
-    //             for (NeuronInt targetNeuron : std::ranges::views::iota(0,targetPop->GetNoNeurons())){
-    //                 JCouplingDistribution.at(sourceNeuron).at(targetNeuron)*=localScalingFactor;
-    //             }
-    //         }
-    //     }
-    //     else if(infoGlobal->networkScaling_mode == 1){
-    //         for (NeuronInt sourceNeuron : std::ranges::views::iota(0,sourcePop->GetNoNeurons())){
-    //             for (NeuronInt targetNeuron : std::ranges::views::iota(0,targetPop->GetNoNeurons())){
-    //                 JCouplingDistribution.at(sourceNeuron).at(targetNeuron)*=globalScalingFactor;
-    //             }
-    //         }
-    //      } else {
-    //         throw "error in Synapse::PostCOnnectNeurons()";
-    //         }
-    // } else {
-    //     if(infoGlobal->networkScaling_mode == 0){
-    //         scaledJ=J*localScalingFactor;
-    //     } else if(infoGlobal->networkScaling_mode == 1){
-    //         scaledJ=J*globalScalingFactor;
-    //     } else {
-    //         throw "error in Synapse::PostCOnnectNeurons()";
-    //     }
-    // }
+
     if ((!hasPlasticityModel && targetPop->HasPlasticityModel()) || (hasPlasticityModel && !targetPop->HasPlasticityModel())){
         throw "Logical error in the usage of plasticity models.";
     }
-    if (!ignoreJDistribution && hasPlasticityModel){
+    if (!ignoreJDParameters && hasPlasticityModel){
         for(NeuronInt sourceNeuron : std::ranges::views::iota(0, static_cast<NeuronInt>(targetSpineList.size()))){
             for(auto& [targetNeuron, spinePtr] : targetSpineList.at(sourceNeuron)){
+                //Here we set the relative coupling strength of the MonoDendrite models so that the weight works as intended in the original models
                 spinePtr->SetRelativeCouplingStrength(GetCouplingStrength(targetNeuron,sourceNeuron)); //const cast here
+            }
+        }
+    }
+    if (ignoreJDParameters && hasPlasticityModel){
+        for(NeuronInt sourceNeuron : std::ranges::views::iota(0, static_cast<NeuronInt>(targetSpineList.size()))){
+            for(NeuronInt synapseIndex : std::ranges::views::iota(0, static_cast<NeuronInt>(targetSpineList.at(sourceNeuron).size()))){
+                DelayDDistribution.at(sourceNeuron).at(synapseIndex)=targetPop->GetSynapticDistanceToSoma(targetSpineList.at(sourceNeuron).at(synapseIndex).first,targetSpineList.at(sourceNeuron).at(synapseIndex).second->GetIdInMorpho())*delayPerMicrometer;
             }
         }
     }
@@ -362,8 +357,11 @@ void Synapse::SetDistributionD() {
         if(!targetSpineList.at(sourceNeuron).empty()){
             noTargets = static_cast<NeuronInt>(GetNoTargetedNeurons(sourceNeuron));
 			DelayDDistribution.at(sourceNeuron).resize(noTargets, 0);
-			for (NeuronInt targetNeuron : std::ranges::views::iota(0,noTargets)) {
-                DelayDDistribution.at(sourceNeuron).at(targetNeuron)=uniformDistribution(generator);
+            if(ignoreJDParameters){
+                continue;
+            }
+			for (NeuronInt synapseIndex : std::ranges::views::iota(0,noTargets)) {
+                DelayDDistribution.at(sourceNeuron).at(synapseIndex)=uniformDistribution(generator);
                 //std::cout << std::to_string(d) << " ";
             }
             //std::cout << "\n";
@@ -405,24 +403,24 @@ void Synapse::WriteDistributionD(const std::string& filename, NeuronInt noRecord
         return;
     }
     int count;
-    size_t writtenConnection;
+    size_t synapseIndex;
     double delay;
     std::ofstream DDistributionFileStream(filename + ".txt"); //ios::binary
 
     //iterate through sourceNeuron & target neurons & write connectivity
     for(NeuronInt sourceNeuron : std::ranges::views::iota(0, std::min(GetNoSourceNeurons(), noRecordedNeuronsDelay))){
-        writtenConnection = 0; // counts the number of connections that have been written for this sourceNeuron neuron
+        synapseIndex = 0; // counts the number of connections that have been written for this sourceNeuron neuron
         for(NeuronInt targetNeuron : std::ranges::views::iota(0, std::min(GetNoTargetNeurons(), noRecordedNeuronsDelay))){
-			if (targetSpineList.at(sourceNeuron).size() <= writtenConnection || targetSpineList.at(sourceNeuron).at(writtenConnection).first != targetNeuron){ // if all connections have been written OR target id does not match
+			if (targetSpineList.at(sourceNeuron).size() <= synapseIndex || targetSpineList.at(sourceNeuron).at(synapseIndex).first != targetNeuron){ // if all connections have been written OR target id does not match
 				DDistributionFileStream << "nan ";
 			} else {
 				count = 1;
-                delay = (HasDdistribution)? DelayDDistribution.at(sourceNeuron).at(writtenConnection) : GetMaxD();
-				writtenConnection++;
-				while (targetSpineList.at(sourceNeuron).size() > writtenConnection && targetSpineList.at(sourceNeuron).at(writtenConnection).first == targetNeuron) { // while connections are still to be written and target id matches
-					writtenConnection++;
+                delay = (HasDdistribution)? DelayDDistribution.at(sourceNeuron).at(synapseIndex) : GetMaxD();
+				synapseIndex++;
+				while (targetSpineList.at(sourceNeuron).size() > synapseIndex && targetSpineList.at(sourceNeuron).at(synapseIndex).first == targetNeuron) { // while connections are still to be written and target id matches
+					synapseIndex++;
 					count++;
-                    delay += (HasDdistribution)? DelayDDistribution.at(sourceNeuron).at(writtenConnection) : GetMaxD();
+                    delay += (HasDdistribution)? DelayDDistribution.at(sourceNeuron).at(synapseIndex) : GetMaxD();
 				}
 				DDistributionFileStream << std::to_string(delay/count)<<" ";
 			}

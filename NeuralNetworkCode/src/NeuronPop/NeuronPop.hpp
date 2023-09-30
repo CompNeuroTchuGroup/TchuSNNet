@@ -81,7 +81,9 @@ public:
 
     int GetNoSynapses() const {return std::accumulate(morphology.begin(), morphology.end(),0, [](int accumulator, const std::unique_ptr<Morphology>& morpho){return accumulator+morpho->GetNoSynapses();});}// This is purely for virtualization reasons
     int GetNoBranches() const {if(isBranched){return static_cast<BranchedMorphology*>(morphology.at(0).get())->GetNoBranches();}else{return 0;}}
-	//*******************
+	int GetMaxGapDelay(int delayPerGap) const {return (morphology.at(0).get())->GetMaxGapDelay(delayPerGap);}
+    double GetSynapticDistanceToSoma(int neuronId, int synapseId) const {return morphology.at(neuronId)->GetSynapticDistanceToSoma(synapseId);}
+    //*******************
     //Set-Functions
     //*******************
     void SetNeurons();
