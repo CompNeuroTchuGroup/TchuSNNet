@@ -6,7 +6,7 @@
 #include "./Morphology/TimingDependentModels/MonoDendriteSTDPBiWindow.hpp"
 #include "./Morphology/TimingDependentModels/MonoDendriteSTDPTazerart.hpp"
 #include "./Morphology/TimingDependentModels/MonoDendriteSTDPTazerartRelative.hpp"
-#include "./Morphology/HybridModels/TraceRBranchedHSTDP.hpp"
+#include "./Morphology/HybridModels/AlphaResourceHSTDP.hpp"
 #include <iostream>
 #include <vector>
 #include <cmath>

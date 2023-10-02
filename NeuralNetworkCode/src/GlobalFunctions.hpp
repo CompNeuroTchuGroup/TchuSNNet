@@ -52,8 +52,8 @@ class CoopSynapseSpine;
 using CoopSpinePtr = std::unique_ptr<CoopSynapseSpine>;
 struct Branch;
 using BranchPtr = Branch*;
-struct ResourceTraceBranch;
-using RTBranchPtr =std::unique_ptr<ResourceTraceBranch>;
+struct AlphaBranch;
+using RTBranchPtr =std::unique_ptr<AlphaBranch>;
 
 struct GlobalSimInfo {
 
@@ -181,7 +181,7 @@ const std::string IDstringMonoDendriteSTDPTazerartRelative{"MonoDendriteSTDPTaze
 const std::string IDstringMonoDendriteSTDPBiWindow{"MonoDendriteSTDPBiWindow"};
 const std::string IDstringMonoDendriteSTDPBiExponential{"MonoDendriteSTDPBiExponential"};
 
-const std::string IDstringTraceResourceHSTDP{"TraceRBranchedHSTDP"};
+const std::string IDstringTraceResourceHSTDP{"AlphaResourceHSTDP"};
 
 // void MultiplyVector (std::vector<signed long> &vector, signed long value);
 // void MultiplyVector (std::vector<double> &vector, double value);

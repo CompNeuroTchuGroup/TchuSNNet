@@ -171,7 +171,7 @@ void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry> &morphologyPara
                 } else if (parameterValues.at(0) == IDstringTraceResourceHSTDP) {
                     for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
                         (void)neuron;//Does nothing, removes warning on unused vars
-                        this->morphology.push_back(std::make_unique<TraceRBranchedHSTDP>(this->infoGlobal)); //Remove, will not  be used
+                        this->morphology.push_back(std::make_unique<AlphaResourceHSTDP>(this->infoGlobal)); //Remove, will not  be used
                         this->morphology.back()->LoadParameters(morphologyParameters);
                         this->hasPlasticity=true;
                         this->isBranched=true;

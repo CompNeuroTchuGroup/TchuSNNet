@@ -33,7 +33,7 @@ Implemented model only work in excitatory populations/synapses. Usage in inhibit
 
 ### BranchedMorphology parameters
 In case the morphology model used works on branched dendrites, the following parameters will apply:
-- dendriteBranchings: Number of branchings in the dendritic tree. The generated tree is a binary one, so the number of branches will be equal to $2^{branchings}$.
+- noBranches: Number of branchings in the dendritic tree. The generated tree is a binary one, so the number of branches will be equal to $2^{branchings}$.
 - synapseAllocation: It can be either 'random' or 'ordered'. It corresponds to the order in which available synapse slots are allocated when the connectivity class connects a presynaptic population. **If connectivity is randomized, the resulting allocation will be randomized no matter what option you select**
 
 ## Stimulus Parameters

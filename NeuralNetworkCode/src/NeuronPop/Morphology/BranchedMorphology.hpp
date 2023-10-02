@@ -10,7 +10,8 @@
 #include "./Morphology.hpp"
 #include "./SynapseSpines/BaseSynapseSpine.hpp"
 #include "./SynapseSpines/BranchedSynapseSpine.hpp"
-#include "./BranchedStructs.hpp"
+//This may cause an include loop
+#include "./BranchedStructs/Branch.hpp"
 #include <string>
 #include <numeric>
 #include <algorithm>
@@ -31,13 +32,14 @@ protected:
     double synapticGap{};
     double branchLength{};
 
+
 //Branched specific
-    int branchings{1};
+    int noBranches{1};
 
     bool orderedSpineAllocationB{false};// If not properly loaded from LP, exception
     bool randomSpineAllocationB{false};
 
-
+    bool branchingTreePattern{true};
     /*bool setBranchAllocationB{false};
     bool OrderedBranchAllocationB{false};// If not properly loaded from LP, exception
     bool RandomBranchAllocationB{false};*/
@@ -64,10 +66,14 @@ public:
 
     //Branched specific methods
     void SetUpBranchedMorphology();
-    void SetUpSynapseSlots(BranchPtr branch); //This function will set up the open synapse slots of a branch object with its id.This one I have to define in the parallel synaptic connectivity masks or the derived classes
     //setUp SYnapse slots is called for every branch in a loop and depending on the bool (universal for all branches for now) it calls random or ordered.
     //The overriding function calls functions of BMorpho. 
-    virtual void SetUpBranchings(int remainingBranchingEvents, std::vector<int> anteriorBranches = std::vector<int>());// Here we set up the vector with the branches
+    void SetUpBranchingTree(int& remainingBranches, int remainingBranchings, std::vector<int> anteriorBranches = std::vector<int>());// Here we set up the vector with the branches
+    void SetUpBranchingBrush(int& remainingBranches, int& remainingBranchings, std::vector<int> anteriorBranches = std::vector<int>());// Here we set up the vector with the branches
+    void SetUpRadialBranching(int& remainingBranches);
+    virtual int AllocateABranch(std::vector<int> anteriorBranches) = 0; //returns the branchID
+
+    void SetUpSynapseSlots(BranchPtr branch); //This function will set up the open synapse slots of a branch object with its id.This one I have to define in the parallel synaptic connectivity masks or the derived classes
     void PostConnectSetUp() override;
     //Allocation shennanigans
     int GetNoBranches(){return static_cast<int>(branches.size());}
@@ -85,7 +91,7 @@ public:
     //
     int GenerateBranchId(){return branchIdGenerator++;}
     double GetSynapticDistanceToSoma(int synapseID) override;
-    int GetMaxGapDelay(int delayPerMicroMeter) override{return branchings*delayPerMicroMeter*branchLength;};
+    int GetMaxGapDelay(int delayPerMicroMeter) override{return noBranches*delayPerMicroMeter*branchLength;};
 
 };
 
