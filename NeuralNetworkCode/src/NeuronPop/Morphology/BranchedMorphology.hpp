@@ -22,8 +22,6 @@
 class BranchedMorphology : public Morphology {
 
 protected:
-//MonoDendriteSTDP moved
-    signed long spineIdGenerator{0}; // variable used to allocate new synapses. type is legacy compatible
     int branchIdGenerator{0}; //Same but in branches. Should be 1 or 0?
     //std::vector<bool> integratePostSpike;// Not necessary
     //std::vector<bool> integratePreSpike;//Not necessary
@@ -39,7 +37,7 @@ protected:
     bool orderedSpineAllocationB{false};// If not properly loaded from LP, exception
     bool randomSpineAllocationB{false};
 
-    bool branchingTreePattern{true};
+    bool branchingTreePattern{false};
     /*bool setBranchAllocationB{false};
     bool OrderedBranchAllocationB{false};// If not properly loaded from LP, exception
     bool RandomBranchAllocationB{false};*/
@@ -71,7 +69,8 @@ public:
     void SetUpBranchingTree(int& remainingBranches, int remainingBranchings, std::vector<int> anteriorBranches = std::vector<int>());// Here we set up the vector with the branches
     void SetUpBranchingBrush(int& remainingBranches, int& remainingBranchings, std::vector<int> anteriorBranches = std::vector<int>());// Here we set up the vector with the branches
     void SetUpRadialBranching(int& remainingBranches);
-    virtual int AllocateABranch(std::vector<int> anteriorBranches) = 0; //returns the branchID
+    
+    virtual int CreateBranch(std::vector<int> anteriorBranches) = 0; //returns the branchID
 
     void SetUpSynapseSlots(BranchPtr branch); //This function will set up the open synapse slots of a branch object with its id.This one I have to define in the parallel synaptic connectivity masks or the derived classes
     void PostConnectSetUp() override;

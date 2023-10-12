@@ -4,15 +4,15 @@
 #ifndef _BRANCH_STRUCT_HEADER_
 #define _BRANCH_STRUCT_HEADER_
 
-#include "../SynapseSpines/ResourceSynapseSpine.hpp"
+
 #include <vector>
 #include <deque>
-#include <unordered_set>
 #include <numeric>
 #include <memory>
 #include <algorithm>
 #include <functional>
 #include <execution>
+#include "../../../GlobalFunctions.hpp"
 
 struct Branch{
     //ID
@@ -36,9 +36,9 @@ struct Branch{
     //int plasticityBranchEventsTotal{};
     //Methods
     //Branch()=default;
-    Branch(double gap, double branchLength, std::vector<int> anteriorBranches, int branchId);
+    Branch(std::vector<int> anteriorBranches,double gap, double branchLength, int branchId);
     Branch(double gap, double branchLength, int branchId);
-    virtual void PostConnectSetUp(std::vector<BranchedSpinePtr> spineData);
+    virtual void PostConnectSetUp(std::vector<BranchedSpinePtr> spineData) = 0;
     //virtual void IncreasePlasticityCounter(){plasticityBranchEventsTotal++;}
 };
 

@@ -3,7 +3,7 @@
 //
 #include "Morphology.hpp"
 
-Morphology::Morphology(GlobalSimInfo* infoGlobal): infoGlobal(infoGlobal), totalPostSpikes(0), totalPreSpikes(0), lastPostSpikeTime(-200),weightNormalization(NOPNormalization) {
+Morphology::Morphology(GlobalSimInfo* infoGlobal): infoGlobal(infoGlobal), totalPostSpikes(0), totalPreSpikes(0) {
     std::uniform_int_distribution<int> distribution(0,INT32_MAX);
     this->seed = distribution(infoGlobal->globalGenerator);
     this->generator=std::mt19937(this->seed);
@@ -47,7 +47,6 @@ void Morphology::SaveParameters(std::ofstream& wParameterFile, std::string neuro
 }
 
 void Morphology::RecordPostSpike() {
-    this->lastPostSpikeTime = this->infoGlobal->dtTimestep * static_cast<double>(this->infoGlobal->timeStep);
     this->totalPostSpikes++;
     this->postSpiked = true;
 }
@@ -93,57 +92,10 @@ std::string Morphology::GetIndividualSynapticProfileHeaderInfo() const
     return baseSpineData.at(0)->GetIndividualSynapticProfileHeaderInfo();
 }
 
-// signed long Morphology::GetSynapseCount() const {
-//     return static_cast<signed long>(this->baseSpineData.size());
-// }
 
-double Morphology::GetWeight(signed long spineID) const {
-    return this->baseSpineData.at(spineID)->GetWeight();
-}
 
-void Morphology::NormalizeWeights() {
-    if (this->weightNormalization == HardNormalization) {
-        this->HardNormalize();
-    } else if (this->weightNormalization == SoftMaxNormalization) {
-        this->SoftMaxNormalize();
-    }
-}
 
-void Morphology::HardNormalize() {
-    for (BaseSpinePtr spine: this->baseSpineData) {
-        spine->SetWeight(std::max(minWeight, std::min(maxWeight, spine->GetWeightUncoupled())));
-    }
-}
 
-void Morphology::SoftMaxNormalize() {
-
-    //Softmax normalization (NNs version)
-    // maxWeights = std::numeric_limits<double>::min();
-    // for (auto& syn : this->baseSpineData) {
-    //     maxWeights = std::max(maxWeights, syn->GetWeight());
-    // }
-
-    double weightSum = std::accumulate(this->baseSpineData.begin(), this->baseSpineData.end(), 0.0, [] (double weightSum, BaseSpinePtr synapse){
-        return weightSum += std::exp(synapse->GetWeightUncoupled()); 
-        });
-    // for (auto& syn : this->baseSpineData) {
-    //     sumWeights += std::exp(syn->GetWeight() - maxWeights);
-    // }
-
-    //It is not clear if the following lines are correct in Softmax normalization. There was no reference previously, so Toni assumed the normalization is the one done in NNs.
-    //As for the multiplication by two, this is because the weights in Saif models are normally distributed between 0 and 2. This can be changed in a model with an extra entry in LP
-    std::for_each(this->baseSpineData.begin(), this->baseSpineData.end(), [weightSum, this](BaseSpinePtr synapse){
-        synapse->SetWeight((std::exp(synapse->GetWeightUncoupled())*this->softMaxMultiplier)/weightSum);
-        });
-}
-
-void Morphology::WeightDecay() {
-    if (this->decayWeights) {
-        std::for_each(baseSpineData.begin(), baseSpineData.end(), [this](BaseSpinePtr spine){
-            spine->SetWeight(spine->GetWeightUncoupled() * weightExpDecay);
-        });
-    }
-}
 
 double Morphology::GenerateSynapticWeight(){
     double weight{};

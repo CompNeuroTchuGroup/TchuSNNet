@@ -158,19 +158,18 @@ void AlphaResourceHSTDP::SaveParameters(std::ofstream &wParameterFile, std::stri
                       "alphaI= alphaBasal + alphaStimulus*exp(-dt/alphaStimTau) \n";
 }
 
-int AlphaResourceHSTDP::AllocateABranch(std::vector<int> anteriorBranches) {
+int AlphaResourceHSTDP::CreateBranch(std::vector<int> anteriorBranches) {
     int branchId{this->GenerateBranchId()};
     if (anteriorBranches.empty()) {
-        this->rTBranches.emplace_back(std::make_unique<AlphaBranch>(
-            AlphaBranch(this->synapticGap, this->branchLength, anteriorBranches, branchId, STDPExpDecay,
-                        coopExpDecay))); // This vector should be sorted by ID by default (tested).
-        this->branches.push_back(static_cast<Branch *>(this->rTBranches.back().get()));
+        this->alphaBranches.emplace_back(AlphaBranch(anteriorBranches,this->synapticGap, this->branchLength,  branchId, STDPExpDecay,
+                        coopExpDecay)); // This vector should be sorted by ID by default (tested).
+        this->branches.push_back(static_cast<Branch *>(&this->alphaBranches.back()));
     } else {
         int branchId{this->GenerateBranchId()};
-        this->rTBranches.emplace_back(std::make_unique<AlphaBranch>(
+        this->alphaBranches.emplace_back(
             AlphaBranch(this->synapticGap, this->branchLength, branchId, STDPExpDecay,
-                        coopExpDecay))); // This vector should be sorted by ID by default (tested).
-        this->branches.push_back(static_cast<Branch *>(this->rTBranches.back().get()));
+                        coopExpDecay)); // This vector should be sorted by ID by default (tested).
+        this->branches.push_back(static_cast<Branch *>(&this->alphaBranches.back()));
     }
     return branchId;
 }
@@ -214,8 +213,8 @@ void AlphaResourceHSTDP::Advect() {
         // STDP pot count.
         // Use the count in the effects of synapses for the actual decay for STDP, but the branch vector for detecting
         // the updatable ones WITH DECAY (of alpha, STDP-like)
-        std::for_each(rTBranches.begin(), rTBranches.end(),
-                      [this](RTBranchPtr &branch) { branch->ApplyTracesOnSpinesLTP(); });
+        std::for_each(alphaBranches.begin(), alphaBranches.end(),
+                      [this](AlphaBranch &branch) { branch.ApplyTracesOnSpinesLTP(); });
         // for (const ResourceTraceBranch* const branch : rTBranches){
         //     for (ResourceSpinePtr spine : branch->rBranchSpineData){
         //         if (spine==nullptr){
@@ -228,8 +227,8 @@ void AlphaResourceHSTDP::Advect() {
         // }
     } else if (CheckIfPreSpikeHappened()) { // Checks if all are empty or some are not. MAy be redundant if frequency is
                                             // high enough.
-        std::for_each(rTBranches.begin(), rTBranches.end(), [this](RTBranchPtr &branch) {
-            branch->ApplyTracesOnSpinesLTD(this->GetPostSynapticTrace(), GetLTDBias());
+        std::for_each(alphaBranches.begin(), alphaBranches.end(), [this](AlphaBranch &branch) {
+            branch.ApplyTracesOnSpinesLTD(this->GetPostSynapticTrace(), GetLTDBias());
         });
     }
     // ApplyEffects();
@@ -251,8 +250,8 @@ void AlphaResourceHSTDP::Advect() {
 // }
 
 bool AlphaResourceHSTDP::CheckIfPreSpikeHappened() {
-    return std::any_of(PAR_UNSEQ, rTBranches.begin(), rTBranches.end(),
-                       [](const RTBranchPtr &branch) { return !branch->spikedSpinesInTheBranch.empty(); });
+    return std::any_of(PAR_UNSEQ, alphaBranches.begin(), alphaBranches.end(),
+                       [](const AlphaBranch &branch) { return !branch.spikedSpinesInTheBranch.empty(); });
 }
 
 // bool BranchedResourceHeteroSTDP::CheckIfThereIsPairing(RBranchPtr branch, int synapseIDinBranch)
@@ -265,7 +264,7 @@ bool AlphaResourceHSTDP::CheckIfPreSpikeHappened() {
 //     pairingCounter<this->timeKernelLength;})>2;
 // }
 
-void AlphaResourceHSTDP::ApplyCoopTraceSpatialProfile(int branchSpineID, AlphaBranch *const currentBranch) {
+void AlphaResourceHSTDP::ApplyCoopTraceSpatialProfile(int branchSpineID, AlphaBranch &const currentBranch) {
     // This function will evaluate all spines within kernel distance of the synapse spine and queue the alpha stimm
     // effects for each pairing found (queue waiting for postspike) All reference declarations are to reduce indexing
     // times in containers int spinePositionBranchIndex;//,absDistance,timeStepDifference;
@@ -273,8 +272,8 @@ void AlphaResourceHSTDP::ApplyCoopTraceSpatialProfile(int branchSpineID, AlphaBr
     // std::set<int>& kernelizedSynapses = currentBranch->updatedSynapseSpines;
     // int branchSlots{static_cast<int>(currentBranch->branchSlots)};
     //  ResourceSynapseSpine* spikedSpine = currentBranch->rBranchSpineData.at(branchSpineID);
-    std::vector<double>::iterator forwardBegin = currentBranch->cooperativityTraces.begin() + (branchSpineID + 1);
-    std::vector<double>::iterator forwardEnd   = currentBranch->cooperativityTraces.end();
+    std::vector<double>::iterator forwardBegin = currentBranch.cooperativityTraces.begin() + (branchSpineID + 1);
+    std::vector<double>::iterator forwardEnd   = currentBranch.cooperativityTraces.end();
     std::transform(PAR_UNSEQ, forwardBegin, forwardEnd, spatialProfile.begin(), forwardBegin, std::plus<double>());
     // Foward loop
     //  for (int positionIndex : std::ranges::views::iota(1,branchSlots-branchSpineID)){//We loop from contiguous spine
@@ -346,8 +345,8 @@ void AlphaResourceHSTDP::ApplyCoopTraceSpatialProfile(int branchSpineID, AlphaBr
     //      // }
     //  }
     std::vector<double>::reverse_iterator reverseBegin =
-        currentBranch->cooperativityTraces.rbegin() + (currentBranch->cooperativityTraces.size() - branchSpineID);
-    std::vector<double>::reverse_iterator reverseEnd = currentBranch->cooperativityTraces.rend();
+        currentBranch.cooperativityTraces.rbegin() + (currentBranch.cooperativityTraces.size() - branchSpineID);
+    std::vector<double>::reverse_iterator reverseEnd = currentBranch.cooperativityTraces.rend();
     std::transform(PAR_UNSEQ, reverseBegin, reverseEnd, spatialProfile.begin(), reverseBegin, std::plus<double>());
     // for (int positionIndex : std::ranges::views::iota(1,branchSpineID+1)){ //And then use branchSynapseID+gapindex
     // //We loop from contiguous spine until spine 0, from the index being branchID-branchID
@@ -379,47 +378,41 @@ void AlphaResourceHSTDP::Reset() {
     // the general upkeep Check increase beta resources here? Not necessary anymore Clear both sets in every branch DONE
     // REVIEW if there are any remaining things to put in this function
     // ClearSynapseSets();
-    std::for_each(rTBranches.begin(), rTBranches.end(), [this](RTBranchPtr &branch) { ComputeWeights(branch.get()); });
+    std::for_each(alphaBranches.begin(), alphaBranches.end(), [this](AlphaBranch &branch) { ComputeWeights(branch); });
     DecayAllTraces();
     // DeleteEffects();
 }
 
-void AlphaResourceHSTDP::ComputeAlphas(const AlphaBranch *const branch) {
+void AlphaResourceHSTDP::ComputeAlphas(AlphaBranch& const branch) {
     // Here we just need to apply all delta alphas, decay them (before makes more sense, the bump has delta t zero.),
     // sum the result to stationary alpha, then update alpha sums? Yes
-    std::for_each(branch->rBranchSpineData.begin(), branch->rBranchSpineData.end(),
-                  [](ResourceSynapseSpine *const spine) {
-                      if (spine != nullptr) {
-                          spine->ComputeAlphaResources();
-                      }
+    std::for_each(branch.alphaSpines.begin(), branch.alphaSpines.end(),
+                  [](AlphaSynapseSpine& spine) {
+                    spine.ComputeAlphaResources();
                   });
 }
 
-void AlphaResourceHSTDP::ComputeWeights(AlphaBranch *const branch) { // This one is the one we call for every branch {
+void AlphaResourceHSTDP::ComputeWeights(AlphaBranch& const branch) { // This one is the one we call for every branch {
     ComputeAlphaSums(branch);
-    branch->resourceFactor =
+    branch.resourceFactor =
         betaResourcePool /
         (omegaOffset +
-         branch->alphaTotalSum); // IMPORTANT, if we make beta non-constant, beta must be referenced from the branch
-    std::for_each(branch->rBranchSpineData.begin(), branch->rBranchSpineData.end(),
-                  [branch](ResourceSynapseSpine *const spine) {
+         branch.alphaTotalSum); // IMPORTANT, if we make beta non-constant, beta must be referenced from the branch
+    std::for_each(branch.spinePtrPosition.begin(), branch.spinePtrPosition.end(),
+                  [branch](AlphaSynapseSpine *const spine) {
                       if (spine != nullptr) {
-                          spine->ComputeWeight(branch->resourceFactor);
+                          spine->ComputeWeight(branch.resourceFactor);
                       }
                   });
 }
 
-void AlphaResourceHSTDP::ComputeAlphaSums(AlphaBranch *const branch) {
+void AlphaResourceHSTDP::ComputeAlphaSums(AlphaBranch& const branch) {
     ComputeAlphas(branch);
-    branch->alphaTotalSum = std::accumulate(branch->rBranchSpineData.begin(), branch->rBranchSpineData.end(), 0.0,
-                                            [](double accumulator, const ResourceSynapseSpine *const spine) {
-                                                if (spine != nullptr) {
-                                                    return accumulator + spine->GetAlphaResources();
-                                                } else {
-                                                    return accumulator;
-                                                }
-                                            });
-}
+    branch.alphaTotalSum = std::accumulate(branch.alphaSpines.begin(), branch.alphaSpines.end(), 0.0,
+                                            [](double accumulator, const AlphaSynapseSpine& const spine) {
+                                                    return accumulator + spine.GetAlphaResources();
+                                                });
+};
 // void AlphaResourceHSTDP::DeleteEffects() {
 //     std::for_each(resourceSpineData.begin(), resourceSpineData.end(), [](ResourceSpinePtr spine){
 //         spine->CullStimulusVectors();
@@ -427,7 +420,7 @@ void AlphaResourceHSTDP::ComputeAlphaSums(AlphaBranch *const branch) {
 //     });
 // }
 void AlphaResourceHSTDP::DecayAllTraces() {
-    std::for_each(rTBranches.begin(), rTBranches.end(), [](RTBranchPtr &branch) { branch->DecayAllTraces(); });
+    std::for_each(alphaBranches.begin(), alphaBranches.end(), [](AlphaBranch &branch) { branch.DecayAllTraces(); });
     // std::for_each(resourceSpineData.begin(), resourceSpineData.end(), [](ResourceSpinePtr spine){
     //     spine->TickStimulusCounts();
     // });
@@ -454,11 +447,11 @@ void AlphaResourceHSTDP::RecordExcitatoryPreSpike(int spikedSpineId) {
     // This function is NOT DELAY COMPATIBLE (careful with the delays in synapse objects)
     // Here only record, afterwards we do the checks
     // Not going down the virtual path because inefficient
-    ResourceSynapseSpine *synapseSpine = resourceSpineData.at(spikedSpineId).get();
-    AlphaBranch          *branch       = rTBranches.at(synapseSpine->GetBranchId()).get();
+    AlphaSynapseSpine *synapseSpine = alphaSpines.at(spikedSpineId);
+    AlphaBranch&          branch       = alphaBranches.at(synapseSpine->GetBranchId());
     int                   branchSpinePosition{synapseSpine->GetBranchPositionId()};
-    branch->spikedSpinesInTheBranch.push_back(branchSpinePosition);
-    branch->preSynapticTraces.at(branchSpinePosition) += 1;
+    branch.spikedSpinesInTheBranch.push_back(branchSpinePosition);
+    branch.preSynapticTraces.at(branchSpinePosition) += 1;
     ApplyCoopTraceSpatialProfile(branchSpinePosition, branch);
     // branch->cooperativityTraces.at(synapseSpine->GetBranchPositionId())+=1;
     this->totalPreSpikes++;
@@ -468,7 +461,7 @@ void AlphaResourceHSTDP::PostConnectSetUp() {
     BranchedMorphology::PostConnectSetUp();
     if (distributeWeights) {
         std::uniform_real_distribution<double> weightDistribution(-alphaBasal, alphaBasal);
-        for (ResourceSpinePtr &spine : resourceSpineData) {
+        for (AlphaSpinePtr spine : alphaSpines) {
             spine->SetAlphaStim(weightDistribution(generator));
         }
     }
@@ -478,20 +471,17 @@ BaseSpinePtr AlphaResourceHSTDP::AllocateNewSynapse(const BranchTargeting &branc
     // here I have to set the maxcount of the spine to maxCount too
     // Here sum over the branches.????
     // And cast the proper pointers to the proper baseSpineData vectors.
-    this->resourceSpineData.push_back(std::make_unique<ResourceSynapseSpine>());
-    ResourceSynapseSpine *newSpine = resourceSpineData.back().get();
-    // Step weights has been removed fron here
-    // newSynapse->SetWeight(this->GenerateSynapticWeight());
-
-    // this->weightsSum += newSynapse->GetWeight();
-    newSpine->SetIdInMorpho(this->spineIdGenerator++);
-    // Branch
     int branch{AllocateBranch(branchTarget)};
     int position{PopSynapseSlotFromBranch(branch, branchTarget.firstSlotTrueLastSlotFalse)};
+    alphaBranches.at(branch).alphaSpines.push_back(AlphaSynapseSpine());
+    AlphaSynapseSpine *newSpine = &alphaBranches.at(branch).alphaSpines.back();
+    this->alphaSpines.push_back(newSpine);
+    // this->weightsSum += newSynapse->GetWeight();
+    newSpine->SetIdInMorpho(this->baseSpineData.size());//this->spineIdGenerator++
+    // Branch
     newSpine->SetBranchPositionId(position);
     newSpine->SetBranchId(branch);
-    newSpine->SetDistanceFromNode(position *
-                                  branches.at(branch)->synapticGap); // This has to be updated if we switch to double
+
     newSpine->SetAlphaStimBump(baseAlphaStimBump);
     newSpine->SetBiasLTD(biasLTD);
     newSpine->SetAlphaBasal(alphaBasal);

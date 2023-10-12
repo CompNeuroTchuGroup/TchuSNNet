@@ -241,5 +241,5 @@ double SynapseSample::GetCumulatedDV(PopInt targetPop, PopInt sourcePop) const {
 }
 
 NeuronInt SynapseSample::GetNoTargetedNeurons(PopInt targetPop,PopInt sourcePop, NeuronInt sourceNeuron) const {
-    return synapses.at(targetPop).at(sourcePop)->GetNoTargetedNeurons(sourceNeuron);
+    return synapses.at(targetPop).at(sourcePop)->GetNoTargetedSynapses(sourceNeuron);
 }

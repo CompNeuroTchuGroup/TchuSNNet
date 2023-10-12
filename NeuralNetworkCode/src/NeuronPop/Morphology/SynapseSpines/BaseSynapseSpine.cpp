@@ -13,7 +13,7 @@
 //    return (spine1->idInMorpho<spine2->idInMorpho);
 //}
 
-void BaseSynapseSpine::SetRelativeCouplingStrength(double rCouplingStrength){
-    std::lock_guard<std::mutex> _guardedMutexLock(_relativeCouplingMutex);//I do not remember why this is necessary. There should be no data race conditions 
-    couplingStrength=rCouplingStrength;
-}
+// void BaseSynapseSpine::SetRelativeCouplingStrength(double rCouplingStrength){
+//     // std::lock_guard<std::mutex> _guardedMutexLock(_relativeCouplingMutex);//I do not remember why this is necessary. There should be no data race conditions 
+//     couplingStrength=rCouplingStrength;
+// }

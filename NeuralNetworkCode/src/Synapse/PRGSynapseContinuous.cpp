@@ -63,7 +63,7 @@ std::vector<double> PRGSynapseContinuous::GetSynapticState(NeuronInt sourceNeuro
     double spikeCounter{ 0 }; // XY{0},
     double lMinus{ 0 };
     // double x_minus{ 0 }, y_minus{ 0 }, ; //state of x, y and l before the spike was processed
-    NeuronInt noTargetNeurons{this->GetNoTargetedNeurons(sourceNeuron)};
+    NeuronInt noTargetNeurons{this->GetNoTargetedSynapses(sourceNeuron)};
     double Jsum = 0;
 
     for (NeuronInt targetNeuron : std::ranges::views::iota(0, noTargetNeurons)) {
@@ -93,7 +93,7 @@ std::vector<double> PRGSynapseContinuous::GetSynapticState(NeuronInt sourceNeuro
         Jsum += GetDistributionJ(targetNeuron,sourceNeuron);
     }
 
-    value.at(0) = Jsum/static_cast<double>(this->GetNoTargetedNeurons(sourceNeuron));
+    value.at(0) = Jsum/static_cast<double>(this->GetNoTargetedSynapses(sourceNeuron));
 	//value[0] = GetCouplingStrength()*static_cast<double>(this->GetNumberOfPostsynapticTargets(pre_neuron));
 
 	value.at(1) = sumXMinus;//the synapses where the spike was transmitted a neurotransmitter count reset to 0
@@ -111,7 +111,7 @@ std::vector<double> PRGSynapseContinuous::AdvectSpikers (NeuronInt spiker) {
     double exptf;
     double exptd        = exp(-dtLastSpike / tauD_MongilloC);
     double exptl        = exp(-dtLastSpike / tauL_PRG);
-    std::vector<double> currents(GetNoTargetedNeurons(spiker), 0.0);
+    std::vector<double> currents(GetNoTargetedSynapses(spiker), 0.0);
     //double exptf_Dtauf  = exp(-dt_lastSpike / (tauF_Mongillo+Delta_tau_f));
 	//double exp_LPA2unbiding = exp(-infoGlobal->dtTimestep / tau_l);
 	//double delta_l; //time at which l switches back to 0 (randomly generated at each synapse)
@@ -143,11 +143,10 @@ std::vector<double> PRGSynapseContinuous::AdvectSpikers (NeuronInt spiker) {
 double PRGSynapseContinuous::TransmitSpike(NeuronInt targetNeuron,NeuronInt spiker){
 
     // Spike is transmitted and neurotransmitter is released
-    double current{MongilloSynapseContinuous::TransmitSpike(targetNeuron, spiker)};
 
     // LPA2 receptor is filled relative to the strength of the transmitted spike
     l_PRG.at(spiker).at(targetNeuron) += M_PRG*y_MongilloC.at(spiker).at(targetNeuron)*x_MongilloC.at(spiker).at(targetNeuron)*(1-l_PRG.at(spiker).at(targetNeuron));
-    return current;
+    return MongilloSynapseContinuous::TransmitSpike(targetNeuron, spiker);
 }
 
 

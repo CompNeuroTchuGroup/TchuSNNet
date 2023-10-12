@@ -4,16 +4,12 @@ PModelSynapse::PModelSynapse(PopPtr targetPop, PopPtr sourcePop, GlobalSimInfo *
     hasPlasticityModel=true;
 }
 std::vector<double> PModelSynapse::AdvectSpikers(NeuronInt spiker) {
-    NeuronInt noTargets{GetNoTargetedNeurons(spiker)};
+    NeuronInt noTargets{GetNoTargetedSynapses(spiker)};
     std::vector<double> currents(noTargets,0.0);
     for(NeuronInt targetNeuronIndex : std::ranges::views::iota (0, noTargets)){
     // for(NeuronInt targetNeuronIndex{0};targetNeuronIndex<noTargets;targetNeuronIndex++){
-        double current =  targetSpineList.at(spiker).at(targetNeuronIndex).second->GetWeight(); //If confused about syntax, talk to Antoni
-
         this->targetPop->RecordExcitatorySynapticSpike(targetSpineList.at(spiker).at(targetNeuronIndex).first, targetSpineList.at(spiker).at(targetNeuronIndex).second->GetIdInMorpho());
-        
-        currents.at(targetNeuronIndex)+=current;
-        this->cumulatedDV   += current;
+        currents.at(targetNeuronIndex)=targetSpineList.at(spiker).at(targetNeuronIndex).second->GetWeight();
     }
     return currents;
 }
@@ -54,7 +50,7 @@ std::vector<double> PModelSynapse::GetSynapticState(NeuronInt sourceNeuron) cons
     Jsum = std::accumulate(targetSpineList.at(sourceNeuron).begin(), targetSpineList.at(sourceNeuron).end(), 0.0, [](double Jsum, std::pair<NeuronInt, BaseSpinePtr> synapse){
         return Jsum + synapse.second->GetWeight();
     });
-    value.at(0) = Jsum/static_cast<double>(this->GetNoTargetedNeurons(sourceNeuron));
+    value.at(0) = Jsum/static_cast<double>(this->GetNoTargetedSynapses(sourceNeuron));
     //value[0] = GetCouplingStrength()*static_cast<double>(this->GetNumberOfPostsynapticTargets(pre_neuron));
     return value;
 }

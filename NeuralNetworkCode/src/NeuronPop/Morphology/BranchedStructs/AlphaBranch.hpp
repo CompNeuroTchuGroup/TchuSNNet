@@ -5,11 +5,13 @@
 #define _ALPHA_BRANCH_STRUCT_HEADER_
 
 #include "./Branch.hpp"
+#include "../SynapseSpines/AlphaSynapseSpine.hpp"
 
 struct AlphaBranch : public Branch {
 
     //Synapse access
-    std::vector<ResourceSynapseSpine*> rBranchSpineData;//CAREFUL! THIS VECTOR IS NOT SORTED AT ANY POINT by SynapseBranchID
+    std::vector<AlphaSynapseSpine> alphaSpines;
+    std::vector<AlphaSpinePtr> spinePtrPosition;//CAREFUL! THIS VECTOR IS NOT SORTED AT ANY POINT by SynapseBranchID
     double alphaTotalSum{};
     double resourceFactor{};
     std::vector<double> preSynapticTraces;//Here is where we look for counts under 10
@@ -23,7 +25,7 @@ struct AlphaBranch : public Branch {
         //Do we clear() after a trigger or not? Most of the function would be the same, or put some refractory period UNRESOLVED
         //Here we could create a false history of plasticity events
     //Methods
-    AlphaBranch(double gap, double branchLength, std::vector<int>anteriorBranches, int branchId, double preSynTraceDecay, double coopTraceDecay);
+    AlphaBranch(std::vector<int>anteriorBranches,double gap, double branchLength,  int branchId, double preSynTraceDecay, double coopTraceDecay);
     AlphaBranch(double gap, double branchLength, int branchId, double preSynTraceDecay, double coopTraceDecay);    
     void PostConnectSetUp(std::vector<BranchedSpinePtr> spineData) override;
         //Count related functions

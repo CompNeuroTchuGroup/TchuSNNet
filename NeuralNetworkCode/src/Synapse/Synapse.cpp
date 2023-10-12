@@ -228,8 +228,6 @@ void Synapse::AllocateSynapseWithPlasticity(NeuronInt targetNeuron, NeuronInt so
             // PostConnectFunction (unscaled as of now), as J distribution is
             // not written yet in flow
         }
-        synapseSpinePtr->SetPreNeuronId(sourceNeuron);
-        synapseSpinePtr->SetPostNeuronId(targetNeuron);
         synapseSpinePtr->SetPreNeuronPop(this->GetSourcePopID());
 
     } else {
@@ -314,13 +312,16 @@ void Synapse::ResetWaitingMatrixEntry() {
     }
 }
 
-void Synapse::ReadWaitingMatrixEntry(std::vector<double> &synaptic_dV, std::mutex &_syndVMutex) const {
+void Synapse::ReadWaitingMatrixEntry(std::vector<double> &synaptic_dV, std::mutex &_syndVMutex) {
     long                        index{(this->infoGlobal->timeStep) % (Dmax + 1)};
+    double                      currentPlaceholder{};
     std::lock_guard<std::mutex> _lockMutex(_syndVMutex);
     for (NeuronInt targetNeuron : std::ranges::views::iota(0, GetNoTargetNeurons())) {
-        synaptic_dV.at(targetNeuron) += waitingMatrix.at(targetNeuron).at(index); // This is the only non-threadsafe
-                                                                                  // line for par, while par_unseq I
-                                                                                  // think it is best to leave alone
+        currentPlaceholder = waitingMatrix.at(targetNeuron).at(index);
+        this->cumulatedDV += currentPlaceholder;//This one is not threadsafe either
+        synaptic_dV.at(targetNeuron) += currentPlaceholder; // This is the only non-threadsafe
+                                                            // line for par, while par_unseq I
+                                                            // think it is best to leave alone
     }
 }
 
@@ -436,7 +437,7 @@ void Synapse::SetDistributionD() {
     // std::cout << "printing D_distribution: \n";
     for (NeuronInt sourceNeuron : std::ranges::views::iota(0, GetNoSourceNeurons())) {
         if (!targetSpineList.at(sourceNeuron).empty()) {
-            noTargets = static_cast<NeuronInt>(GetNoTargetedNeurons(sourceNeuron));
+            noTargets = static_cast<NeuronInt>(GetNoTargetedSynapses(sourceNeuron));
             DelayDDistribution.at(sourceNeuron).resize(noTargets, 0);
             if (ignoreJDParameters) {
                 continue;

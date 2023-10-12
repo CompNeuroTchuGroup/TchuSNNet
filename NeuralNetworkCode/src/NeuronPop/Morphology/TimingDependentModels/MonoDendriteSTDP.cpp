@@ -49,9 +49,9 @@ void MonoDendriteSTDP::Advect() {
     // update for pre-post effects for all synapses
     if (this->postSpiked){
         for (const CoopSpinePtr& spine: this->spineDataCoop) {
-            if (spine->GetLastSpike() > 0 && this->integratePreSpike.at(spine->GetIdInMorpho())) {
-                this->UpdateLTP(spine->GetIdInMorpho());
-                this->integratePreSpike.at(spine->GetIdInMorpho()) = false;
+            if (spine->GetLastSpike() > 0 && this->integratePreSpike.at(spine->idInMorpho)) {
+                this->UpdateLTP(spine->idInMorpho);
+                this->integratePreSpike.at(spine->idInMorpho) = false;
             }
         }
         this->postSpiked=false;
@@ -59,7 +59,20 @@ void MonoDendriteSTDP::Advect() {
 
     this->Reset();
 }
-
+void MonoDendriteSTDP::NormalizeWeights() {
+    if (this->weightNormalization == HardNormalization) {
+        this->HardNormalize();
+    } else if (this->weightNormalization == SoftMaxNormalization) {
+        this->SoftMaxNormalize();
+    }
+}
+void MonoDendriteSTDP::WeightDecay() {
+    if (this->decayWeights) {
+        std::for_each(baseSpineData.begin(), baseSpineData.end(), [this](BaseSpinePtr spine){
+            spine->weight=(spine->GetWeightUncoupled() * weightExpDecay);
+        });
+    }
+}
 void MonoDendriteSTDP::ThetaDecay() {
     std::for_each(spineDataCoop.begin(), spineDataCoop.end(), [this](const CoopSpinePtr& spine){
         spine->SetTheta(spine->GetTheta() * thetaExpDecay);
@@ -387,7 +400,33 @@ void MonoDendriteSTDP::Reset() {
     std::fill(this->spikedSpines.begin(),this->spikedSpines.end(), false);
     this->spikedSpinesId.clear();
 }
+void MonoDendriteSTDP::HardNormalize() {
+    for (BaseSpinePtr spine: this->baseSpineData) {
+        spine->weight=(std::max(minWeight, std::min(maxWeight, spine->GetWeightUncoupled())));
+    }
+}
 
+void MonoDendriteSTDP::SoftMaxNormalize() {
+
+    //Softmax normalization (NNs version)
+    // maxWeights = std::numeric_limits<double>::min();
+    // for (auto& syn : this->baseSpineData) {
+    //     maxWeights = std::max(maxWeights, syn->GetWeight());
+    // }
+
+    double weightSum = std::accumulate(this->baseSpineData.begin(), this->baseSpineData.end(), 0.0, [] (double weightSum, BaseSpinePtr synapse){
+        return weightSum += std::exp(synapse->GetWeightUncoupled()); 
+        });
+    // for (auto& syn : this->baseSpineData) {
+    //     sumWeights += std::exp(syn->GetWeight() - maxWeights);
+    // }
+
+    //It is not clear if the following lines are correct in Softmax normalization. There was no reference previously, so Toni assumed the normalization is the one done in NNs.
+    //As for the multiplication by two, this is because the weights in Saif models are normally distributed between 0 and 2. This can be changed in a model with an extra entry in LP
+    std::for_each(this->baseSpineData.begin(), this->baseSpineData.end(), [weightSum, this](BaseSpinePtr synapse){
+        synapse->weight=((std::exp(synapse->GetWeightUncoupled())*this->softMaxMultiplier)/weightSum);
+        });
+}
 BaseSpinePtr MonoDendriteSTDP::AllocateNewSynapse(const BranchTargeting& branchTargeting) {
 
     std::uniform_real_distribution<double> distribution(0.0,2.0);
@@ -413,16 +452,16 @@ BaseSpinePtr MonoDendriteSTDP::AllocateNewSynapse(const BranchTargeting& branchT
             if (static_cast<int>(spineDataCoop.size()) > weightStepBoundary.at(currWightStepId)) {
                 currWightStepId++;
             }
-            newSpine->SetWeight(weightStepValue.at(currWightStepId));
+            newSpine->weight=(weightStepValue.at(currWightStepId));
         } else {
             if (distributeWeights) {
-                newSpine->SetWeight(distribution(generator));
+                newSpine->weight=(distribution(generator));
             } else {
-                newSpine->SetWeight(this->initialWeights); // assuming a range of weight between 0 and 2, weight is initialized to midpoint: 1
+                newSpine->weight=(this->initialWeights); // assuming a range of weight between 0 and 2, weight is initialized to midpoint: 1
             }
         }
         //this->weightsSum += newSynapse->GetWeight();
-        newSpine->SetIdInMorpho(this->spineIdGenerator++);
+        newSpine->idInMorpho=(this->spineIdGenerator++);
         // newSynapse->postNeuronId = ? // set in the Synapse object that calls for a new synapse
         // newSynapse->preNeuronId = ? // set in the Synapse object that calls for a new synapse
         this->baseSpineData.push_back(static_cast<BaseSpinePtr>(newSpine));

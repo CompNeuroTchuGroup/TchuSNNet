@@ -32,12 +32,10 @@ void ExponentialCurrentSynapse::ResetcumulatedDV() {
 }
 
 std::vector<double> ExponentialCurrentSynapse::AdvectSpikers (NeuronInt spiker){
-    NeuronInt noTargets{GetNoTargetedNeurons(spiker)};
+    NeuronInt noTargets{GetNoTargetedSynapses(spiker)};
     std::vector<double> currents(noTargets);
     for(NeuronInt targetNeuron : std::ranges::views::iota (0, noTargets)){
-		double calcCurrent = GetCouplingStrength(targetNeuron, spiker)*infoGlobal->dtTimestep/tauConstant;
-		currents.at(targetNeuron)+=calcCurrent;
-		this->cumulatedDV += calcCurrent;
+		currents.at(targetNeuron)=GetCouplingStrength(targetNeuron, spiker)*infoGlobal->dtTimestep/tauConstant;
 	}
     return currents;
 }
@@ -54,11 +52,11 @@ std::vector<double> ExponentialCurrentSynapse::GetSynapticState(NeuronInt source
     std::vector<double> value(1);
     // get average coupling strength
     double Jsum = 0;
-    for(NeuronInt targetNeuron : std::ranges::views::iota(0,this->GetNoTargetedNeurons(sourceNeuron))){
+    for(NeuronInt targetNeuron : std::ranges::views::iota(0,this->GetNoTargetedSynapses(sourceNeuron))){
         Jsum += GetDistributionJ(targetNeuron,sourceNeuron);
     }
 
-    value.at(0) = Jsum/static_cast<double>(this->GetNoTargetedNeurons(sourceNeuron));
+    value.at(0) = Jsum/static_cast<double>(this->GetNoTargetedSynapses(sourceNeuron));
     //value[0] = GetCouplingStrength()*static_cast<double>(this->GetNumberOfPostsynapticTargets(pre_neuron));
     return value;
 }

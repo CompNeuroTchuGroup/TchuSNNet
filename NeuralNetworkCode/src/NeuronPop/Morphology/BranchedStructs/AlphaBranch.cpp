@@ -2,15 +2,15 @@
 
 #include "AlphaBranch.hpp"
 
-AlphaBranch::AlphaBranch(double gap, double branchLength, std::vector<int> anteriorBranches, int branchId,
+AlphaBranch::AlphaBranch(std::vector<int> anteriorBranches,double gap, double branchLength,  int branchId,
                          double preSynTraceDecay, double coopTraceDecay)
-    : Branch(gap, branchLength, anteriorBranches, branchId), rBranchSpineData(branchSlots, nullptr),
+    : Branch(anteriorBranches,gap, branchLength,  branchId), spinePtrPosition(branchSlots, nullptr),
       preSynapticTraces(branchSlots), cooperativityTraces(branchSlots), preSynTraceDecay{preSynTraceDecay},
       coopTraceDecay{coopTraceDecay} {
 }
 
 AlphaBranch::AlphaBranch(double gap, double branchLength, int branchId, double preSynTraceDecay, double coopTraceDecay)
-    : Branch(gap, branchLength, branchId), rBranchSpineData(branchSlots, nullptr), preSynapticTraces(branchSlots),
+    : Branch(gap, branchLength, branchId), spinePtrPosition(branchSlots, nullptr), preSynapticTraces(branchSlots),
       cooperativityTraces(branchSlots), preSynTraceDecay{preSynTraceDecay}, coopTraceDecay{coopTraceDecay} {
 }
 
@@ -21,7 +21,7 @@ void AlphaBranch::PostConnectSetUp(std::vector<BranchedSpinePtr> spineData) {
     // function.
     for (BranchedSpinePtr synapse : spineData) {
         if (synapse->GetBranchId() == branchId) {
-            rBranchSpineData.at(synapse->GetBranchPositionId()) = static_cast<ResourceSynapseSpine *>(synapse);
+            spinePtrPosition.at(synapse->GetBranchPositionId()) = static_cast<AlphaSynapseSpine *>(synapse);
         }
     }
     // std::sort(resouceBranchSpineData.begin(), resouceBranchSpineData.end(),
@@ -37,8 +37,8 @@ void AlphaBranch::ApplyTracesOnSpinesLTP() {
     // equation is to make the trace heavily dependant on the presynaptic trace
     // as no glutamate means no calcium on postspike.
     for (size_t preSynIndex : std::ranges::views::iota(0u, branchSlots)) {
-        if (rBranchSpineData.at(preSynIndex) != nullptr) {
-            rBranchSpineData.at(preSynIndex)
+        if (spinePtrPosition.at(preSynIndex) != nullptr) {
+            spinePtrPosition.at(preSynIndex)
                 ->AddTraceToAlpha((1 + cooperativityTraces.at(preSynIndex)) *
                                   preSynapticTraces.at(preSynIndex)); // 1 can be substituted
                                                                       // with presynTrace
@@ -54,8 +54,8 @@ void AlphaBranch::ApplyTracesOnSpinesLTD(double postSynapticTrace, double biasLT
     // make the trace heavily dependant on the presynaptic trace as no
     // glutamate means no calcium on postspike.
     for (int preSynIndex : spikedSpinesInTheBranch) {
-        if (rBranchSpineData.at(preSynIndex) != nullptr) {
-            rBranchSpineData.at(preSynIndex)
+        if (spinePtrPosition.at(preSynIndex) != nullptr) {
+            spinePtrPosition.at(preSynIndex)
                 ->AddTraceToAlpha(-(biasLTD - cooperativityTraces.at(preSynIndex)) *
                                   postSynapticTrace); // Negative to get LTD//1 can
                                                       // be substituted with

@@ -107,7 +107,7 @@ public:
     
     //All of the following functions throw to ease the virtualization, but it is a bad coding practice
 
-    void RecordExcitatorySynapticSpike(NeuronInt neuronId, NeuronInt spineID){this->morphology.at(neuronId)->RecordExcitatoryPreSpike(spineID);}
+    void RecordExcitatorySynapticSpike(NeuronInt neuronId, int spineID){this->morphology.at(neuronId)->RecordExcitatoryPreSpike(spineID);}
     void RecordPostSpike(NeuronInt spikerID) {this->morphology.at(spikerID)->RecordPostSpike();}
 
     BaseSpinePtr AllocateNewSynapse(NeuronInt neuronId, BranchTargeting& targeting);

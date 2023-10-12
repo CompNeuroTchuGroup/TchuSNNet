@@ -12,7 +12,7 @@
 #include <numeric>
 #include <unordered_map>
 
-class ResourceSynapseSpine : public BranchedSynapseSpine {
+class AlphaSynapseSpine : public BranchedSynapseSpine {
 
     protected:
     //Resource model N and K.
@@ -52,8 +52,8 @@ class ResourceSynapseSpine : public BranchedSynapseSpine {
     // bool updated{false};
     
     public:
-    ResourceSynapseSpine() = default;
-    ~ResourceSynapseSpine() override = default;
+    AlphaSynapseSpine() = default;
+    ~AlphaSynapseSpine() override = default;
     //Getters
     double GetAlphaResources() const {return alphaResources;}
     // bool GetDepressionFlagSTDP(){return depressionFlagSTDP;}

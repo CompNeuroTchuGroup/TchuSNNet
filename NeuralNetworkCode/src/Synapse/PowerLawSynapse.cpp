@@ -27,9 +27,7 @@ std::vector<double> PowerLawSynapse::AdvectSpikers (NeuronInt spiker) {
 	double exponent{pow(averageFrequency, kExponent_PLaw)};
 	std::vector<double> currents(targetSpineList.at(spiker).size());
 	for (NeuronInt targetNeuron : std::ranges::views::iota(0, static_cast<NeuronInt>(targetSpineList.at(spiker).size()))) {
-		double couplingStrength = GetCouplingStrength(targetNeuron, spiker)* exponent;
-		currents.at(targetNeuron) = couplingStrength;//No plus equal because the currents vector is based on indexes, not actual neuron ids
-		this->cumulatedDV += couplingStrength;
+		currents.at(targetNeuron) = GetCouplingStrength(targetNeuron, spiker)* exponent;//No plus equal because the currents vector is based on indexes, not actual neuron ids
 	}
 	return currents;
 }
@@ -73,10 +71,10 @@ std::vector<double> PowerLawSynapse::GetSynapticState(NeuronInt sourceNeuron) co
 	std::vector<double> synapticState(1);
 	double Jsum = 0;
 	// get average coupling strength
-	for (NeuronInt targetNeuron : std::ranges::views::iota(0, this->GetNoTargetedNeurons(sourceNeuron))) {
+	for (NeuronInt targetNeuron : std::ranges::views::iota(0, this->GetNoTargetedSynapses(sourceNeuron))) {
 		Jsum += GetDistributionJ(targetNeuron,sourceNeuron);
 	}
-	synapticState.at(0) = Jsum / static_cast<double>(this->GetNoTargetedNeurons(sourceNeuron));
+	synapticState.at(0) = Jsum / static_cast<double>(this->GetNoTargetedSynapses(sourceNeuron));
 	//value[0] = GetCouplingStrength()*static_cast<double>(this->GetNumberOfPostsynapticTargets(pre_neuron));
 	return synapticState;
 }

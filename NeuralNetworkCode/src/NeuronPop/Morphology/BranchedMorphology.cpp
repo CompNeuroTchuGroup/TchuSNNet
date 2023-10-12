@@ -145,8 +145,7 @@ void BranchedMorphology::SetUpBranchedMorphology() {
     // them in the recursive function call.
     int remainingBranchings{static_cast<int>(std::floor(std::log2(noBranches))) - 1};
     int remainingBranches{noBranches--};
-    int branchId{this->GenerateBranchId()};
-    this->branches.push_back(new Branch(this->synapticGap, this->branchLength, branchId));
+    CreateBranch(std::vector<int>());
     if (branchingTreePattern) {
         SetUpBranchingTree(remainingBranches, remainingBranchings);
     } else {
@@ -358,7 +357,7 @@ void BranchedMorphology::SetUpBranchingTree(int &remainingBranches, int remainin
         (void)iteration;
         remainingBranches--;
         if (remainingBranches > 0) {
-            int branchId{AllocateABranch(anteriorBranches)};
+            int branchId{CreateBranch(anteriorBranches)};
             if (remainingBranchings > 0) {
                 std::vector<int> anteriorBranchesCopy(anteriorBranches);
                 anteriorBranchesCopy.push_back(branchId);
@@ -380,7 +379,7 @@ void BranchedMorphology::SetUpBranchingBrush(int &remainingBranches, int &remain
         (void)iteration;
         remainingBranches--;
         if (remainingBranches > 0) {
-            int branchId{AllocateABranch(anteriorBranches)};
+            int branchId{CreateBranch(anteriorBranches)};
             if (remainingBranchings > 0) {
                 std::vector<int> anteriorBranchesCopy(anteriorBranches);
                 anteriorBranchesCopy.push_back(branchId);
@@ -394,7 +393,7 @@ void BranchedMorphology::SetUpBranchingBrush(int &remainingBranches, int &remain
 void BranchedMorphology::SetUpRadialBranching(int &remainingBranches) {
     for (int branchNumber : std::ranges::views::iota(0, remainingBranches)) {
         (void)branchNumber;
-        (void)AllocateABranch(std::vector<int>());
+        (void)CreateBranch(std::vector<int>());
         // Constructor here
     }
 }

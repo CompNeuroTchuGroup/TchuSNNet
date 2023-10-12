@@ -1,38 +1,38 @@
 //
 // Created by Antoni Bertolin on 14.06.23
 //
-#include "ResourceSynapseSpine.hpp"
+#include "AlphaSynapseSpine.hpp"
 
 
 
-std::vector<double> ResourceSynapseSpine::GetIndividualSynapticProfile() const
+std::vector<double> AlphaSynapseSpine::GetIndividualSynapticProfile() const
 {
     std::vector<double> dataArray(5);
     dataArray.at(0) = this->branchId;
     dataArray.at(1) = this->weight;
     dataArray.at(2) = this->alphaResources;
-    dataArray.at(3) = this->distanceFromNode;
+    dataArray.at(3) = this->branchPositionId;
     dataArray.at(4) = this->prePopId;
     return dataArray;
 }
 
-std::string ResourceSynapseSpine::GetIndividualSynapticProfileHeaderInfo() const{
-    return std::string("{<branch ID>, <weight>, <alpha resources>, <distance to node>, <presynaptic population ID>}");
+std::string AlphaSynapseSpine::GetIndividualSynapticProfileHeaderInfo() const{
+    return std::string("{<branch ID>, <weight>, <alpha resources>, <position ID>, <presynaptic population ID>}");
 }
 
-void ResourceSynapseSpine::ComputeAlphaResources(){
+void AlphaSynapseSpine::ComputeAlphaResources(){
     //alphaResources=(kBasal+kStimulus)/(nBasal+nStimulus);
     alphaResources=alphaBasal+alphaStim;
     DecayAlphaResources();
 }
 
-void ResourceSynapseSpine::DecayAlphaResources(){
+void AlphaSynapseSpine::DecayAlphaResources(){
     // kStimulus*=kStimulusExpDecay;
     // nStimulus*=nStimulusExpDecay;
     alphaStim *= alphaStimulusExpDecay;
 }
 
-void ResourceSynapseSpine::ComputeWeight(double resourceFactor){
+void AlphaSynapseSpine::ComputeWeight(double resourceFactor){
     this->weight=this->alphaResources*resourceFactor;
 }
 
@@ -110,6 +110,6 @@ void ResourceSynapseSpine::ComputeWeight(double resourceFactor){
 //     //Single-timestep nature of this vector means we can just .clear()
 //     depAlphaTempAndCount.clear();
 // }
-void ResourceSynapseSpine::AddTraceToAlpha(double computedTrace) {
+void AlphaSynapseSpine::AddTraceToAlpha(double computedTrace) {
     alphaStim = std::max(alphaStim + alphaStimBump*computedTrace, -alphaBasal);
 }

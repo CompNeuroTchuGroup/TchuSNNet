@@ -8,7 +8,6 @@
 #define NEURALNETWORK_MONODENDRITE_H
 
 #include <iostream>
-#include <unordered_set>
 #include <algorithm>
 
 #include "../Morphology.hpp"
@@ -26,6 +25,8 @@ protected:
     double tauTheta{}; // decay constant of heterosynaptic effects in spines
     double lambdaDist{}; // decay constant of heterosynaptic effects over distance between synapses
     double tauDelay{}; // decay constant of heterosynaptic effects over inter-synapse spike timing difference
+
+    double lastPostSpikeTime{-200};
 
     double thetaExpDecay{1.0};
     double dendriticLength{}; // this would change in case of more complex dendritic geometry (atm it is a single 1D dendrite)
@@ -47,6 +48,13 @@ protected:
     std::vector<CoopSpinePtr> spineDataCoop;
 
     double initialWeights{1.0};
+    
+    bool   decayWeights{false};
+    double WeightDecayConstant{1.0};
+    double weightExpDecay{};
+    
+    WeightNormalization weightNormalization{NOPNormalization};
+    double softMaxMultiplier{2.0};
 
     double baseLTP{};
     double baseLTD{};
@@ -56,7 +64,10 @@ protected:
 
     double alpha{};
     double beta{};
-
+    virtual void NormalizeWeights();
+    void HardNormalize();
+    void SoftMaxNormalize();
+    virtual void WeightDecay();
     void ThetaDecay();
     void UpdateCooperativity(signed long spineID, signed long neighborId);
     // void pseudoCoop(signed long spineID, signed long neighborId);

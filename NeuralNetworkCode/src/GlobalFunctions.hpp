@@ -46,14 +46,16 @@ class BaseSynapseSpine;
 using BaseSpinePtr = BaseSynapseSpine*;
 class BranchedSynapseSpine;
 using BranchedSpinePtr = BranchedSynapseSpine*;
-class ResourceSynapseSpine;
-using ResourceSpinePtr = std::unique_ptr<ResourceSynapseSpine>;
+class AlphaSynapseSpine;
+using AlphaSpinePtr = AlphaSynapseSpine*;
 class CoopSynapseSpine;
 using CoopSpinePtr = std::unique_ptr<CoopSynapseSpine>;
+class CaResSynapseSpine;
+using CaRsSpinePtr=CaResSynapseSpine*;
 struct Branch;
 using BranchPtr = Branch*;
 struct AlphaBranch;
-using RTBranchPtr =std::unique_ptr<AlphaBranch>;
+using AlphaBranchPtr =AlphaBranch*;
 
 struct GlobalSimInfo {
 

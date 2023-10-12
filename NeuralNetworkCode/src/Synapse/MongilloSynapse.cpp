@@ -12,7 +12,7 @@ std::vector<double> MongilloSynapse::AdvectSpikers (NeuronInt spiker){
     double lastSpikeTime    = sourcePop->GetTimeSinceLastSpike(spiker); //static_cast<double>(infoGlobal->timeStep - neuronsPre->get_previous_spike_step(spiker))*dtTimestep;
     double expTauF           = exp(-lastSpikeTime/tauF_Mongillo);
     double expTauD           = exp(-lastSpikeTime/tauD_Mongillo);
-    NeuronInt noTargets {GetNoTargetedNeurons(spiker)};
+    NeuronInt noTargets {GetNoTargetedSynapses(spiker)};
     std::vector<double> currents(noTargets);
 
     std::replace_if(y_Mongillo.at(spiker).begin(), y_Mongillo.at(spiker).end(), [this, expTauF](bool state){
@@ -45,7 +45,7 @@ std::vector<double> MongilloSynapse::AdvectSpikers (NeuronInt spiker){
 
         //Spike transmission
         if(x_Mongillo.at(spiker).at(targetNeuron) && y_Mongillo.at(spiker).at(targetNeuron)){
-            currents.at(targetNeuron)+=TransmitSpike(targetNeuron, spiker);
+            currents.at(targetNeuron)=TransmitSpike(targetNeuron, spiker);
         } else {
             spikeSubmitted.at(spiker).at(targetNeuron) = false;
         }
@@ -57,21 +57,18 @@ std::vector<double> MongilloSynapse::AdvectSpikers (NeuronInt spiker){
 double MongilloSynapse::TransmitSpike(NeuronInt targetNeuron,NeuronInt spiker){
     // long target                         = geometry->GetTargetList(spikerId)->at(targetId);
 
-    //double J_ij                         = GetCouplingStrength();
-    double J_ij                         = GetCouplingStrength(targetNeuron, spiker);
+    //double J_ij                         = GetCouplingStrength();                   = ;
     x_Mongillo.at(spiker).at(targetNeuron)               = false; //Neurotransmitter release
     spikeSubmitted.at(spiker).at(targetNeuron) = true;
 
-    this->cumulatedDV                  += J_ij; //static_cast<double>(spike_submitted.at(spiker).sum())
-
-    return J_ij;
+    return GetCouplingStrength(targetNeuron, spiker);
 }
 
 
 void MongilloSynapse::ConnectNeurons() {
     Synapse::ConnectNeurons();
     for (NeuronInt sourceNeuron : std::ranges::views::iota(0,GetNoSourceNeurons())) {
-        NeuronInt noTargetNeurons { GetNoTargetedNeurons(sourceNeuron)};
+        NeuronInt noTargetNeurons { GetNoTargetedSynapses(sourceNeuron)};
         x_Mongillo.at(sourceNeuron).resize(noTargetNeurons);
         y_Mongillo.at(sourceNeuron).resize(noTargetNeurons);
         spikeSubmitted.at(sourceNeuron).resize(noTargetNeurons);
@@ -128,7 +125,7 @@ std::vector<double> MongilloSynapse::GetSynapticState(NeuronInt sourceNeuron) co
     int ySum{std::accumulate(y_Mongillo.at(sourceNeuron).begin(), y_Mongillo.at(sourceNeuron).end(), 0, [](int accumulator, bool value){return accumulator+value;})};
     // int XY=0;
     int SpikeSubmitted{std::accumulate(spikeSubmitted.at(sourceNeuron).begin(), spikeSubmitted.at(sourceNeuron).end(), 0, [](int accumulator, bool value){return accumulator+value;})};
-    NeuronInt noTargets {GetNoTargetedNeurons(sourceNeuron)};
+    NeuronInt noTargets {GetNoTargetedSynapses(sourceNeuron)};
     double Jsum {};
     for(int targetNeuron : std::ranges::views::iota(0,noTargets)){
         Jsum += (GetDistributionJ(targetNeuron,sourceNeuron));

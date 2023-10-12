@@ -11,8 +11,6 @@ struct BranchTargeting;
 #include "../BranchedMorphology.hpp"
 #include "../../../GlobalFunctions.hpp"
 #include <numeric>
-// #include <map>
-#include <unordered_set>
 
 
 class AlphaResourceHSTDP : public BranchedMorphology {
@@ -22,12 +20,8 @@ protected:
     //Synapse variables
     double alphaBasal{1.0};//LP and SP 
     double alphaStimulusTau{1.0};//LP and SP store the tau
-    double alphaStimulusExpDecay{1.0}; //LP and SP has to already be calculated
-    //Branch variables
-    // size_t betaEventsWindowSize{};
-    // int betaEventsPerTimestepThreshold{};
-    double betaResourcePool{1.0}; //LP and SP
-    // double betaUpTick{0.05};
+    double alphaStimulusExpDecay{1.0}; 
+    double betaResourcePool{1.0}; 
     double omegaOffset{1.0}; //LP and SP
 
     double cooperativityTau{1.0};//Strong decay needs small constants//LP and SP
@@ -35,21 +29,22 @@ protected:
     double spaceProfileLambda{1.0};//LP and SP
     double tauSTDP{1.0};//LP and SP
     double STDPExpDecay{1.0};
+    double baseAlphaStimBump{1.0};//LP and SP
+    double biasLTD{1.0};
 
+    //PostSynaptic trace
+    double postSynapticTrace{};
     std::vector<double> spatialProfile{};//This is more efficient than the map, but we need a hash function. TEST whether this is faster than vector<vector> or map<>
     // std::unordered_map<int, double> decayHashTableSTDP{};//??Should STDP not decay? unordered_map? looks like vector is more ideal
 
     // double baseKStimulusBump{1.0};//LP and SP
     // double baseNStimulusBump{1.0};//LP and SP
-    double baseAlphaStimBump{1.0};//LP and SP
+
 
     //STDP and STDD parameters (MAKE SURE TO TUNE STDD, AS NEGATIVE WEIGHTS MUST BE AVOIDED)
-    double biasLTD{1.0};
 
-    //PostSynaptic trace
-    double postSynapticTrace{};
-    std::vector<ResourceSpinePtr> resourceSpineData;
-    std::vector<RTBranchPtr> rTBranches;
+    std::vector<AlphaSpinePtr> alphaSpines;
+    std::vector<AlphaBranch> alphaBranches;
     
 public:
 
@@ -62,7 +57,7 @@ public:
     void CheckParameters(const std::vector<FileEntry>& parameters) override;    
     void SaveParameters(std::ofstream& wParameterStream, std::string neuronIdentificator) const override;
 
-    int AllocateABranch(std::vector<int> anteriorBranches) override;
+    int CreateBranch(std::vector<int> anteriorBranches) override;
     void SetUpHashTable(); //Has to set up both time and space from the exp constants. Call in LP
 
     std::string GetType() const override {return IDstringTraceResourceHSTDP;};
@@ -73,7 +68,7 @@ public:
     // void UpdateCoopTrace(const ResourceTraceBranch* const branch);
     bool CheckIfPreSpikeHappened();
     //bool CheckIfThereIsPairing(RBranchPtr branch, int synapseIDinBranch);
-    void ApplyCoopTraceSpatialProfile(int branchSpineID, AlphaBranch* const branchID);
+    void ApplyCoopTraceSpatialProfile(int branchSpineID, AlphaBranch& const branchID);
     // double CallKernelHashTable(int distanceToCenterInGaps);
     //Plasticity events functions
     // void ApplyEffects();//Here we increase the plasticity count of synapse and branch
@@ -88,9 +83,9 @@ public:
     void DecayAllTraces();//Last method called in Reset()
     // void ClearSynapseSets();
     //Recalc methods. These methods have to be done per branch
-    void ComputeAlphas(const AlphaBranch* const branch);//Run in LP
-    void ComputeWeights(AlphaBranch* const branch);//Run in LP
-    void ComputeAlphaSums(AlphaBranch* const branch);//Called inside recalc weights
+    void ComputeAlphas(AlphaBranch& const branch);//Run in LP
+    void ComputeWeights(AlphaBranch& const branch);//Run in LP
+    void ComputeAlphaSums(AlphaBranch& const branch);//Called inside recalc weights
     //Record methods
     void RecordPostSpike() override;
     void RecordExcitatoryPreSpike(int spikedSpineId) override;//Here set the trigger count to 0

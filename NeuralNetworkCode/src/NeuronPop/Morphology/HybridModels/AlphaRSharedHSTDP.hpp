@@ -11,12 +11,11 @@ struct BranchTargeting;
 #include "../BranchedMorphology.hpp"
 #include "../../../GlobalFunctions.hpp"
 #include <numeric>
-// #include <map>
-#include <unordered_set>
 
-
+// DEPRECATED
 class AlphaRSharedBHSTDP : public BranchedMorphology {
 //This class models a behaviour based on wi=beta*(alfai/(omega+sum(alfai))), where alfai represents the spine's resources as (Ks*expdt+Kbasal)/(Ns*expdt+Nbasal) with bumps on Ks and Ns
+//It is mathematically provable that this model is equivlaent to the original in a single branch.
 protected:
     //Synapse variables
     //Synapse variables
@@ -50,8 +49,8 @@ protected:
 
     //PostSynaptic trace
     double postSynapticTrace{};
-    std::vector<ResourceSpinePtr> resourceSpineData;
-    std::vector<RTBranchPtr> rTBranches;
+    std::vector<AlphaSpinePtr> resourceSpineData;
+    std::vector<AlphaBranchPtr> alphaBranches;
     
 public:
 
@@ -64,7 +63,7 @@ public:
     void CheckParameters(const std::vector<FileEntry>& parameters) override;    
     void SaveParameters(std::ofstream& wParameterStream, std::string neuronIdentificator) const override;
 
-    int AllocateABranch(std::vector<int> anteriorBranches) override;
+    int CreateBranch(std::vector<int> anteriorBranches) override;
     void SetUpHashTable(); //Has to set up both time and space from the exp constants. Call in LP
     
     std::string GetType() const override {return IDstringTraceResourceHSTDP;};

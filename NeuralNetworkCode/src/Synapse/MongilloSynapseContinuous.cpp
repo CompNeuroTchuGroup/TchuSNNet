@@ -15,7 +15,7 @@ std::vector<double> MongilloSynapseContinuous::AdvectSpikers (NeuronInt spiker){
     double dtLastSpike    = sourcePop->GetTimeSinceLastSpike(spiker); //static_cast<double>(infoGlobal->timeStep - neuronsPre->get_previous_spike_step(spiker))*dtTimestep;
     double exptf           = exp(-dtLastSpike/tauF_MongilloC);
     double exptd           = exp(-dtLastSpike/tauD_MongilloC);
-    NeuronInt noTargetNeurons{ this->GetNoTargetedNeurons(spiker) };
+    NeuronInt noTargetNeurons{ this->GetNoTargetedSynapses(spiker) };
 
     std::vector<double> currents(noTargetNeurons);
     //std::cout << "Synapse " << this->GetIdStr() << "\n";
@@ -43,7 +43,7 @@ std::vector<double> MongilloSynapseContinuous::AdvectSpikers (NeuronInt spiker){
         // y_Mongillo.at(spiker).at(targetNeuron) += u_MongilloC*(1-y_Mongillo.at(spiker).at(targetNeuron));
 
         //Spike transmission
-        currents.at(targetNeuron) += TransmitSpike(targetNeuron,spiker);
+        currents.at(targetNeuron) = TransmitSpike(targetNeuron,spiker);
     }
     return currents;
 }
@@ -53,7 +53,6 @@ double MongilloSynapseContinuous::TransmitSpike(NeuronInt targetNeuron,NeuronInt
 
     // double J_ij                         = GetCouplingStrength(targetNeuron, spiker);
     double current {GetCouplingStrength(targetNeuron, spiker)*x_MongilloC.at(spiker).at(targetNeuron)*y_MongilloC.at(spiker).at(targetNeuron)};
-    this->cumulatedDV += current;
 
     spikeSubmitted.at(spiker).at(targetNeuron) = current;
     x_MongilloC.at(spiker).at(targetNeuron) *= (1-y_MongilloC.at(spiker).at(targetNeuron));  // neurotransmitter release.
@@ -74,7 +73,7 @@ void MongilloSynapseContinuous::ConnectNeurons() {
     std::vector<double> yLocalMin;
 
     for(NeuronInt sourceNeuron : std::ranges::views::iota(0,GetNoSourceNeurons())){
-        NeuronInt totalTargets{ GetNoTargetedNeurons(sourceNeuron) };
+        NeuronInt totalTargets{ GetNoTargetedSynapses(sourceNeuron) };
         x_MongilloC.at(sourceNeuron).resize(totalTargets, 0.1);
         y_MongilloC.at(sourceNeuron).resize(totalTargets, 0.4);
         spikeSubmitted.at(sourceNeuron).resize(totalTargets);
@@ -152,7 +151,7 @@ std::vector<double> MongilloSynapseContinuous::GetSynapticState(NeuronInt source
     // double XY=0;
     double recordedSpikeSubmitted{ 0 };
     //double xMinus{ 0 }, yMinus{0}; //State of x and y before spike was processed
-    NeuronInt noTargetNeurons{ this->GetNoTargetedNeurons(sourceNeuron) };
+    NeuronInt noTargetNeurons{ this->GetNoTargetedSynapses(sourceNeuron) };
     double Jsum{ 0 };
     
     for(NeuronInt targetNeuron : std::ranges::views::iota(0, noTargetNeurons)){
@@ -174,7 +173,7 @@ std::vector<double> MongilloSynapseContinuous::GetSynapticState(NeuronInt source
         //XY += x_Mongillo[pre_neuron][i] * y[pre_neuron][i];
     }
 
-    outputArray.at(0) = Jsum/static_cast<double>(this->GetNoTargetedNeurons(sourceNeuron));
+    outputArray.at(0) = Jsum/static_cast<double>(this->GetNoTargetedSynapses(sourceNeuron));
     //value[0]= GetCouplingStrength()*static_cast<double>(this->GetNumberOfPostsynapticTargets(pre_neuron));
     outputArray.at(1)= sumXMinus;//the synapses where the spike was transmitted a neurotransmitter count reset to 0
     outputArray.at(2)= sumYMinus;//expected value of y before the spike-induced increase in bound calcium probability

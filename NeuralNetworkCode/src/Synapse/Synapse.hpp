@@ -79,7 +79,7 @@ protected:
     // End of HCS data
     // Introduce boolean
 
-    void ReadWaitingMatrixEntry(std::vector<double> &synaptic_dV, std::mutex &syndVMutex) const;
+    void ReadWaitingMatrixEntry(std::vector<double> &synaptic_dV, std::mutex &syndVMutex);
 
     virtual std::vector<double> AdvectSpikers(NeuronInt spiker) = 0;
 
@@ -141,7 +141,7 @@ public:
 
     NeuronInt GetNoSourceNeurons() const { return sourcePop->GetNoNeurons(); }
     NeuronInt GetNoTargetNeurons() const { return targetPop->GetNoNeurons(); }
-    NeuronInt GetNoTargetedNeurons(NeuronInt sourceNeuron) const { return static_cast<NeuronInt>(targetSpineList.at(sourceNeuron).size()); }
+    NeuronInt GetNoTargetedSynapses(NeuronInt sourceNeuron) const { return static_cast<NeuronInt>(targetSpineList.at(sourceNeuron).size()); }
     PopPtr GetSourceNeuronPop() const { return sourcePop; }
     PopPtr GetTargetNeuronPop() const { return targetPop; }
 
