@@ -3,7 +3,7 @@
 BaseSpinePtr ResourceCalciumDiffusionModel::AllocateNewSynapse(const BranchTargeting &branchTarget) {
     int branch{AllocateBranch(branchTarget)};
     int position{PopSynapseSlotFromBranch(branch, branchTarget.firstSlotTrueLastSlotFalse)};
-    // caDiffBranches.at(branch).CaDiffSpines.push_back(CaResSynapseSpine(kinasesTotal, phosphatasesTotal, initialWeights));
+    // caDiffBranches.at(branch).CaDiffSpines.push_back(CaResSynapseSpine(kinasesTotal, calcineurinTotal, initialWeights));
     CaRsSpinePtr newSpine = &caDiffBranches.at(branch).CaResSpines.at(position);
     this->caResSpines.push_back(newSpine);
     // this->weightsSum += newSynapse->GetWeight();
@@ -12,6 +12,8 @@ BaseSpinePtr ResourceCalciumDiffusionModel::AllocateNewSynapse(const BranchTarge
     // Branch
     newSpine->branchPositionId=(position);
     newSpine->branchId=(branch);
+
+    newSpine->connected=true;
 
     branches.at(branch)->synapseSlotClosedIndex.push_back(position);//Do we really need this?
 

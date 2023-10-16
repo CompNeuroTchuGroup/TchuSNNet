@@ -13,26 +13,25 @@ struct CaResSynapseSpine : public BranchedSynapseSpine {
     bool connected{false};
 
     cadouble calciumOldStep{};
-    cadouble calciumFree{};
-
-    const double kinasesTotal{}; // If this is set to zero, there is no synapse
-    const double phosphatasesTotal{};
-    const double calmodulinTotal{};// We just multiply this by the logistic function to get the active ones
-    const double neurograninTotal{};//THIS IS STILL NOT DONE
+    cadouble calciumFree{0.08};
 
     double calmodulinActive{};
-    double kinasesActive{};
-    double kinasesInactive{};
-    double phosphatasesActive{};
-    double phosphatasesInactive{};
+    double calmodulinNeurogranin{};
+
+    double kinasesCaM{};
+    double kinasesPhospho{};
+    // double kinasesInactive{};
+
+    double calcineurinActive{};
+    // double phosphatasesInactive{};
 
     double resourcesOldStep{};
     double resourcesAvailable{};
 
-    CaResSynapseSpine(double kTot, double nTot, double camTot);
+    CaResSynapseSpine();
     ~CaResSynapseSpine() override = default;
     // End of step
-    void RestoreSpine(); // This function MUST run right before diffusion
+    void PreDiffusion(); // This function MUST run right before diffusion
     // Profile methods
     std::vector<double> GetIndividualSynapticProfile() const override;
     std::string         GetIndividualSynapticProfileHeaderInfo() const override;

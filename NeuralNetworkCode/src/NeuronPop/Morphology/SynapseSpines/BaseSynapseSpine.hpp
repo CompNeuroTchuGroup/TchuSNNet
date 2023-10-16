@@ -26,7 +26,6 @@ struct BaseSynapseSpine {
 
     //Necessary mutex
 
-    public:
     //Constructors
     BaseSynapseSpine() = default;
     virtual ~BaseSynapseSpine() = default;

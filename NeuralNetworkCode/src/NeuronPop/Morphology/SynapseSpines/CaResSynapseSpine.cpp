@@ -1,11 +1,15 @@
 #include "CaResSynapseSpine.hpp"
 
-CaResSynapseSpine::CaResSynapseSpine(double kTot, double nTot, double camTot): kinasesTotal{kTot}, phosphatasesTotal{nTot},calmodulinTotal{camTot}, connected{false} {
+CaResSynapseSpine::CaResSynapseSpine(): connected{false} {
 }
 
-void CaResSynapseSpine::RestoreSpine() {
-    kinasesInactive=kinasesTotal-kinasesActive;
-    phosphatasesInactive=phosphatasesTotal-phosphatasesInactive;
+void CaResSynapseSpine::PreDiffusion() {
+    //This has to run before reations, and before diffusion. Makes no sense to do both, and makes no sense to actually store the inactive forms in the spine, if we are going to calculate it to the timestep anyway
+    // kinasesInactive=kinasesTotal-(kinasesCaM+kinasesPhospho);
+    // phosphatasesInactive=calcineurinTotal-phosphatasesInactive;
+    if (calciumFree<0 || resourcesAvailable<0){
+        throw "Negative something happened";
+    }
     calciumOldStep=calciumFree;
     resourcesOldStep=resourcesAvailable;
 }

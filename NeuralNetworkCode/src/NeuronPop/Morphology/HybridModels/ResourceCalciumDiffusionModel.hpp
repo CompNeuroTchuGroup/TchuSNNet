@@ -17,22 +17,11 @@ using CaResSpinePtr = CaResSynapseSpine *;
 class ResourceCalciumDiffusionModel : public BranchedMorphology {
     // This class models changes in weight depending on the concentration of kinases and phosphatases
   protected:
+    Constants constants;
+
     std::vector<CaResSpinePtr>     caResSpines;
     std::vector<CaDiffusionBranch> caDiffBranches;
     // Constants
-    double   kinasesTotal;         // Upper limit of Kinases (determines, with active, unactive species)
-    double   phosphatasesTotal;    // Upper limit of phosphatases (determines, with active, unactive species)
-    double   reaction1Ctt;         // k1, from K inactive to K active
-    double   reaction2Ctt;         // k2, from K active to K inactive
-    double   reaction3Ctt;         // k3, from N inactive to N active
-    double   reaction4Ctt;         // k4, from N active to N inactive
-    double   reaction5Ctt;         // kK, from resources to weight
-    double   reaction6Ctt;         // kN, from weight to resources
-    cadouble   caDiffusionFct;       // Consider delta x not squared yet here
-    double   resourceDiffusionFct; // Consider delta x not squared yet here
-    cadouble   caDecayFct;           // Consider not yet exponentiated
-    cadouble initialCalcium;
-    double   initialResources;
     cadouble prespikeCalcium, postspikeCalcium;
     TStepInt preSpikeDelaySteps;//either we calculate the modulus here or we keep to the swaps.
     TStepInt TStepMod;//Here we store the modulus (only calculated once). We will calculate it every timestep just for safety.
