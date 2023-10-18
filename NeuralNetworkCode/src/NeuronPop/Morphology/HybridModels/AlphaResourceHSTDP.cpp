@@ -448,12 +448,12 @@ void AlphaResourceHSTDP::RecordExcitatoryPreSpike(int spikedSpineId) {
     // Here only record, afterwards we do the checks
     // Not going down the virtual path because inefficient
     AlphaSynapseSpine *synapseSpine = alphaSpines.at(spikedSpineId);
-    AlphaBranch&          branch       = alphaBranches.at(synapseSpine->GetBranchId());
-    int                   branchSpinePosition{synapseSpine->GetBranchPositionId()};
+    AlphaBranch&          branch       = alphaBranches.at(synapseSpine->branchId);
+    int                   branchSpinePosition{synapseSpine->branchPositionId};
     branch.spikedSpinesInTheBranch.push_back(branchSpinePosition);
     branch.preSynapticTraces.at(branchSpinePosition) += 1;
     ApplyCoopTraceSpatialProfile(branchSpinePosition, branch);
-    // branch->cooperativityTraces.at(synapseSpine->GetBranchPositionId())+=1;
+    // branch->cooperativityTraces.at(synapseSpine->branchPositionId)+=1;
     this->totalPreSpikes++;
 }
 
@@ -477,10 +477,10 @@ BaseSpinePtr AlphaResourceHSTDP::AllocateNewSynapse(const BranchTargeting &branc
     AlphaSynapseSpine *newSpine = &alphaBranches.at(branch).alphaSpines.back();
     this->alphaSpines.push_back(newSpine);
     // this->weightsSum += newSynapse->GetWeight();
-    newSpine->SetIdInMorpho(this->baseSpineData.size());//this->spineIdGenerator++
+    newSpine->idInMorpho=this->baseSpineData.size();//this->spineIdGenerator++
     // Branch
-    newSpine->SetBranchPositionId(position);
-    newSpine->SetBranchId(branch);
+    newSpine->branchPositionId=position;
+    newSpine->branchId=branch;
 
     newSpine->SetAlphaStimBump(baseAlphaStimBump);
     newSpine->SetBiasLTD(biasLTD);

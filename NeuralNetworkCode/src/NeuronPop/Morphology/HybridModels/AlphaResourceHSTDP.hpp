@@ -99,8 +99,6 @@ public:
     //void CalcMorphoPlasticityEvents() override;
     //For debugging purposes
     bool IgnoreJDParameters() const override {return true;}
-    void WeightDecay() override {throw "Unintended call of AlphaResourceHSTDP::WeightDecay";};//This function should never be called 
-    void NormalizeWeights() override {return;};
 };
 
 #endif

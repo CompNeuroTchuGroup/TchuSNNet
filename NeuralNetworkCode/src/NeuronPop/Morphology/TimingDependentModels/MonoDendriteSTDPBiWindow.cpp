@@ -61,7 +61,7 @@ void MonoDendriteSTDPBiWindow::UpdateLTP(signed long spineID) {
 //    this->weightsSum -= this->synapseDataCoop.at(synId)->weight;
 //    double time = this->lastPostSpikeTime - syn->GetLastSpike();
     double change = this->preFactorLTP * this->aLTP(spine->GetTheta()) * this->gLTP(this->lastPostSpikeTime - spine->GetLastSpike());
-    this->spineDataCoop.at(spineID)->AddToWeight(change);
+    this->spineDataCoop.at(spineID)->weight+=(change);
 
 //    this->weight_changes.emplace_back(synId, change);
 
@@ -80,7 +80,7 @@ void MonoDendriteSTDPBiWindow::UpdateLTD(signed long spineID) {
 
 //    double time = this->lastPostSpikeTime - syn->lastSpike;
     double change  = -this->preFactorLTD * this->aLTD(spine->GetTheta()) * this->gLTD(this->lastPostSpikeTime - spine->GetLastSpike());
-    this->spineDataCoop.at(spineID)->AddToWeight(change);
+    this->spineDataCoop.at(spineID)->weight+=(change);
 
 //    this->weight_changes.emplace_back(synId, change);
 

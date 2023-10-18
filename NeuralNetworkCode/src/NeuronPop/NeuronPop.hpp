@@ -7,6 +7,7 @@
 #include "./Morphology/TimingDependentModels/MonoDendriteSTDPTazerart.hpp"
 #include "./Morphology/TimingDependentModels/MonoDendriteSTDPTazerartRelative.hpp"
 #include "./Morphology/HybridModels/AlphaResourceHSTDP.hpp"
+#include "./Morphology/HybridModels/ResourceCalciumDiffusionModel.hpp"
 #include <iostream>
 #include <vector>
 #include <cmath>

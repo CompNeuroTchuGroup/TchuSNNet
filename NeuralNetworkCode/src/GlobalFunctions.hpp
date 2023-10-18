@@ -42,15 +42,15 @@ class Synapse;
 using SynapsePtr = std::unique_ptr<Synapse>;
 class NeuronPop;
 using PopPtr = std::shared_ptr<NeuronPop>;
-class BaseSynapseSpine;
+struct BaseSynapseSpine;
 using BaseSpinePtr = BaseSynapseSpine*;
-class BranchedSynapseSpine;
+struct BranchedSynapseSpine;
 using BranchedSpinePtr = BranchedSynapseSpine*;
-class AlphaSynapseSpine;
+struct AlphaSynapseSpine;
 using AlphaSpinePtr = AlphaSynapseSpine*;
-class CoopSynapseSpine;
+struct CoopSynapseSpine;
 using CoopSpinePtr = std::unique_ptr<CoopSynapseSpine>;
-class CaResSynapseSpine;
+struct CaResSynapseSpine;
 using CaRsSpinePtr=CaResSynapseSpine*;
 struct Branch;
 using BranchPtr = Branch*;
@@ -184,6 +184,7 @@ const std::string IDstringMonoDendriteSTDPBiWindow{"MonoDendriteSTDPBiWindow"};
 const std::string IDstringMonoDendriteSTDPBiExponential{"MonoDendriteSTDPBiExponential"};
 
 const std::string IDstringTraceResourceHSTDP{"AlphaResourceHSTDP"};
+const std::string IDstringResourceCalciumDiffusion{"ResourceCalciumDiffusion"};
 
 // void MultiplyVector (std::vector<signed long> &vector, signed long value);
 // void MultiplyVector (std::vector<double> &vector, double value);

@@ -222,13 +222,13 @@ void Synapse::AllocateSynapseWithPlasticity(NeuronInt targetNeuron, NeuronInt so
 
     if (synapseSpinePtr != nullptr) {
         if (ignoreJDParameters) {
-            synapseSpinePtr->SetRelativeCouplingStrength(relativeCouplingStrength);
+            synapseSpinePtr->couplingStrength=(relativeCouplingStrength);
         } else {
             // The SetRelativeCouplingStrength is already done in the
             // PostConnectFunction (unscaled as of now), as J distribution is
             // not written yet in flow
         }
-        synapseSpinePtr->SetPreNeuronPop(this->GetSourcePopID());
+        synapseSpinePtr->prePopId=(this->GetSourcePopID());
 
     } else {
         throw "AllocateNewSynapseWithPlasticity returned a nullptr";
@@ -361,7 +361,7 @@ void Synapse::PostConnectNeurons() {
                 // Here we set the relative coupling strength of the
                 // MonoDendrite models so that the weight works as intended in
                 // the original models
-                spinePtr->SetRelativeCouplingStrength(
+                spinePtr->couplingStrength=(
                     GetCouplingStrength(targetNeuron, sourceNeuron)); // const cast here
             }
         }
@@ -373,7 +373,7 @@ void Synapse::PostConnectNeurons() {
                 DelayDDistribution.at(sourceNeuron).at(synapseIndex) =
                     targetPop->GetSynapticDistanceToSoma(
                         targetSpineList.at(sourceNeuron).at(synapseIndex).first,
-                        targetSpineList.at(sourceNeuron).at(synapseIndex).second->GetIdInMorpho()) *
+                        targetSpineList.at(sourceNeuron).at(synapseIndex).second->idInMorpho) *
                     delayPerMicrometer;
             }
         }

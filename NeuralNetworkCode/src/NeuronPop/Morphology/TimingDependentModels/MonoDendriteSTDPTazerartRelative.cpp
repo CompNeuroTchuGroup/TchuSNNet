@@ -74,7 +74,7 @@ void MonoDendriteSTDPTazerartRelative::CheckParameters(const std::vector<FileEnt
 void MonoDendriteSTDPTazerartRelative::UpdateLTP(signed long spineID) {
     CoopSynapseSpine* spine = this->spineDataCoop.at(spineID).get();
 //    this->weightsSum -= this->synapseDataCoop.at(synId)->weight;
-    this->spineDataCoop.at(spineID)->AddToWeight(this->spineDataCoop.at(spineID)->GetWeightUncoupled() * this->preFactorLTP * this->aLTP(spine->GetTheta()) * this->gLTP(this->lastPostSpikeTime - spine->GetLastSpike()));
+    this->spineDataCoop.at(spineID)->weight+=(this->spineDataCoop.at(spineID)->GetWeightUncoupled() * this->preFactorLTP * this->aLTP(spine->GetTheta()) * this->gLTP(this->lastPostSpikeTime - spine->GetLastSpike()));
 //    this->synapseDataCoop.at(synId)->weight = std::min(2.0, this->synapseDataCoop.at(synId)->weight);
 //    this->weightsSum += this->synapseDataCoop.at(synId)->weight;
 }
@@ -82,7 +82,7 @@ void MonoDendriteSTDPTazerartRelative::UpdateLTP(signed long spineID) {
 void MonoDendriteSTDPTazerartRelative::UpdateLTD(signed long spineID) {
     CoopSynapseSpine* spine = this->spineDataCoop.at(spineID).get();
 //    this->weightsSum -= this->synapseDataCoop.at(synId)->weight;
-    this->spineDataCoop.at(spineID)->AddToWeight(-this->spineDataCoop.at(spineID)->GetWeightUncoupled() * this->preFactorLTD * this->aLTD(spine->GetTheta()) * this->gLTD(spine->GetLastSpike() - this->lastPostSpikeTime));
+    this->spineDataCoop.at(spineID)->weight+=(-this->spineDataCoop.at(spineID)->GetWeightUncoupled() * this->preFactorLTD * this->aLTD(spine->GetTheta()) * this->gLTD(spine->GetLastSpike() - this->lastPostSpikeTime));
 //    this->synapseDataCoop.at(synId)->weight = std::max(0.0, this->synapseDataCoop.at(synId)->weight);
 //    this->weightsSum += this->synapseDataCoop.at(synId)->weight;
 }

@@ -94,7 +94,7 @@ void MonoDendriteSTDPTazerart::UpdateLTP(signed long spineID) {
 //    this->weightsSum -= this->synapseDataCoop.at(synId)->weight;
     double change = this->preFactorLTP * this->aLTP(spine->GetTheta()) * this->gLTP(this->lastPostSpikeTime - spine->GetLastSpike());
 //    std::cout << synId << " : "  << change << std::endl;
-    this->spineDataCoop.at(spineID)->AddToWeight(change);
+    this->spineDataCoop.at(spineID)->weight+=(change);
 
 //    if (synId == 0) {
 //        std::cout << synId << " -- "<< this->lastPostSpikeTime << ", " << syn->lastSpike << " : "  << change << std::endl;
@@ -114,7 +114,7 @@ void MonoDendriteSTDPTazerart::UpdateLTD(signed long spineID) {
 //    this->weightsSum -= this->synapseDataCoop.at(synId)->weight;
     double change = -this->preFactorLTD * this->aLTD(spine->GetTheta()) * this->gLTD(spine->GetLastSpike() - this->lastPostSpikeTime);
 //    std::cout << synId << " : "  << change << std::endl;
-    this->spineDataCoop.at(spineID)->AddToWeight(change);
+    this->spineDataCoop.at(spineID)->weight+=(change);
 
 //    if (synId == 0) {
 //        std::cout << synId << " -- " << syn->lastSpike << " , " << this->lastPostSpikeTime << " : "  << change << std::endl;

@@ -1,8 +1,8 @@
 //
 // Created by Antoni Bertolin on 14.06.23
 //
-#ifndef _RESOURCE_SYNAPSE_SPINE_CLASS_HEADER_
-#define _RESOURCE_SYNAPSE_SPINE_CLASS_HEADER_
+#ifndef _CALCIUM_RESOURCE_DIFFUSION_SYNAPSE_SPINE_CLASS_HEADER_
+#define _CALCIUM_RESOURCE_DIFFUSION_SYNAPSE_SPINE_CLASS_HEADER_
 
 #include "BranchedSynapseSpine.hpp"
 using cadouble = double; //If we go to long for precision concerns
@@ -13,7 +13,7 @@ struct CaResSynapseSpine : public BranchedSynapseSpine {
     bool connected{false};
 
     cadouble calciumOldStep{};
-    cadouble calciumFree{0.08};
+    cadouble calciumFree{0.00};
 
     double calmodulinActive{};
     double calmodulinNeurogranin{};

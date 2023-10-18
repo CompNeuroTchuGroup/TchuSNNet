@@ -13,10 +13,10 @@ void BranchedMorphology::RecordPostSpike() {
 void BranchedMorphology::RecordExcitatoryPreSpike(int spikedSynapseId) {
     // This function is NOT DELAY COMPATIBLE (careful with the delays in synapse objects)
     Morphology::RecordExcitatoryPreSpike(spikedSynapseId);
-    // this->branches.at(this->branchedSpineData.at(spikedSynapseId)->GetBranchId())->spikedSyn.at(this->branchedSpineData.at(spikedSynapseId)->GetBranchPositionId())=true;
+    // this->branches.at(this->branchedSpineData.at(spikedSynapseId)->branchId)->spikedSyn.at(this->branchedSpineData.at(spikedSynapseId)->branchPositionId)=true;
     BranchedSpinePtr synapseSpine = this->branchedSpineData.at(spikedSynapseId);
-    this->branches.at(synapseSpine->GetBranchId())
-        ->spikedSpinesInTheBranch.push_back(synapseSpine->GetBranchPositionId());
+    this->branches.at(synapseSpine->branchId)
+        ->spikedSpinesInTheBranch.push_back(synapseSpine->branchPositionId);
 }
 
 void BranchedMorphology::Reset() {
@@ -322,8 +322,8 @@ int BranchedMorphology::PopSynapseSlotFromBranch(int branch, bool firstSlotTrueL
 }
 
 double BranchedMorphology::GetSynapticDistanceToSoma(int synapseID) {
-    return branches.at(branchedSpineData.at(synapseID)->GetBranchId())->anteriorBranches.size() * branchLength +
-           branchedSpineData.at(synapseID)->GetBranchPositionId() * synapticGap;
+    return branches.at(branchedSpineData.at(synapseID)->branchId)->anteriorBranches.size() * branchLength +
+           branchedSpineData.at(synapseID)->branchPositionId * synapticGap;
 }
 /*void BranchedMorphology::SetUpBranchingTree(int remainingBranchingEvents, std::vector<int> anteriorBranches) {
     //This is binary tree

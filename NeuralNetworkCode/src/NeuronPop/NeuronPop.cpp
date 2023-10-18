@@ -88,7 +88,7 @@ void NeuronPop::AdvectPlasticityModel() {
         std::for_each(std::execution::unseq,spikerNeurons.begin(), spikerNeurons.end(), [this](NeuronInt spiker){
             RecordPostSpike(spiker);
         });
-        std::for_each(PAR,morphology.begin(), morphology.end(), [](std::unique_ptr<Morphology>& singleMorphology){
+        std::for_each(PAR_UNSEQ,morphology.begin(), morphology.end(), [](std::unique_ptr<Morphology>& singleMorphology){
             singleMorphology->Advect();
         });
     }
@@ -172,6 +172,14 @@ void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry> &morphologyPara
                     for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
                         (void)neuron;//Does nothing, removes warning on unused vars
                         this->morphology.push_back(std::make_unique<AlphaResourceHSTDP>(this->infoGlobal)); //Remove, will not  be used
+                        this->morphology.back()->LoadParameters(morphologyParameters);
+                        this->hasPlasticity=true;
+                        this->isBranched=true;
+                    }
+                } else if (parameterValues.at(0) == IDstringResourceCalciumDiffusion) {
+                    for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
+                        (void)neuron;//Does nothing, removes warning on unused vars
+                        this->morphology.push_back(std::make_unique<ResourceCalciumDiffusionModel>(this->infoGlobal)); //Remove, will not  be used
                         this->morphology.back()->LoadParameters(morphologyParameters);
                         this->hasPlasticity=true;
                         this->isBranched=true;

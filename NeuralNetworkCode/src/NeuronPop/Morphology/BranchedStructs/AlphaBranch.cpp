@@ -20,8 +20,8 @@ void AlphaBranch::PostConnectSetUp(std::vector<BranchedSpinePtr> spineData) {
     // exist until ConnectNeurons() is called in the NeuralNetwork::Simulate()
     // function.
     for (BranchedSpinePtr synapse : spineData) {
-        if (synapse->GetBranchId() == branchId) {
-            spinePtrPosition.at(synapse->GetBranchPositionId()) = static_cast<AlphaSynapseSpine *>(synapse);
+        if (synapse->branchId == branchId) {
+            spinePtrPosition.at(synapse->branchPositionId) = static_cast<AlphaSynapseSpine *>(synapse);
         }
     }
     // std::sort(resouceBranchSpineData.begin(), resouceBranchSpineData.end(),
