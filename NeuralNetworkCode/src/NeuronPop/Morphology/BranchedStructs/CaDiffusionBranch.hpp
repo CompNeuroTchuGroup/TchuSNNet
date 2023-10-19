@@ -11,7 +11,7 @@
 struct Constants{ //currently 19 + the prespike/postspike calcium and the prespike calcium influx delay, so 21
     cadouble caDiffusionFct;//Consider delta x squared already here
 
-    cadouble caDecayFct;//Consider already exponentiated
+    cadouble calciumBufferingCtt;//Consider already exponentiated
      
     double kinasesTotal;//Upper limit of Kinases (determines, with active, unactive species)
     double calcineurinTotal;//Upper limit of phosphatases (determines, with active, unactive species)
@@ -33,7 +33,8 @@ struct Constants{ //currently 19 + the prespike/postspike calcium and the prespi
 
     
     double resourceDiffusionFct;//Consider delta x squared already here
-    // cadouble initialCalcium; 
+    cadouble calciumBasal;
+    cadouble calciumInfluxBasal;
     double initialResources, initialWeight;
 };
 // include the spine class

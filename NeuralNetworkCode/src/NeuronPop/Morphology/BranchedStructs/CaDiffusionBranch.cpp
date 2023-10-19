@@ -7,7 +7,7 @@ CaDiffusionBranch::CaDiffusionBranch(std::vector<int> anteriorBranches, double g
         spine.resourcesAvailable = constants.initialResources;
         spine.weight             = constants.initialWeight;
     }
-    waitingMatrix.resize(prespikeDelaySteps, std::vector<cadouble>(branchLength / gap, 0));
+    waitingMatrix.resize(prespikeDelaySteps, std::vector<cadouble>(branchLength / gap, constants.calciumInfluxBasal));
 }
 
 CaDiffusionBranch::CaDiffusionBranch(double gap, double branchLength, int branchId, TStepInt prespikeDelaySteps, Constants constants) : Branch(gap, branchLength, branchId), constants{constants} {
@@ -40,7 +40,7 @@ void CaDiffusionBranch::PreSpikeCalciumInflux(TStepInt &&step) {
     // for (size_t index : std::ranges::views::iota(0u, prespikeWaitingMatrix.size()-1)){
     //   prespikeWaitingMatrix.at(index).swap(prespikeWaitingMatrix.at(index+1));
     // }
-    std::fill(PAR_UNSEQ, waitingMatrix.at(step).begin(), waitingMatrix.at(step).end(), 0.0);
+    std::fill(PAR_UNSEQ, waitingMatrix.at(step).begin(), waitingMatrix.at(step).end(), constants.calciumInfluxBasal);
 }
 
 void CaDiffusionBranch::Advect(TStepInt step) {
@@ -94,14 +94,14 @@ void CaDiffusionBranch::Advect(TStepInt step) {
     // First boundary case
     // Diffusion of calcium
     CaResSpines.at(0).calciumFree += constants.caDiffusionFct * (-CaResSpines.at(0).calciumOldStep + CaResSpines.at(1).calciumOldStep);
-    CaResSpines.at(0).calciumFree -= CaResSpines.at(0).calciumFree * constants.caDecayFct;
+    CaResSpines.at(0).calciumFree += -CaResSpines.at(0).calciumFree * constants.calciumBufferingCtt;
     // Diffusion of resources
     CaResSpines.at(0).resourcesAvailable += constants.resourceDiffusionFct * (-CaResSpines.at(0).resourcesOldStep + CaResSpines.at(1).resourcesOldStep);
     for (size_t spineIndex : std::ranges::views::iota(1u, lastIndex)) {
         // Diffusion of calcium
         CaResSpines.at(spineIndex).calciumFree +=
             constants.caDiffusionFct * (-2 * CaResSpines.at(spineIndex).calciumOldStep + CaResSpines.at(spineIndex - 1).calciumOldStep + CaResSpines.at(spineIndex + 1).calciumOldStep);
-        CaResSpines.at(spineIndex).calciumFree -= CaResSpines.at(spineIndex).calciumFree * constants.caDecayFct;
+        CaResSpines.at(spineIndex).calciumFree -= CaResSpines.at(spineIndex).calciumFree * constants.calciumBufferingCtt;
         // Diffusion of resources
         CaResSpines.at(spineIndex).resourcesAvailable +=
             constants.resourceDiffusionFct * (-2 * CaResSpines.at(spineIndex).resourcesOldStep + CaResSpines.at(spineIndex - 1).resourcesOldStep + CaResSpines.at(spineIndex + 1).resourcesOldStep);
@@ -109,7 +109,7 @@ void CaDiffusionBranch::Advect(TStepInt step) {
     // Last boundary case
     //  Diffusion of calcium
     CaResSpines.at(lastIndex).calciumFree += constants.caDiffusionFct * (-CaResSpines.at(lastIndex).calciumOldStep + CaResSpines.at(lastIndex - 1).calciumOldStep);
-    CaResSpines.at(lastIndex).calciumFree -= CaResSpines.at(lastIndex).calciumFree * constants.caDecayFct;
+    CaResSpines.at(lastIndex).calciumFree += -CaResSpines.at(lastIndex).calciumFree * constants.calciumBufferingCtt;
     // Diffusion of resources
     CaResSpines.at(lastIndex).resourcesAvailable += constants.resourceDiffusionFct * (-CaResSpines.at(lastIndex).resourcesOldStep + CaResSpines.at(lastIndex - 1).resourcesOldStep);
 }
@@ -163,20 +163,20 @@ void CaDiffusionBranch::Advect(TStepInt step) {
 //     //First boundary case
 //           // Diffusion of calcium
 //     CaResSpines.at(0).calciumFree+=caDiffusionFct*(-CaResSpines.at(0).calciumOldStep+CaResSpines.at(1).calciumOldStep);
-//     CaResSpines.at(0).calciumFree-=CaResSpines.at(0).calciumFree*caDecayFct;
+//     CaResSpines.at(0).calciumFree-=CaResSpines.at(0).calciumFree*calciumBufferingCtt;
 //           // Diffusion of resources
 //     CaResSpines.at(0).resourcesAvailable+=resourceDiffusionFct*(-CaResSpines.at(0).resourcesOldStep+CaResSpines.at(1).resourcesOldStep);
 //     for (size_t spineIndex : std::ranges::views::iota(1u, lastIndex)) {
 //       // Diffusion of calcium
 //         CaResSpines.at(spineIndex).calciumFree+=caDiffusionFct*(-2*CaResSpines.at(spineIndex).calciumOldStep+CaResSpines.at(spineIndex-1).calciumOldStep+CaResSpines.at(spineIndex+1).calciumOldStep);
-//         CaResSpines.at(spineIndex).calciumFree-=CaResSpines.at(spineIndex).calciumFree*caDecayFct;
+//         CaResSpines.at(spineIndex).calciumFree-=CaResSpines.at(spineIndex).calciumFree*calciumBufferingCtt;
 //               // Diffusion of resources
 //         CaResSpines.at(spineIndex).resourcesAvailable+=resourceDiffusionFct*(-2*CaResSpines.at(spineIndex).resourcesOldStep+CaResSpines.at(spineIndex-1).resourcesOldStep+CaResSpines.at(spineIndex+1).resourcesOldStep);
 //     }
 //     //Last boundary case
 //               // Diffusion of calcium
 //     CaResSpines.at(lastIndex).calciumFree+=caDiffusionFct*(-CaResSpines.at(lastIndex).calciumOldStep+CaResSpines.at(lastIndex-1).calciumOldStep);
-//     CaResSpines.at(lastIndex).calciumFree-=CaResSpines.at(lastIndex).calciumFree*caDecayFct;
+//     CaResSpines.at(lastIndex).calciumFree-=CaResSpines.at(lastIndex).calciumFree*calciumBufferingCtt;
 //                   // Diffusion of resources
 //     CaResSpines.at(lastIndex).resourcesAvailable+=resourceDiffusionFct*(-CaResSpines.at(lastIndex).resourcesOldStep+CaResSpines.at(lastIndex-1).resourcesOldStep);
 // }

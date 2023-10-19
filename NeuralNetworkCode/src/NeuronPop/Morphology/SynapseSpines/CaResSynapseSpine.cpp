@@ -15,15 +15,16 @@ void CaResSynapseSpine::PreDiffusion() {
 }
 
 std::vector<double> CaResSynapseSpine::GetIndividualSynapticProfile() const {
-    std::vector<double> dataArray(4);
+    std::vector<double> dataArray(5);
     dataArray.at(0) = this->branchId;
     dataArray.at(1) = this->weight;
-    dataArray.at(2) = this->branchPositionId;
-    dataArray.at(3) = this->prePopId;
+    dataArray.at(2)= this->calciumFree;
+    dataArray.at(3) = this->branchPositionId;
+    dataArray.at(4) = this->prePopId;
     return dataArray;
 }
 
 std::string CaResSynapseSpine::GetIndividualSynapticProfileHeaderInfo() const {
-    return std::string("{<branch ID>, <weight>, <position ID>, <presynaptic population ID>}");
+    return std::string("{<branch ID>, <weight>, <calcium>, <position ID>, <presynaptic population ID>}");
 
 }

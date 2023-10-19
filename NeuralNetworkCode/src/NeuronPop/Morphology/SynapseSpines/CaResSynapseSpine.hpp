@@ -13,7 +13,7 @@ struct CaResSynapseSpine : public BranchedSynapseSpine {
     bool connected{false};
 
     cadouble calciumOldStep{};
-    cadouble calciumFree{0.00};
+    cadouble calciumFree{};
 
     double calmodulinActive{};
     double calmodulinNeurogranin{};
