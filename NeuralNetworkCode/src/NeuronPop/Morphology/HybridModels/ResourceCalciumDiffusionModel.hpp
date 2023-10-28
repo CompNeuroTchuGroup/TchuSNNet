@@ -22,10 +22,18 @@ class ResourceCalciumDiffusionModel : public BranchedMorphology {
     std::vector<CaResSpinePtr>     caResSpines;
     std::vector<CaDiffusionBranch> caDiffBranches;
     // Constants
-    cadouble prespikeCalcium{}, postspikeCalcium{};
-    TStepInt preSpikeDelaySteps{}; // either we calculate the modulus here
-    TStepInt TStepModded{};           // Here we store the modulus (only calculated once). We will calculate it every timestep just for safety.
-    TStepInt TStepInput{};//Here is where the input happens
+    double prespikeCalcium{}, postspikeCalcium{};
+    
+    double preCalciumRiseTau;
+    double preCalciumDecayTau;
+
+    double postCalciumRiseTau;
+    double postCalciumDecayTau;
+    
+    double calciumBasal{};
+    // TStepInt preSpikeDelaySteps{}; // either we calculate the modulus here
+    // TStepInt TStepModded{};           // Here we store the modulus (only calculated once). We will calculate it every timestep just for safety.
+    // TStepInt TStepInput{};//Here is where the input happens
   public:
     // main Methods
     ResourceCalciumDiffusionModel() = default;

@@ -55,13 +55,30 @@ void ResourceCalciumDiffusionModel::LoadParameters(const std::vector<FileEntry> 
             this->prespikeCalcium      = std::stod(parameterValues.at(0));
         } else if (parameterName.find("postspikeCalcium") != std::string::npos) {
             this->postspikeCalcium      = std::stod(parameterValues.at(0));
-        } else if (parameterName.find("preCalciumDelay") != std::string::npos) {
-            this->preSpikeDelaySteps      = std::lround(std::stod(parameterValues.at(0))/infoGlobal->dtTimestep);
+        } else if (parameterName.find("preCalciumRiseTau") != std::string::npos) {
+            this->preCalciumRiseTau      = std::lround(std::stod(parameterValues.at(0))/infoGlobal->dtTimestep);
+        } else if (parameterName.find("preCalciumDecayTau") != std::string::npos) {
+            this->preCalciumDecayTau      = std::lround(std::stod(parameterValues.at(0))/infoGlobal->dtTimestep);
+        } else if (parameterName.find("postCalciumRiseTau") != std::string::npos) {
+            this->postCalciumRiseTau      = std::lround(std::stod(parameterValues.at(0))/infoGlobal->dtTimestep);
+        } else if (parameterName.find("postCalciumDecayTau") != std::string::npos) {
+            this->postCalciumDecayTau      = std::lround(std::stod(parameterValues.at(0))/infoGlobal->dtTimestep);
+        } else if (parameterName.find("nonlinearNMDAFactor") != std::string::npos) {
+            this->constants.nonlinearFactorNMDA      = std::lround(std::stod(parameterValues.at(0)));
         } else if (parameterName.find("calciumBasal") != std::string::npos) {
-            this->constants.calciumBasal      = std::lround(std::stod(parameterValues.at(0)));
+            this->calciumBasal      = std::lround(std::stod(parameterValues.at(0)));
         }
     }
-    this->constants.calciumInfluxBasal=constants.calciumBasal*constants.calciumBufferingCtt;
+    this->constants.calciumInfluxBasal=calciumBasal*constants.calciumBufferingCtt;
+    
+    this->constants.preCalciumRiseRate=1/preCalciumRiseTau;
+    this->constants.preCalciumDecayRate=1/preCalciumDecayTau;
+    this->constants.postCalciumRiseRate=1/postCalciumRiseTau;
+    this->constants.postCalciumDecayRate=1/postCalciumDecayTau;
+
+    this->constants.preCalciumFluxFactor=prespikeCalcium*std::pow((((1/preCalciumDecayTau)-(1/preCalciumRiseTau))*(std::pow(preCalciumRiseTau/preCalciumDecayTau,1/((preCalciumRiseTau/preCalciumDecayTau)-1))-std::pow(preCalciumRiseTau/preCalciumDecayTau,1/(1-(preCalciumRiseTau/preCalciumDecayTau))))),-1);    
+    this->constants.postCalciumFluxFactor=postspikeCalcium*std::pow((((1/postCalciumDecayTau)-(1/postCalciumRiseTau))*(std::pow(postCalciumRiseTau/postCalciumDecayTau,1/((postCalciumRiseTau/postCalciumDecayTau)-1))-std::pow(postCalciumRiseTau/postCalciumDecayTau,1/(1-(postCalciumRiseTau/postCalciumDecayTau))))),-1);
+    
 }
 
 void ResourceCalciumDiffusionModel::CheckParameters(const std::vector<FileEntry> &parameters) {
@@ -113,9 +130,18 @@ void ResourceCalciumDiffusionModel::CheckParameters(const std::vector<FileEntry>
             throw "prespikeCalcium was not consistent in plasticity model parameters.";
         } else if (parameterName.find("postspikeCalcium") != std::string::npos && this->postspikeCalcium      != std::stod(parameterValues.at(0))) {
             throw "postspikeCalcium was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("preCalciumDelay") != std::string::npos && this->preSpikeDelaySteps      != std::lround(std::stod(parameterValues.at(0))/infoGlobal->dtTimestep)) {
+        } else if (parameterName.find("preCalciumRiseTau") != std::string::npos && this->preCalciumRiseTau      != std::lround(std::stod(parameterValues.at(0))/infoGlobal->dtTimestep)) {
             throw "preCalciumDelay was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("calciumBasal") != std::string::npos && this->constants.calciumBasal      != std::lround(std::stod(parameterValues.at(0)))) {
+        } else if (parameterName.find("preCalciumDecayTau") != std::string::npos && this->preCalciumDecayTau      != std::lround(std::stod(parameterValues.at(0))/infoGlobal->dtTimestep)) {
+            throw "preCalciumDelay was not consistent in plasticity model parameters.";
+        } else if (parameterName.find("postCalciumRiseTau") != std::string::npos && this->postCalciumRiseTau      != std::lround(std::stod(parameterValues.at(0))/infoGlobal->dtTimestep)) {
+            throw "preCalciumDelay was not consistent in plasticity model parameters.";
+        } else if (parameterName.find("postCalciumDecayTau") != std::string::npos && this->postCalciumDecayTau      != std::lround(std::stod(parameterValues.at(0))/infoGlobal->dtTimestep)) {
+            throw "preCalciumDelay was not consistent in plasticity model parameters.";
+        } else if (parameterName.find("nonlinearNMDAFactor") != std::string::npos && this->constants.nonlinearFactorNMDA      != std::lround(std::stod(parameterValues.at(0)))) {
+            throw "preCalciumDelay was not consistent in plasticity model parameters.";
+
+        } else if (parameterName.find("calciumBasal") != std::string::npos && this->calciumBasal      != std::lround(std::stod(parameterValues.at(0)))) {
             throw "preCalciumDelay was not consistent in plasticity model parameters.";
         }
     }
@@ -172,55 +198,68 @@ void ResourceCalciumDiffusionModel::SaveParameters(std::ofstream &wParameterFile
     wParameterFile << "\t" << "#Total influx of calcium with a prespike\n";
     wParameterFile << neuronIdentificator << "postspikeCalcium\t\t" << std::to_string(this->postspikeCalcium) << " #nM/spike";
     wParameterFile << "\t" << "#Total influx of calcium with a postspike\n";
-    wParameterFile << neuronIdentificator << "preCalciumDelay\t\t" << std::to_string(static_cast<double>(this->preSpikeDelaySteps)*infoGlobal->dtTimestep) << " #secs.";
+    wParameterFile << neuronIdentificator << "preCalciumRiseTau\t\t" << std::to_string(static_cast<double>(this->preCalciumRiseTau)*infoGlobal->dtTimestep) << " #secs.";
+    wParameterFile << "\t" << "#Delay of the prespike calcium influx\n";
+    wParameterFile << neuronIdentificator << "preCalciumDecayTau\t\t" << std::to_string(static_cast<double>(this->preCalciumDecayTau)*infoGlobal->dtTimestep) << " #secs.";
+    wParameterFile << "\t" << "#Delay of the prespike calcium influx\n";
+    wParameterFile << neuronIdentificator << "postCalciumRiseTau\t\t" << std::to_string(static_cast<double>(this->postCalciumRiseTau)*infoGlobal->dtTimestep) << " #secs.";
+    wParameterFile << "\t" << "#Delay of the prespike calcium influx\n";
+    wParameterFile << neuronIdentificator << "postCalciumDecayTau\t\t" << std::to_string(static_cast<double>(this->postCalciumDecayTau)*infoGlobal->dtTimestep) << " #secs.";
+    wParameterFile << "\t" << "#Delay of the prespike calcium influx\n";
+    wParameterFile << neuronIdentificator << "nonlinearNMDAFactor\t\t" << std::to_string(static_cast<double>(this->constants.nonlinearFactorNMDA)) << " #secs.";
     wParameterFile << "\t" << "#Delay of the prespike calcium influx\n";
 
-    wParameterFile << neuronIdentificator << "calciumBasal\t\t" << std::to_string(constants.calciumBasal) << " #secs.";
+    wParameterFile << neuronIdentificator << "calciumBasal\t\t" << std::to_string(calciumBasal) << " #secs.";
     wParameterFile << "\t" << "#Delay of the prespike calcium influx\n";
 }
 
 int ResourceCalciumDiffusionModel::CreateBranch(std::vector<int> anteriorBranches) {
     int branchId{this->GenerateBranchId()};
     if (!anteriorBranches.empty()) {
-        this->caDiffBranches.emplace_back(CaDiffusionBranch(anteriorBranches,this->synapticGap, this->branchLength,  branchId,preSpikeDelaySteps, constants)); // This vector should be sorted by ID by default (tested).
+        this->caDiffBranches.emplace_back(CaDiffusionBranch(anteriorBranches,this->synapticGap, this->branchLength,  branchId, constants)); // This vector should be sorted by ID by default (tested).
         this->branches.push_back(static_cast<Branch *>(&this->caDiffBranches.back()));
     } else {
         int branchId{this->GenerateBranchId()};
         this->caDiffBranches.emplace_back(
-            CaDiffusionBranch(this->synapticGap, this->branchLength,  branchId,preSpikeDelaySteps, constants)); // This vector should be sorted by ID by default (tested).
+            CaDiffusionBranch(this->synapticGap, this->branchLength,  branchId, constants)); // This vector should be sorted by ID by default (tested).
         this->branches.push_back(static_cast<Branch *>(&this->caDiffBranches.back()));
     }
     return branchId;
 }
 
 void ResourceCalciumDiffusionModel::Advect() {
-    if (!postSpiked){
-        TStepModded=infoGlobal->timeStep%preSpikeDelaySteps;
-    }
+    // if (!postSpiked){
+    //     TStepModded=infoGlobal->timeStep%preSpikeDelaySteps;
+    // }
     // TStepModded++;//Here we could assume that the timestep goes hand in hand with this integer in terms of increments.
     // TStepModded%=preSpikeDelaySteps;
-    TStepInput=TStepModded+preSpikeDelaySteps+1;
-    TStepInput%=preSpikeDelaySteps;
+    // TStepInput=TStepModded+preSpikeDelaySteps+1;
+    // TStepInput%=preSpikeDelaySteps;
     for (CaDiffusionBranch& branch: caDiffBranches){
-        branch.Advect(TStepModded);
+        branch.Advect();
+        // branch.Advect(TStepModded);
     }
-    TStepModded++;//This is for the postspike calcium influx next timestep
+    // TStepModded++;//This is for the postspike calcium influx next timestep
 }
 
 void ResourceCalciumDiffusionModel::RecordPostSpike() {
-    TStepModded=infoGlobal->timeStep%preSpikeDelaySteps;
+    // TStepModded=infoGlobal->timeStep%preSpikeDelaySteps;
     this->totalPostSpikes++;
-    this->postSpiked = true;
+    // this->postSpiked = true;
     for (CaDiffusionBranch& branch: caDiffBranches){
-    	std::transform(PAR_UNSEQ,branch.waitingMatrix.at(TStepModded).begin(), branch.waitingMatrix.at(TStepModded).end(), branch.waitingMatrix.at(TStepModded).begin(),std::bind(std::plus<cadouble>(),std::placeholders::_1, postspikeCalcium));
+        branch.PostSpikeCalciumFlux();
     }
+    // for (CaDiffusionBranch& branch: caDiffBranches){
+    // 	std::transform(PAR_UNSEQ,branch.waitingMatrix.at(TStepModded).begin(), branch.waitingMatrix.at(TStepModded).end(), branch.waitingMatrix.at(TStepModded).begin(),std::bind(std::plus<double>(),std::placeholders::_1, postspikeCalcium));
+    // }
 }
 
 void ResourceCalciumDiffusionModel::RecordExcitatoryPreSpike(int spikedSpineId) {
-    CaResSynapseSpine& synapseSpine = *caResSpines.at(spikedSpineId);
-    CaDiffusionBranch&  branch       = caDiffBranches.at(synapseSpine.branchId);
-    int  branchSpinePosition{synapseSpine.branchPositionId};
-    branch.waitingMatrix.at(TStepInput).at(branchSpinePosition)+=prespikeCalcium;
+    // CaResSynapseSpine& synapseSpine = *caResSpines.at(spikedSpineId);
+    // CaDiffusionBranch&  branch       = caDiffBranches.at(synapseSpine.branchId);
+    // int  branchSpinePosition{synapseSpine.branchPositionId};
+    caResSpines.at(spikedSpineId)->preTransientIncrease++;
+    // branch.waitingMatrix.at(TStepInput).at(branchSpinePosition)+=prespikeCalcium;
     this->totalPreSpikes++;
 }
 
@@ -235,7 +274,7 @@ BaseSpinePtr ResourceCalciumDiffusionModel::AllocateNewSynapse(const BranchTarge
     int position{PopSynapseSlotFromBranch(branch, branchTarget.firstSlotTrueLastSlotFalse)};
     // caDiffBranches.at(branch).CaDiffSpines.push_back(CaResSynapseSpine(kinasesTotal, calcineurinTotal, initialWeights));
     CaRsSpinePtr newSpine = &caDiffBranches.at(branch).CaResSpines.at(position);
-    this->caResSpines.push_back(newSpine);
+
     // this->weightsSum += newSynapse->GetWeight();
     newSpine->idInMorpho=(this->baseSpineData.size());//this->spineIdGenerator++
     newSpine->weight=initialWeights;
@@ -246,10 +285,11 @@ BaseSpinePtr ResourceCalciumDiffusionModel::AllocateNewSynapse(const BranchTarge
     newSpine->connected=true;
 
     branches.at(branch)->synapseSlotClosedIndex.push_back(position);//Do we really need this?
-
+  
     // Storage (other)
     this->baseSpineData.push_back(static_cast<BaseSpinePtr>(newSpine));
     this->branchedSpineData.push_back(static_cast<BranchedSpinePtr>(newSpine));
+    this->caResSpines.push_back(newSpine);
 
     return this->baseSpineData.back();
 }

@@ -9,9 +9,9 @@
 #include "../../../GlobalFunctions.hpp"
 #include "../SynapseSpines/CaResSynapseSpine.hpp"
 struct Constants{ //currently 19 + the prespike/postspike calcium and the prespike calcium influx delay, so 21
-    cadouble caDiffusionFct;//Consider delta x squared already here
+    double caDiffusionFct;//Consider delta x squared already here
 
-    cadouble calciumBufferingCtt;//Consider already exponentiated
+    double calciumBufferingCtt;//Consider already exponentiated
      
     double kinasesTotal;//Upper limit of Kinases (determines, with active, unactive species)
     double calcineurinTotal;//Upper limit of phosphatases (determines, with active, unactive species)
@@ -33,14 +33,24 @@ struct Constants{ //currently 19 + the prespike/postspike calcium and the prespi
 
     
     double resourceDiffusionFct;//Consider delta x squared already here
-    cadouble calciumBasal;
-    cadouble calciumInfluxBasal;
+
+    double calciumInfluxBasal;
     double initialResources, initialWeight;
+
+    double preCalciumFluxFactor;
+    double preCalciumRiseRate;
+    double preCalciumDecayRate;
+
+    double postCalciumFluxFactor;
+    double postCalciumRiseRate;
+    double postCalciumDecayRate;
+
+    double nonlinearFactorNMDA;
 };
 // include the spine class
 struct CaDiffusionBranch : public Branch {
 
-    std::vector<std::vector<cadouble>> waitingMatrix;//First axis is the position and time 0. Second axis is the time 1, 2, 3. Receives calcium of both prespikes and postspikes
+    // std::vector<std::vector<double>> waitingMatrix;//First axis is the position and time 0. Second axis is the time 1, 2, 3. Receives calcium of both prespikes and postspikes
     //We swap vector positions (0,1;1,2;2,3), then set to false last vector. std::iter_swap or std::swap. Test speed in this.
     //Synapse access
     std::vector<CaResSynapseSpine> CaResSpines;//VECTOR ACCOUNTS FOR EMPTY SYNAPSE SLOTS
@@ -53,13 +63,14 @@ struct CaDiffusionBranch : public Branch {
 
     //Methods
     //Setup
-    CaDiffusionBranch(std::vector<int>anteriorBranches,double gap, double branchLength, int branchId, TStepInt prespikeDelaySteps, Constants constants);
-    CaDiffusionBranch(double gap, double branchLength, int branchId, TStepInt prespikeDelaySteps, Constants constants);
+    CaDiffusionBranch(std::vector<int>anteriorBranches,double gap, double branchLength, int branchId, Constants constants);
+    CaDiffusionBranch(double gap, double branchLength, int branchId, Constants constants);
     void PostConnectSetUp(std::vector<BranchedSpinePtr> spineData) override;
+    void PostSpikeCalciumFlux();
     //Input methods
-    void PreSpikeCalciumInflux(TStepInt&& timestep);//We do swaps of the matrix and fill with zeroes. Matrix contains the calcium concentration already and we just add.
+    // void PreSpikeCalciumInflux(TStepInt&& timestep);//We do swaps of the matrix and fill with zeroes. Matrix contains the calcium concentration already and we just add.
     // void PreSpikeCalciumInflux();//We do swaps of the matrix and fill with zeroes. Matrix contains the calcium concentration already and we just add.    
     //Reaction methods
-    void Advect(TStepInt step);//All done in the scope of the branch!
+    void Advect();//All done in the scope of the branch!
 };
 #endif

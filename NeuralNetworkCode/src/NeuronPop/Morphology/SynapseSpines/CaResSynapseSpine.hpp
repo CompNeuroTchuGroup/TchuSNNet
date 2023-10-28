@@ -5,15 +5,21 @@
 #define _CALCIUM_RESOURCE_DIFFUSION_SYNAPSE_SPINE_CLASS_HEADER_
 
 #include "BranchedSynapseSpine.hpp"
-using cadouble = double; //If we go to long for precision concerns
+// using double = double; //If we go to long for precision concerns
 
 struct CaResSynapseSpine : public BranchedSynapseSpine {
 
   public:
     bool connected{false};
 
-    cadouble calciumOldStep{};
-    cadouble calciumFree{};
+    double preTransientIncrease{};//Abstract trace
+    double preTransient{};//Calcium trace (interacts with postspike)
+
+    double postTransientIncrease{};//Abstract trace
+    double postTransient{};//Calcium trace (interacts with postspike)
+
+    double calciumOldStep{};
+    double calciumFree{};
 
     double calmodulinActive{};
     double calmodulinNeurogranin{};
