@@ -76,8 +76,8 @@ void ResourceCalciumDiffusionModel::LoadParameters(const std::vector<FileEntry> 
     this->constants.postCalciumRiseRate=1/postCalciumRiseTau;
     this->constants.postCalciumDecayRate=1/postCalciumDecayTau;
 
-    this->constants.preCalciumFluxFactor=prespikeCalcium*std::pow((((1/preCalciumDecayTau)-(1/preCalciumRiseTau))*(std::pow(preCalciumRiseTau/preCalciumDecayTau,1/((preCalciumRiseTau/preCalciumDecayTau)-1))-std::pow(preCalciumRiseTau/preCalciumDecayTau,1/(1-(preCalciumRiseTau/preCalciumDecayTau))))),-1);    
-    this->constants.postCalciumFluxFactor=postspikeCalcium*std::pow((((1/postCalciumDecayTau)-(1/postCalciumRiseTau))*(std::pow(postCalciumRiseTau/postCalciumDecayTau,1/((postCalciumRiseTau/postCalciumDecayTau)-1))-std::pow(postCalciumRiseTau/postCalciumDecayTau,1/(1-(postCalciumRiseTau/postCalciumDecayTau))))),-1);
+    this->constants.preCalciumFluxFactor=prespikeCalcium*std::pow((((1/preCalciumDecayTau)-(1/preCalciumRiseTau))*(std::pow(preCalciumRiseTau/preCalciumDecayTau,1/(1-(preCalciumRiseTau/preCalciumDecayTau)))-std::pow(preCalciumRiseTau/preCalciumDecayTau,1/((preCalciumDecayTau/preCalciumRiseTau)-1)))),-1);    
+    this->constants.postCalciumFluxFactor=postspikeCalcium*std::pow((((1/postCalciumDecayTau)-(1/postCalciumRiseTau))*(std::pow(postCalciumRiseTau/postCalciumDecayTau,1/(1-(postCalciumRiseTau/postCalciumDecayTau)))-std::pow(postCalciumRiseTau/postCalciumDecayTau,1/((postCalciumDecayTau/postCalciumRiseTau)-1)))),-1);
     
 }
 
