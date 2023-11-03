@@ -18,35 +18,35 @@ void ResourceCalciumDiffusionModel::LoadParameters(const std::vector<FileEntry> 
         } else if (parameterName.find("neurograninTotal") != std::string::npos) {
             this->constants.neurograninTotal      = std::stod(parameterValues.at(0));
         } else if (parameterName.find("kOne") != std::string::npos) {
-            this->constants.reaction1Ctt      = std::stod(parameterValues.at(0));
+            this->constants.reaction1Ctt      = std::stod(parameterValues.at(0))*infoGlobal->dtTimestep;
         } else if (parameterName.find("kTwo") != std::string::npos) {
-            this->constants.reaction2Ctt      = std::stod(parameterValues.at(0));
+            this->constants.reaction2Ctt      = std::stod(parameterValues.at(0))*infoGlobal->dtTimestep;
         } else if (parameterName.find("kThree") != std::string::npos) {
-            this->constants.reaction3Ctt      = std::stod(parameterValues.at(0));
+            this->constants.reaction3Ctt      = std::stod(parameterValues.at(0))*infoGlobal->dtTimestep;
         } else if (parameterName.find("kFour") != std::string::npos) {
-            this->constants.reaction4Ctt      = std::stod(parameterValues.at(0));
+            this->constants.reaction4Ctt      = std::stod(parameterValues.at(0))*infoGlobal->dtTimestep;
         } else if (parameterName.find("kFive") != std::string::npos) {
-            this->constants.reaction5Ctt      = std::stod(parameterValues.at(0));
+            this->constants.reaction5Ctt      = std::stod(parameterValues.at(0))*infoGlobal->dtTimestep;
         } else if (parameterName.find("kSix") != std::string::npos) {
-            this->constants.reaction6Ctt      = std::stod(parameterValues.at(0));
+            this->constants.reaction6Ctt      = std::stod(parameterValues.at(0))*infoGlobal->dtTimestep;
         } else if (parameterName.find("kSeven") != std::string::npos) {
-            this->constants.reaction7Ctt      = std::stod(parameterValues.at(0));
+            this->constants.reaction7Ctt      = std::stod(parameterValues.at(0))*infoGlobal->dtTimestep;
         } else if (parameterName.find("kEight") != std::string::npos) {
-            this->constants.reaction8Ctt      = std::stod(parameterValues.at(0));
+            this->constants.reaction8Ctt      = std::stod(parameterValues.at(0))*infoGlobal->dtTimestep;
         } else if (parameterName.find("kNine") != std::string::npos) {
-            this->constants.reaction9Ctt      = std::stod(parameterValues.at(0));
+            this->constants.reaction9Ctt      = std::stod(parameterValues.at(0))*infoGlobal->dtTimestep;
         } else if (parameterName.find("kTen") != std::string::npos) {
-            this->constants.reaction10Ctt      = std::stod(parameterValues.at(0));
+            this->constants.reaction10Ctt      = std::stod(parameterValues.at(0))*infoGlobal->dtTimestep;
         } else if (parameterName.find("kEleven") != std::string::npos) {
-            this->constants.reaction11Ctt      = std::stod(parameterValues.at(0));
+            this->constants.reaction11Ctt      = std::stod(parameterValues.at(0))*infoGlobal->dtTimestep;
         } else if (parameterName.find("kTwelve") != std::string::npos) {
-            this->constants.reaction12Ctt      = std::stod(parameterValues.at(0));
+            this->constants.reaction12Ctt      = std::stod(parameterValues.at(0))*infoGlobal->dtTimestep;
         } else if (parameterName.find("resourceDiffusion") != std::string::npos) {
-            this->constants.resourceDiffusionFct      = std::stod(parameterValues.at(0))/std::pow(synapticGap, 2);
+            this->constants.resourceDiffusionFct      = std::stod(parameterValues.at(0))*infoGlobal->dtTimestep/std::pow(synapticGap, 2);
         } else if (parameterName.find("calciumDiffusion") != std::string::npos) {
-            this->constants.caDiffusionFct      = std::stod(parameterValues.at(0))/std::pow(synapticGap, 2);
+            this->constants.caDiffusionFct      = std::stod(parameterValues.at(0))*infoGlobal->dtTimestep/std::pow(synapticGap, 2);
         } else if (parameterName.find("calciumBuffering") != std::string::npos) {
-            this->constants.calciumBufferingCtt      = std::stod(parameterValues.at(0));
+            this->constants.calciumBufferingCtt      = std::stod(parameterValues.at(0))*infoGlobal->dtTimestep;
         } else if (parameterName.find("initialWeights") != std::string::npos) {
             this->constants.initialWeight      = std::stod(parameterValues.at(0));
         } else if (parameterName.find("initialResources") != std::string::npos) {
@@ -56,17 +56,17 @@ void ResourceCalciumDiffusionModel::LoadParameters(const std::vector<FileEntry> 
         } else if (parameterName.find("postspikeCalcium") != std::string::npos) {
             this->postspikeCalcium      = std::stod(parameterValues.at(0));
         } else if (parameterName.find("preCalciumRiseTau") != std::string::npos) {
-            this->preCalciumRiseTau      = std::lround(std::stod(parameterValues.at(0))/infoGlobal->dtTimestep);
+            this->preCalciumRiseTau      = (std::stod(parameterValues.at(0))*infoGlobal->dtTimestep);
         } else if (parameterName.find("preCalciumDecayTau") != std::string::npos) {
-            this->preCalciumDecayTau      = std::lround(std::stod(parameterValues.at(0))/infoGlobal->dtTimestep);
+            this->preCalciumDecayTau      = (std::stod(parameterValues.at(0))*infoGlobal->dtTimestep);
         } else if (parameterName.find("postCalciumRiseTau") != std::string::npos) {
-            this->postCalciumRiseTau      = std::lround(std::stod(parameterValues.at(0))/infoGlobal->dtTimestep);
+            this->postCalciumRiseTau      = (std::stod(parameterValues.at(0))*infoGlobal->dtTimestep);
         } else if (parameterName.find("postCalciumDecayTau") != std::string::npos) {
-            this->postCalciumDecayTau      = std::lround(std::stod(parameterValues.at(0))/infoGlobal->dtTimestep);
+            this->postCalciumDecayTau      = (std::stod(parameterValues.at(0))*infoGlobal->dtTimestep);
         } else if (parameterName.find("nonlinearNMDAFactor") != std::string::npos) {
-            this->constants.nonlinearFactorNMDA      = std::lround(std::stod(parameterValues.at(0)));
+            this->constants.nonlinearFactorNMDA      = (std::stod(parameterValues.at(0)));
         } else if (parameterName.find("calciumBasal") != std::string::npos) {
-            this->calciumBasal      = std::lround(std::stod(parameterValues.at(0)));
+            this->calciumBasal      = (std::stod(parameterValues.at(0)));
         }
     }
     this->constants.calciumInfluxBasal=calciumBasal*constants.calciumBufferingCtt;
@@ -92,35 +92,35 @@ void ResourceCalciumDiffusionModel::CheckParameters(const std::vector<FileEntry>
             throw "calmodulinTotal was not consistent in plasticity model parameters.";
         } else if (parameterName.find("neurograninTotal") != std::string::npos&&this->constants.neurograninTotal      != std::stod(parameterValues.at(0))) {
             throw "neurograninTotal was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("kOne") != std::string::npos && this->constants.reaction1Ctt      != std::stod(parameterValues.at(0))) {
+        } else if (parameterName.find("kOne") != std::string::npos && this->constants.reaction1Ctt      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep) {
             throw "kOne was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("kTwo") != std::string::npos && this->constants.reaction2Ctt      != std::stod(parameterValues.at(0))) {
+        } else if (parameterName.find("kTwo") != std::string::npos && this->constants.reaction2Ctt      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep) {
             throw "kTwo was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("kThree") != std::string::npos && this->constants.reaction3Ctt      != std::stod(parameterValues.at(0))) {
+        } else if (parameterName.find("kThree") != std::string::npos && this->constants.reaction3Ctt      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep) {
             throw "kThree was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("kFour") != std::string::npos && this->constants.reaction4Ctt      != std::stod(parameterValues.at(0))) {
+        } else if (parameterName.find("kFour") != std::string::npos && this->constants.reaction4Ctt      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep) {
             throw "kFour was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("kFive") != std::string::npos && this->constants.reaction5Ctt      != std::stod(parameterValues.at(0))) {
+        } else if (parameterName.find("kFive") != std::string::npos && this->constants.reaction5Ctt      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep) {
             throw "kFive was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("kSix") != std::string::npos && this->constants.reaction6Ctt      != std::stod(parameterValues.at(0)) ) {
+        } else if (parameterName.find("kSix") != std::string::npos && this->constants.reaction6Ctt      != std::stod(parameterValues.at(0)) *infoGlobal->dtTimestep) {
             throw "kSix was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("kSeven") != std::string::npos && this->constants.reaction7Ctt      != std::stod(parameterValues.at(0))) {
+        } else if (parameterName.find("kSeven") != std::string::npos && this->constants.reaction7Ctt      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep) {
             throw "kSeven was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("kEight") != std::string::npos && this->constants.reaction8Ctt      != std::stod(parameterValues.at(0))) {
+        } else if (parameterName.find("kEight") != std::string::npos && this->constants.reaction8Ctt      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep) {
             throw "kEight was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("kNine") != std::string::npos && this->constants.reaction9Ctt      != std::stod(parameterValues.at(0))) {
+        } else if (parameterName.find("kNine") != std::string::npos && this->constants.reaction9Ctt      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep) {
             throw "kNine was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("kTen") != std::string::npos && this->constants.reaction10Ctt      != std::stod(parameterValues.at(0))) {
+        } else if (parameterName.find("kTen") != std::string::npos && this->constants.reaction10Ctt      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep) {
             throw "kTen was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("kEleven") != std::string::npos && this->constants.reaction11Ctt      != std::stod(parameterValues.at(0))) {
+        } else if (parameterName.find("kEleven") != std::string::npos && this->constants.reaction11Ctt      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep) {
             throw "kEleven was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("kTwelve") != std::string::npos && this->constants.reaction12Ctt      != std::stod(parameterValues.at(0))) {
+        } else if (parameterName.find("kTwelve") != std::string::npos && this->constants.reaction12Ctt      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep) {
             throw "kTwelve was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("resourceDiffusion") != std::string::npos && this->constants.resourceDiffusionFct      != std::stod(parameterValues.at(0))/std::pow(synapticGap, 2)) {
+        } else if (parameterName.find("resourceDiffusion") != std::string::npos && this->constants.resourceDiffusionFct      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep/std::pow(synapticGap, 2)) {
             throw "resourceDiffusion was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("calciumDiffusion") != std::string::npos && this->constants.caDiffusionFct      != std::stod(parameterValues.at(0))/std::pow(synapticGap, 2)) {
+        } else if (parameterName.find("calciumDiffusion") != std::string::npos && this->constants.caDiffusionFct      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep/std::pow(synapticGap, 2)) {
             throw "calciumDiffusion was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("calciumBuffering") != std::string::npos && this->constants.calciumBufferingCtt      != std::stod(parameterValues.at(0))) {
+        } else if (parameterName.find("calciumBuffering") != std::string::npos && this->constants.calciumBufferingCtt      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep) {
             throw "calciumBuffering was not consistent in plasticity model parameters.";
         } else if (parameterName.find("initialWeights") != std::string::npos && this->constants.initialWeight      != std::stod(parameterValues.at(0))) {
             throw "initialWeights was not consistent in plasticity model parameters.";
@@ -130,18 +130,18 @@ void ResourceCalciumDiffusionModel::CheckParameters(const std::vector<FileEntry>
             throw "prespikeCalcium was not consistent in plasticity model parameters.";
         } else if (parameterName.find("postspikeCalcium") != std::string::npos && this->postspikeCalcium      != std::stod(parameterValues.at(0))) {
             throw "postspikeCalcium was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("preCalciumRiseTau") != std::string::npos && this->preCalciumRiseTau      != std::lround(std::stod(parameterValues.at(0))/infoGlobal->dtTimestep)) {
+        } else if (parameterName.find("preCalciumRiseTau") != std::string::npos && this->preCalciumRiseTau      != (std::stod(parameterValues.at(0))*infoGlobal->dtTimestep)) {
             throw "preCalciumDelay was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("preCalciumDecayTau") != std::string::npos && this->preCalciumDecayTau      != std::lround(std::stod(parameterValues.at(0))/infoGlobal->dtTimestep)) {
+        } else if (parameterName.find("preCalciumDecayTau") != std::string::npos && this->preCalciumDecayTau      != (std::stod(parameterValues.at(0))*infoGlobal->dtTimestep)) {
             throw "preCalciumDelay was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("postCalciumRiseTau") != std::string::npos && this->postCalciumRiseTau      != std::lround(std::stod(parameterValues.at(0))/infoGlobal->dtTimestep)) {
+        } else if (parameterName.find("postCalciumRiseTau") != std::string::npos && this->postCalciumRiseTau      != (std::stod(parameterValues.at(0))*infoGlobal->dtTimestep)) {
             throw "preCalciumDelay was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("postCalciumDecayTau") != std::string::npos && this->postCalciumDecayTau      != std::lround(std::stod(parameterValues.at(0))/infoGlobal->dtTimestep)) {
+        } else if (parameterName.find("postCalciumDecayTau") != std::string::npos && this->postCalciumDecayTau      != (std::stod(parameterValues.at(0))*infoGlobal->dtTimestep)) {
             throw "preCalciumDelay was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("nonlinearNMDAFactor") != std::string::npos && this->constants.nonlinearFactorNMDA      != std::lround(std::stod(parameterValues.at(0)))) {
+        } else if (parameterName.find("nonlinearNMDAFactor") != std::string::npos && this->constants.nonlinearFactorNMDA      != (std::stod(parameterValues.at(0)))) {
             throw "preCalciumDelay was not consistent in plasticity model parameters.";
 
-        } else if (parameterName.find("calciumBasal") != std::string::npos && this->calciumBasal      != std::lround(std::stod(parameterValues.at(0)))) {
+        } else if (parameterName.find("calciumBasal") != std::string::npos && this->calciumBasal      != (std::stod(parameterValues.at(0)))) {
             throw "preCalciumDelay was not consistent in plasticity model parameters.";
         }
     }
@@ -158,36 +158,36 @@ void ResourceCalciumDiffusionModel::SaveParameters(std::ofstream &wParameterFile
     wParameterFile << neuronIdentificator << "neurograninTotal\t\t" << std::to_string(this->constants.neurograninTotal) << " #nM/spine";
     wParameterFile << "\t" << "#Concentration of neurogranin in the synapse spine\n";
 
-    wParameterFile << neuronIdentificator << "kOne\t\t" << std::to_string(this->constants.reaction1Ctt) << " #k units";
+    wParameterFile << neuronIdentificator << "kOne\t\t" << std::to_string(this->constants.reaction1Ctt/infoGlobal->dtTimestep) << " #k units";
     wParameterFile << "\t" << "#From CaM and Ng to CaMNg\n";
-    wParameterFile << neuronIdentificator << "kTwo\t\t" << std::to_string(this->constants.reaction2Ctt) << " #k units";
+    wParameterFile << neuronIdentificator << "kTwo\t\t" << std::to_string(this->constants.reaction2Ctt/infoGlobal->dtTimestep) << " #k units";
     wParameterFile << "\t" << "#From CaMNg to CaM and Ng\n";    
-    wParameterFile << neuronIdentificator << "kThree\t\t" << std::to_string(this->constants.reaction3Ctt) << " #k units";
+    wParameterFile << neuronIdentificator << "kThree\t\t" << std::to_string(this->constants.reaction3Ctt/infoGlobal->dtTimestep) << " #k units";
     wParameterFile << "\t" << "#From CaM and Ca to active CaM\n";
-    wParameterFile << neuronIdentificator << "kFour\t\t" << std::to_string(this->constants.reaction4Ctt) << " #k units";
+    wParameterFile << neuronIdentificator << "kFour\t\t" << std::to_string(this->constants.reaction4Ctt/infoGlobal->dtTimestep) << " #k units";
     wParameterFile << "\t" << "#From active CaM to CaM and Ca\n";
-    wParameterFile << neuronIdentificator << "kFive\t\t" << std::to_string(this->constants.reaction5Ctt) << " #k units";
+    wParameterFile << neuronIdentificator << "kFive\t\t" << std::to_string(this->constants.reaction5Ctt/infoGlobal->dtTimestep) << " #k units";
     wParameterFile << "\t" << "#From N inactive to N active, using CaM\n";
-    wParameterFile << neuronIdentificator << "kSix\t\t" << std::to_string(this->constants.reaction6Ctt) << " #k units";
+    wParameterFile << neuronIdentificator << "kSix\t\t" << std::to_string(this->constants.reaction6Ctt/infoGlobal->dtTimestep) << " #k units";
     wParameterFile << "\t" << "#From N active to N inactive, using CaM\n";
-    wParameterFile << neuronIdentificator << "kSeven\t\t" << std::to_string(this->constants.reaction7Ctt) << " #k units";
+    wParameterFile << neuronIdentificator << "kSeven\t\t" << std::to_string(this->constants.reaction7Ctt/infoGlobal->dtTimestep) << " #k units";
     wParameterFile << "\t" << "#From K bound to CaM to phosphorylated K\n";
-    wParameterFile << neuronIdentificator << "kEight\t\t" << std::to_string(this->constants.reaction8Ctt) << " #k units";
+    wParameterFile << neuronIdentificator << "kEight\t\t" << std::to_string(this->constants.reaction8Ctt/infoGlobal->dtTimestep) << " #k units";
     wParameterFile << "\t" << "#From phosphorylated K to K bound to CaM\n";
-    wParameterFile << neuronIdentificator << "kNine\t\t" << std::to_string(this->constants.reaction9Ctt) << " #k units";
+    wParameterFile << neuronIdentificator << "kNine\t\t" << std::to_string(this->constants.reaction9Ctt/infoGlobal->dtTimestep) << " #k units";
     wParameterFile << "\t" << "#From K inactive to K active, using CaM\n";
-    wParameterFile << neuronIdentificator << "kTen\t\t" << std::to_string(this->constants.reaction10Ctt) << " #k units";
+    wParameterFile << neuronIdentificator << "kTen\t\t" << std::to_string(this->constants.reaction10Ctt/infoGlobal->dtTimestep) << " #k units";
     wParameterFile << "\t" << "#From K active to K inactive, using CaM\n";
-    wParameterFile << neuronIdentificator << "kEleven\t\t" << std::to_string(this->constants.reaction11Ctt) << " #k units";
+    wParameterFile << neuronIdentificator << "kEleven\t\t" << std::to_string(this->constants.reaction11Ctt/infoGlobal->dtTimestep) << " #k units";
     wParameterFile << "\t" << "#From resources to weight\n";
-    wParameterFile << neuronIdentificator << "kTwelve\t\t" << std::to_string(this->constants.reaction12Ctt) << " #k units";
+    wParameterFile << neuronIdentificator << "kTwelve\t\t" << std::to_string(this->constants.reaction12Ctt/infoGlobal->dtTimestep) << " #k units";
     wParameterFile << "\t" << "#From weight to resources\n";
 
-    wParameterFile << neuronIdentificator << "resourceDiffusion\t" << std::to_string(this->constants.resourceDiffusionFct*std::pow(synapticGap, 2)) << " #some units";
+    wParameterFile << neuronIdentificator << "resourceDiffusion\t" << std::to_string(this->constants.resourceDiffusionFct*std::pow(synapticGap, 2)/infoGlobal->dtTimestep) << " #some units";
     wParameterFile << "\t" << "#Diffusion constant of resources used to increase synapse size\n";
-    wParameterFile << neuronIdentificator << "calciumDiffusion\t" << std::to_string(this->constants.caDiffusionFct*std::pow(synapticGap, 2)) << " #some units";
+    wParameterFile << neuronIdentificator << "calciumDiffusion\t" << std::to_string(this->constants.caDiffusionFct*std::pow(synapticGap, 2)/infoGlobal->dtTimestep) << " #some units";
     wParameterFile << "\t" << "#Diffusion constant of free calcium in the branch\n";
-    wParameterFile << neuronIdentificator << "calciumBuffering\t\t" << std::to_string(this->constants.calciumBufferingCtt) << " #some other units";
+    wParameterFile << neuronIdentificator << "calciumBuffering\t\t" << std::to_string(this->constants.calciumBufferingCtt/infoGlobal->dtTimestep) << " #some other units";
     wParameterFile << "\t" << "#Decay constant for free calcium\n";
 
     wParameterFile << neuronIdentificator << "initialWeights\t\t" << std::to_string(this->constants.initialWeight) << " #dmV/spine";
@@ -198,13 +198,13 @@ void ResourceCalciumDiffusionModel::SaveParameters(std::ofstream &wParameterFile
     wParameterFile << "\t" << "#Total influx of calcium with a prespike\n";
     wParameterFile << neuronIdentificator << "postspikeCalcium\t\t" << std::to_string(this->postspikeCalcium) << " #nM/spike";
     wParameterFile << "\t" << "#Total influx of calcium with a postspike\n";
-    wParameterFile << neuronIdentificator << "preCalciumRiseTau\t\t" << std::to_string(static_cast<double>(this->preCalciumRiseTau)*infoGlobal->dtTimestep) << " #secs.";
+    wParameterFile << neuronIdentificator << "preCalciumRiseTau\t\t" << std::to_string(static_cast<double>(this->preCalciumRiseTau)/infoGlobal->dtTimestep) << " #secs.";
     wParameterFile << "\t" << "#Delay of the prespike calcium influx\n";
-    wParameterFile << neuronIdentificator << "preCalciumDecayTau\t\t" << std::to_string(static_cast<double>(this->preCalciumDecayTau)*infoGlobal->dtTimestep) << " #secs.";
+    wParameterFile << neuronIdentificator << "preCalciumDecayTau\t\t" << std::to_string(static_cast<double>(this->preCalciumDecayTau)/infoGlobal->dtTimestep) << " #secs.";
     wParameterFile << "\t" << "#Delay of the prespike calcium influx\n";
-    wParameterFile << neuronIdentificator << "postCalciumRiseTau\t\t" << std::to_string(static_cast<double>(this->postCalciumRiseTau)*infoGlobal->dtTimestep) << " #secs.";
+    wParameterFile << neuronIdentificator << "postCalciumRiseTau\t\t" << std::to_string(static_cast<double>(this->postCalciumRiseTau)/infoGlobal->dtTimestep) << " #secs.";
     wParameterFile << "\t" << "#Delay of the prespike calcium influx\n";
-    wParameterFile << neuronIdentificator << "postCalciumDecayTau\t\t" << std::to_string(static_cast<double>(this->postCalciumDecayTau)*infoGlobal->dtTimestep) << " #secs.";
+    wParameterFile << neuronIdentificator << "postCalciumDecayTau\t\t" << std::to_string(static_cast<double>(this->postCalciumDecayTau)/infoGlobal->dtTimestep) << " #secs.";
     wParameterFile << "\t" << "#Delay of the prespike calcium influx\n";
     wParameterFile << neuronIdentificator << "nonlinearNMDAFactor\t\t" << std::to_string(static_cast<double>(this->constants.nonlinearFactorNMDA)) << " #secs.";
     wParameterFile << "\t" << "#Delay of the prespike calcium influx\n";
