@@ -76,7 +76,7 @@ public:
     void PostConnectSetUp() override;
     //Allocation shennanigans
     int GetNoBranches(){return static_cast<int>(branches.size());}
-    BaseSpinePtr AllocateNewSynapse(const BranchTargeting& synapse) override = 0; //Use the reference to call GetBranchTarget
+    BaseSpinePtr AllocateNewSynapse(BranchTargeting& synapse) override = 0; //Use the reference to call GetBranchTarget
 
     int AllocateBranch(const BranchTargeting synapse);//The selected branch allocation is simple. This function is called in AllocateNewSynapse
     int RandomBranchAllocation();
@@ -85,7 +85,7 @@ public:
     //virtual int orderedGuidedBranchAllocation(const char DendriticSubRegionID);
     void RandomSynapseAllocation(BranchPtr branch);
     void OrderedSynapseAllocation(BranchPtr branch);//These two are coming from the SetUpSynapseSlots already, called depending on a bool. 
-    int PopSynapseSlotFromBranch(int branch, bool firstSlotTrueLastSlotFalse);
+    int PopSynapseSlotFromBranch(BranchTargeting& branchTargeting);
     //virtual void AlternatedSynapseAllocation(BranchPtr branch);
     //
     int GenerateBranchId(){return branchIdGenerator++;}

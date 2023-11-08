@@ -32,6 +32,7 @@ class Synapse
 protected:
     // NAMING CONVENTIONS FOR THE CLASS:
     // sourceNeuron == preNeuron, targetNeuron == postNeuron.
+    BranchTargeting branchTarget{};
     const PopPtr sourcePop;
     const PopPtr targetPop; // conductance based synapses need access to membrane potential
     const PopInt sourcePopID, targetPopID;
@@ -75,7 +76,7 @@ protected:
     bool hasPlasticityModel{false};
     bool ignoreJDParameters{false};
     double relativeCouplingStrength{1};
-    BranchTargeting branchTarget{};
+
     // End of HCS data
     // Introduce boolean
 

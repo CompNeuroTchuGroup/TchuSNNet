@@ -97,7 +97,7 @@ public:
     void RecordExcitatoryPreSpike(int spikedSpineId) override;//Here set the trigger count to 0
     void PostConnectSetUp() override;
     //Allocation methods
-    BaseSpinePtr AllocateNewSynapse(const BranchTargeting& synapse) override; //Call the Branched one inside before setting all counters
+    BaseSpinePtr AllocateNewSynapse(BranchTargeting& synapse) override; //Call the Branched one inside before setting all counters
         //Remember to set all counts to maxCount    
     //Record functions
     std::vector<double> GetOverallSynapticProfile() const override;

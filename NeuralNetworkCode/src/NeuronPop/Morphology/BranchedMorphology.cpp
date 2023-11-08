@@ -306,17 +306,29 @@ void BranchedMorphology::OrderedSynapseAllocation(BranchPtr branch) {
     // Then I will have to pop_front() in AllocateNewSynapse
 }
 
-int BranchedMorphology::PopSynapseSlotFromBranch(int branch, bool firstSlotTrueLastSlotFalse) {
-    if (branches.at(branch)->openSpineSlots.empty()) {
+int BranchedMorphology::PopSynapseSlotFromBranch(BranchTargeting& branchTargeting) {
+    if (branches.at(branchTargeting.targetBranch)->openSpineSlots.empty()) {
         throw "No allocatable exception";
     }
+    int position{};
     // Position
-    int position{(firstSlotTrueLastSlotFalse) ? branches.at(branch)->openSpineSlots.front()
-                                              : branches.at(branch)->openSpineSlots.back()};
-    if (firstSlotTrueLastSlotFalse) {
-        branches.at(branch)->openSpineSlots.pop_front();
+    if (branchTargeting.setOfPositions.empty()){
+        position=(branchTargeting.firstSlotTrueLastSlotFalse) ? branches.at(branchTargeting.targetBranch)->openSpineSlots.front()
+                                              : branches.at(branchTargeting.targetBranch)->openSpineSlots.back();
     } else {
-        branches.at(branch)->openSpineSlots.pop_back();
+        std::deque<int>::iterator foundPosition {std::find(branches.at(branchTargeting.targetBranch)->openSpineSlots.begin(),branches.at(branchTargeting.targetBranch)->openSpineSlots.end(),branchTargeting.setOfPositions.back())};
+        if (foundPosition==branches.at(branchTargeting.targetBranch)->openSpineSlots.end()){
+            throw "There was no free slot coinciding with set position";
+        } else {
+            branches.at(branchTargeting.targetBranch)->openSpineSlots.erase(foundPosition);
+            position=branchTargeting.setOfPositions.back();
+            branchTargeting.setOfPositions.pop_back();
+        }
+    }
+    if (branchTargeting.firstSlotTrueLastSlotFalse) {
+        branches.at(branchTargeting.targetBranch)->openSpineSlots.pop_front();
+    } else {
+        branches.at(branchTargeting.targetBranch)->openSpineSlots.pop_back();
     }
     return position;
 }

@@ -45,12 +45,12 @@ void ResourceCalciumDiffusionModel::LoadParameters(const std::vector<FileEntry> 
             this->constants.resourceDiffusionFct      = std::stod(parameterValues.at(0))*infoGlobal->dtTimestep/std::pow(synapticGap, 2);
         } else if (parameterName.find("calciumDiffusion") != std::string::npos) {
             this->constants.caDiffusionFct      = std::stod(parameterValues.at(0))*infoGlobal->dtTimestep/std::pow(synapticGap, 2);
-        } else if (parameterName.find("calciumBuffering") != std::string::npos) {
-            this->constants.calciumBufferingCtt      = std::stod(parameterValues.at(0))*infoGlobal->dtTimestep;
-        } else if (parameterName.find("initialWeights") != std::string::npos) {
+        } else if (parameterName.find("calciumExtrusion") != std::string::npos) {
+            this->constants.calciumExtrusionCtt      = std::stod(parameterValues.at(0))*infoGlobal->dtTimestep;
+        } else if (parameterName.find("initialWeight") != std::string::npos) {
             this->constants.initialWeight      = std::stod(parameterValues.at(0));
         } else if (parameterName.find("initialResources") != std::string::npos) {
-            this->constants.initialResources      = std::stod(parameterValues.at(0));
+            this->availResourcesRatio      = std::stod(parameterValues.at(0));
         } else if (parameterName.find("prespikeCalcium") != std::string::npos) {
             this->prespikeCalcium      = std::stod(parameterValues.at(0));
         } else if (parameterName.find("postspikeCalcium") != std::string::npos) {
@@ -67,10 +67,12 @@ void ResourceCalciumDiffusionModel::LoadParameters(const std::vector<FileEntry> 
             this->constants.nonlinearFactorNMDA      = (std::stod(parameterValues.at(0)));
         } else if (parameterName.find("calciumBasal") != std::string::npos) {
             this->calciumBasal      = (std::stod(parameterValues.at(0)));
+        } else if (parameterName.find("resourceConversionFct") != std::string::npos) {
+            this->resourceConversionFct      = (std::stod(parameterValues.at(0)));
         }
     }
-    this->constants.calciumInfluxBasal=calciumBasal*constants.calciumBufferingCtt;
-    
+    this->constants.calciumInfluxBasal=calciumBasal*constants.calciumExtrusionCtt;
+    this->constants.initialResources=this->constants.initialWeight/resourceConversionFct/availResourcesRatio;
     this->constants.preCalciumRiseRate=1/preCalciumRiseTau;
     this->constants.preCalciumDecayRate=1/preCalciumDecayTau;
     this->constants.postCalciumRiseRate=1/postCalciumRiseTau;
@@ -120,12 +122,12 @@ void ResourceCalciumDiffusionModel::CheckParameters(const std::vector<FileEntry>
             throw "resourceDiffusion was not consistent in plasticity model parameters.";
         } else if (parameterName.find("calciumDiffusion") != std::string::npos && this->constants.caDiffusionFct      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep/std::pow(synapticGap, 2)) {
             throw "calciumDiffusion was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("calciumBuffering") != std::string::npos && this->constants.calciumBufferingCtt      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep) {
+        } else if (parameterName.find("calciumExtrusion") != std::string::npos && this->constants.calciumExtrusionCtt      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep) {
             throw "calciumBuffering was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("initialWeights") != std::string::npos && this->constants.initialWeight      != std::stod(parameterValues.at(0))) {
-            throw "initialWeights was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("initialResources") != std::string::npos && this->constants.initialResources      != std::stod(parameterValues.at(0))) {
-            throw "initialResources was not consistent in plasticity model parameters.";
+        } else if (parameterName.find("initialWeight") != std::string::npos && this->constants.initialWeight      != std::stod(parameterValues.at(0))) {
+            throw "initialWeight was not consistent in plasticity model parameters.";
+        } else if (parameterName.find("availResourcesRatio") != std::string::npos && this->availResourcesRatio      != std::stod(parameterValues.at(0))) {
+            throw "availResourcesRatio was not consistent in plasticity model parameters.";
         } else if (parameterName.find("prespikeCalcium") != std::string::npos && this->prespikeCalcium      != std::stod(parameterValues.at(0))) {
             throw "prespikeCalcium was not consistent in plasticity model parameters.";
         } else if (parameterName.find("postspikeCalcium") != std::string::npos && this->postspikeCalcium      != std::stod(parameterValues.at(0))) {
@@ -140,6 +142,8 @@ void ResourceCalciumDiffusionModel::CheckParameters(const std::vector<FileEntry>
             throw "preCalciumDelay was not consistent in plasticity model parameters.";
         } else if (parameterName.find("nonlinearNMDAFactor") != std::string::npos && this->constants.nonlinearFactorNMDA      != (std::stod(parameterValues.at(0)))) {
             throw "preCalciumDelay was not consistent in plasticity model parameters.";
+        } else if (parameterName.find("resourceConversionFct") != std::string::npos && this->resourceConversionFct      != (std::stod(parameterValues.at(0)))) {
+            throw "#mV*nM^-1 Conversion factor from nM to mV";
 
         } else if (parameterName.find("calciumBasal") != std::string::npos && this->calciumBasal      != (std::stod(parameterValues.at(0)))) {
             throw "preCalciumDelay was not consistent in plasticity model parameters.";
@@ -187,12 +191,11 @@ void ResourceCalciumDiffusionModel::SaveParameters(std::ofstream &wParameterFile
     wParameterFile << "\t" << "#Diffusion constant of resources used to increase synapse size\n";
     wParameterFile << neuronIdentificator << "calciumDiffusion\t" << std::to_string(this->constants.caDiffusionFct*std::pow(synapticGap, 2)/infoGlobal->dtTimestep) << " #some units";
     wParameterFile << "\t" << "#Diffusion constant of free calcium in the branch\n";
-    wParameterFile << neuronIdentificator << "calciumBuffering\t\t" << std::to_string(this->constants.calciumBufferingCtt/infoGlobal->dtTimestep) << " #some other units";
-    wParameterFile << "\t" << "#Decay constant for free calcium\n";
 
-    wParameterFile << neuronIdentificator << "initialWeights\t\t" << std::to_string(this->constants.initialWeight) << " #dmV/spine";
+
+    wParameterFile << neuronIdentificator << "initialWeight\t\t" << std::to_string(this->constants.initialWeight) << " #dmV/spine";
     wParameterFile << "\t" << "#Initial weight value\n";
-    wParameterFile << neuronIdentificator << "initialResources\t\t" << std::to_string(this->constants.initialResources) << " #/spine";
+    wParameterFile << neuronIdentificator << "availResourcesRatio\t\t" << std::to_string(this->availResourcesRatio) << " #/spine";
     wParameterFile << "\t" << "#Initial amount of resources for each segment of the dendrite\n";
     wParameterFile << neuronIdentificator << "prespikeCalcium\t\t" << std::to_string(this->prespikeCalcium) << " #nM/spike";
     wParameterFile << "\t" << "#Total influx of calcium with a prespike\n";
@@ -211,6 +214,10 @@ void ResourceCalciumDiffusionModel::SaveParameters(std::ofstream &wParameterFile
 
     wParameterFile << neuronIdentificator << "calciumBasal\t\t" << std::to_string(calciumBasal) << " #secs.";
     wParameterFile << "\t" << "#Delay of the prespike calcium influx\n";
+    wParameterFile << neuronIdentificator << "calciumExtrusion\t\t" << std::to_string(this->constants.calciumExtrusionCtt/infoGlobal->dtTimestep) << " #some other units";
+    wParameterFile << "\t" << "#Extrusion rate for free calcium\n";
+    wParameterFile << neuronIdentificator << "resourceConversionFct\t\t" << std::to_string(resourceConversionFct) << " #secs.";
+    wParameterFile << "\t" << "#Conversion from resource molar units () to dmV/sec\n";
 }
 
 int ResourceCalciumDiffusionModel::CreateBranch(std::vector<int> anteriorBranches) {
@@ -269,15 +276,15 @@ void ResourceCalciumDiffusionModel::PostConnectSetUp() {
     }
 }
 
-BaseSpinePtr ResourceCalciumDiffusionModel::AllocateNewSynapse(const BranchTargeting &branchTarget) {
+BaseSpinePtr ResourceCalciumDiffusionModel::AllocateNewSynapse(BranchTargeting &branchTarget) {
     int branch{AllocateBranch(branchTarget)};
-    int position{PopSynapseSlotFromBranch(branch, branchTarget.firstSlotTrueLastSlotFalse)};
-    // caDiffBranches.at(branch).CaDiffSpines.push_back(CaResSynapseSpine(kinasesTotal, calcineurinTotal, initialWeights));
+    int position{PopSynapseSlotFromBranch(branchTarget)};
+    // caDiffBranches.at(branch).CaDiffSpines.push_back(CaResSynapseSpine(kinasesTotal, calcineurinTotal, constants.initialWeight));
     CaRsSpinePtr newSpine = &caDiffBranches.at(branch).CaResSpines.at(position);
 
     // this->weightsSum += newSynapse->GetWeight();
     newSpine->idInMorpho=(this->baseSpineData.size());//this->spineIdGenerator++
-    newSpine->weight=initialWeights;
+    newSpine->weight=constants.initialWeight;
     // Branch
     newSpine->branchPositionId=(position);
     newSpine->branchId=(branch);

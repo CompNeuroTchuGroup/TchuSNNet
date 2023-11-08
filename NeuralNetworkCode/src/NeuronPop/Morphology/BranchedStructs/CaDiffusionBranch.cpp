@@ -49,7 +49,7 @@ void CaDiffusionBranch::Advect() {
     // container index-1. When the end is reached, you do the diffusion of last container.
     double inactiveCalmodulin{}, kDot{}, nDot{}, kPDot{}, wDot{}, camDot{}, ngDot{}; // inactivePhosphatases{},inactiveKinases{}, unboundNeurogranin{}; is only used once, so you can
                                                                                      // calculate it in place
-    const Constants constants{constants};                                                                                 
+    const Constants constants{this->constants};                                                                                 
     size_t lastIndex{CaResSpines.size() - 1};
     // PreSpikeCalciumInflux(std::move(step));
     // I apologize in advance, as this function requires being run with spatial and temporal locality for max speed.
@@ -104,14 +104,14 @@ void CaDiffusionBranch::Advect() {
     // First boundary case
     // Diffusion of calcium
     CaResSpines.at(0).calciumFree += constants.caDiffusionFct * (-CaResSpines.at(0).calciumOldStep + CaResSpines.at(1).calciumOldStep);
-    CaResSpines.at(0).calciumFree += constants.calciumInfluxBasal-CaResSpines.at(0).calciumFree * constants.calciumBufferingCtt;
+    CaResSpines.at(0).calciumFree += constants.calciumInfluxBasal-CaResSpines.at(0).calciumFree * constants.calciumExtrusionCtt;
     // Diffusion of resources
     CaResSpines.at(0).resourcesAvailable += constants.resourceDiffusionFct * (-CaResSpines.at(0).resourcesOldStep + CaResSpines.at(1).resourcesOldStep);
     for (size_t spineIndex : std::ranges::views::iota(1u, lastIndex)) {
         // Diffusion of calcium
         CaResSpines.at(spineIndex).calciumFree +=
             constants.caDiffusionFct * (-2 * CaResSpines.at(spineIndex).calciumOldStep + CaResSpines.at(spineIndex - 1).calciumOldStep + CaResSpines.at(spineIndex + 1).calciumOldStep);
-        CaResSpines.at(spineIndex).calciumFree += constants.calciumInfluxBasal-CaResSpines.at(spineIndex).calciumFree * constants.calciumBufferingCtt;
+        CaResSpines.at(spineIndex).calciumFree += constants.calciumInfluxBasal-CaResSpines.at(spineIndex).calciumFree * constants.calciumExtrusionCtt;
         // Diffusion of resources
         CaResSpines.at(spineIndex).resourcesAvailable +=
             constants.resourceDiffusionFct * (-2 * CaResSpines.at(spineIndex).resourcesOldStep + CaResSpines.at(spineIndex - 1).resourcesOldStep + CaResSpines.at(spineIndex + 1).resourcesOldStep);
@@ -119,7 +119,7 @@ void CaDiffusionBranch::Advect() {
     // Last boundary case
     //  Diffusion of calcium
     CaResSpines.at(lastIndex).calciumFree += constants.caDiffusionFct * (-CaResSpines.at(lastIndex).calciumOldStep + CaResSpines.at(lastIndex - 1).calciumOldStep);
-    CaResSpines.at(lastIndex).calciumFree += constants.calciumInfluxBasal-CaResSpines.at(lastIndex).calciumFree * constants.calciumBufferingCtt;
+    CaResSpines.at(lastIndex).calciumFree += constants.calciumInfluxBasal-CaResSpines.at(lastIndex).calciumFree * constants.calciumExtrusionCtt;
     // Diffusion of resources
     CaResSpines.at(lastIndex).resourcesAvailable += constants.resourceDiffusionFct * (-CaResSpines.at(lastIndex).resourcesOldStep + CaResSpines.at(lastIndex - 1).resourcesOldStep);
 }

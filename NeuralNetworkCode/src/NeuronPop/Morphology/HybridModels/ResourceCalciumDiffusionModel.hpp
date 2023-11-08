@@ -24,11 +24,14 @@ class ResourceCalciumDiffusionModel : public BranchedMorphology {
     // Constants
     double prespikeCalcium{}, postspikeCalcium{};
     
-    double preCalciumRiseTau;
-    double preCalciumDecayTau;
+    double preCalciumRiseTau{};
+    double preCalciumDecayTau{};
 
-    double postCalciumRiseTau;
-    double postCalciumDecayTau;
+    double postCalciumRiseTau{};
+    double postCalciumDecayTau{};
+
+    double availResourcesRatio{};
+    double resourceConversionFct{};
     
     double calciumBasal{};
     // TStepInt preSpikeDelaySteps{}; // either we calculate the modulus here
@@ -55,7 +58,7 @@ class ResourceCalciumDiffusionModel : public BranchedMorphology {
     void RecordExcitatoryPreSpike(int spikedSpineId) override; // Here set the trigger count to 0
     void PostConnectSetUp() override;
     // Allocation methods
-    BaseSpinePtr AllocateNewSynapse(const BranchTargeting &branchTarget) override; // Call the Branched one inside before setting all counters
+    BaseSpinePtr AllocateNewSynapse(BranchTargeting &branchTarget) override; // Call the Branched one inside before setting all counters
     // Remember to set all counts to maxCount
     // Record functions
     std::vector<double> GetOverallSynapticProfile() const override;

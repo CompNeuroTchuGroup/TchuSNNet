@@ -104,33 +104,6 @@ void Synapse::LoadParameters(const std::vector<FileEntry> &synapseParameters) {
                                                                 // correct,
                                                                 // exception
             }
-        } else if (parameterName.find("targetBranch") != std::string::npos) {
-            if (parameterValues.at(0).find("random") != std::string::npos) {
-                this->branchTarget.randomTargetBranch = true;
-            } else if (parameterValues.at(0).find("none") != std::string::npos) {
-                // Here nothing is done to handle the case where we do not used
-                // branched Checking if the input is an integer would take more
-                // time than checking if None is in a single string with 5
-                // characters max (I think).
-            } else if (parameterValues.at(0).find("ordered") != std::string::npos) {
-                this->branchTarget.orderedTargetBranch = true;
-            } else {
-                this->branchTarget.targetBranch = std::stoi(parameterValues.at(0));
-                if (this->branchTarget.targetBranch >= targetPop->GetNoBranches()) {
-                    throw "Targeted branch does not exist";
-                }
-                this->branchTarget.setTargetBranch = true;
-                // Missing exception management for when the input is not an
-                // integer.
-            }
-        } else if (parameterName.find("subregion") != std::string::npos) {
-            this->branchTarget.DendriticSubRegion = parameterValues.at(0).at(0); // Re-think this char array wacky stuff
-        } else if (parameterName.find("slotOrder") != std::string::npos) {
-            if (parameterValues.at(0).find("first") != std::string::npos) {
-                this->branchTarget.firstSlotTrueLastSlotFalse = true;
-            } else if (parameterValues.at(0).find("last") != std::string::npos) {
-                this->branchTarget.firstSlotTrueLastSlotFalse = false;
-            }
         } else if (parameterName.find("relative_coupling") != std::string::npos) {
             this->relativeCouplingStrength = std::stod(parameterValues.at(0));
         } else if (parameterName.find("seed") != std::string::npos) {
@@ -174,38 +147,6 @@ void Synapse::SaveParameters(std::ofstream &wParameterStream, std::string idStri
     }
     if (userSeed) {
         wParameterStream << idString << "seed\t\t\t\t\t\t" << std::to_string(this->seed) << "\n";
-    }
-
-    // Synaptic targeting
-    if (this->targetPop->IsBranchedBool()) {
-        wParameterStream << idString << "targetBranch\t\t\t\t\t";
-        if (this->branchTarget.randomTargetBranch) {
-            wParameterStream << "random"; // Missing comments on what this is supposed to do
-        } else if (this->branchTarget.setTargetBranch) {
-            wParameterStream << std::to_string(this->branchTarget.targetBranch); // Missing comments on what
-                                                                                 // this is supposed to do
-        } else if (this->branchTarget.orderedTargetBranch) {
-            wParameterStream << "ordered";
-        } else {
-            wParameterStream << "none"; // Missing comments on what this is supposed to do
-        }
-        wParameterStream << "\t\t\t#You can target branches in an 'ordered' "
-                            "manner (0,1,2...), "
-                            "'random', or set (if you input a number). Put "
-                            "none if the HS does "
-                            "not used branched morphology\n";
-        wParameterStream << idString + "pmodel_"
-                         << "slotOrder\t\t";
-        if (this->branchTarget.firstSlotTrueLastSlotFalse) {
-            wParameterStream << "first\t";
-        } else {
-            wParameterStream << "last\t";
-        }
-        wParameterStream << "\t"
-                         << "#'first' synapse allocation will allocate synapses from the "
-                            "beggining to the end of the available slots. 'last' will do "
-                            "the "
-                            "opposite. This only makes sense in ordered allocation\n";
     }
     if (geometry != nullptr) {
         geometry->SaveParameters(wParameterStream, idString);

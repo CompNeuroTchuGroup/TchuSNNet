@@ -56,7 +56,7 @@ class Morphology {
     virtual void LoadParameters(const std::vector<FileEntry> &parameters);
     virtual void CheckParameters(const std::vector<FileEntry> &parameters);
 
-    virtual BaseSpinePtr AllocateNewSynapse(const BranchTargeting &synapse) = 0;
+    virtual BaseSpinePtr AllocateNewSynapse(BranchTargeting &synapse) = 0;
     double GenerateSynapticWeight(); // Here we generate the synaptic weight to be allocated when a synapse is allocated
     int    GetNoSynapses() const { return static_cast<int>(baseSpineData.size()); }
     virtual std::string GetType() const = 0;

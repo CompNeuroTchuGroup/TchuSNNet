@@ -427,7 +427,7 @@ void MonoDendriteSTDP::SoftMaxNormalize() {
         synapse->weight=((std::exp(synapse->GetWeightUncoupled())*this->softMaxMultiplier)/weightSum);
         });
 }
-BaseSpinePtr MonoDendriteSTDP::AllocateNewSynapse(const BranchTargeting& branchTargeting) {
+BaseSpinePtr MonoDendriteSTDP::AllocateNewSynapse(BranchTargeting& branchTargeting) {
 
     std::uniform_real_distribution<double> distribution(0.0,2.0);
 

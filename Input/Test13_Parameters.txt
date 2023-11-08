@@ -110,13 +110,20 @@ synapses_1_0_pmodel_kEleven
 synapses_1_0_pmodel_kTwelve
 synapses_1_0_pmodel_resourceDiffusion
 synapses_1_0_pmodel_calciumDiffusion
-synapses_1_0_pmodel_calciumBuffering
-synapses_1_0_pmodel_initialWeights
-synapses_1_0_pmodel_initialResources
+synapses_1_0_pmodel_calciumExtrusion
+synapses_1_0_pmodel_initialWeight
+synapses_1_0_pmodel_availResourcesRatio
 synapses_1_0_pmodel_prespikeCalcium
 synapses_1_0_pmodel_postspikeCalcium
-synapses_1_0_pmodel_preCalciumDelay
-synapses_1_0_pmodel_calciumBasal
+synapses_1_0_pmodel_preCalciumRiseTau 0.001
+synapses_1_0_pmodel_preCalciumDecayTau 0.003
+synapses_1_0_pmodel_postCalciumRiseTau 0.0002
+synapses_1_0_pmodel_postCalciumDecayTau 0.0012
+synapses_1_0_pmodel_nonlinearNMDAFactor 4
+synapses_1_0_pmodel_
+synapses_1_0_pmodel_
+synapses_1_0_pmodel_resourceConversionFct
+synapses_1_0_pmodel_calciumBasal 0.05
 
 ##### The weight of this model is defined as wI=beta*alphaI/(omega+branch-sum(alpha)), where alphaI= alphaBasal + alphaStimulus*exp(-dt/alphaStimTau) 
 ########### Connectivity ################

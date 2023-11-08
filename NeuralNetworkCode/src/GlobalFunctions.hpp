@@ -124,6 +124,7 @@ struct BranchTargeting{ //This is esentially a wrapper for HCS different targeti
     bool randomTargetBranch{false};
     bool orderedTargetBranch{false};
     bool firstSlotTrueLastSlotFalse{true};
+    std::vector<int> setOfPositions;
 };
 namespace threadsafe{
     static std::mutex _timeMutex;

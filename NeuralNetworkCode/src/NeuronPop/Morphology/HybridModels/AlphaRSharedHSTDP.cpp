@@ -460,12 +460,12 @@ void AlphaRSharedBHSTDP::PostConnectSetUp() {
     }
 }
 
-BaseSpinePtr AlphaRSharedBHSTDP::AllocateNewSynapse(const BranchTargeting &branchTarget) {
+BaseSpinePtr AlphaRSharedBHSTDP::AllocateNewSynapse(BranchTargeting &branchTarget) {
     // here I have to set the maxcount of the spine to maxCount too
     // Here sum over the branches.????
     // And cast the proper pointers to the proper baseSpineData vectors.
     int branch{AllocateBranch(branchTarget)};
-    int position{PopSynapseSlotFromBranch(branch, branchTarget.firstSlotTrueLastSlotFalse)};
+    int position{PopSynapseSlotFromBranch(branchTarget)};
     alphaBranches.at(branch)->alphaSpines.push_back(AlphaSynapseSpine());
     AlphaSynapseSpine *newSpine = &alphaBranches.at(branch)->alphaSpines.back();
     this->resourceSpineData.push_back(newSpine);

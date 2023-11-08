@@ -98,7 +98,7 @@ public:
     void CheckParameters(const std::vector<FileEntry>& parameters) override;
 
 
-    virtual BaseSpinePtr AllocateNewSynapse(const BranchTargeting& bTargeting) override;
+    virtual BaseSpinePtr AllocateNewSynapse(BranchTargeting& bTargeting) override;
 
 
     int GetMaxGapDelay(int delayPerMicroMeter) override {return dendriticLength*delayPerMicroMeter;};
