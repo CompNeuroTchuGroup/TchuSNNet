@@ -96,7 +96,7 @@ void CaDiffusionBranch::Advect() {
         wDot = constants.reaction11Ctt * spine.resourcesAvailable * (spine.kinasesCaM + spine.kinasesPhospho) - constants.reaction12Ctt * spine.weight * spine.calcineurinActive;
         spine.weight += wDot;
         // 9th Consumption of resources by weight change
-        spine.resourcesAvailable -= wDot;
+        spine.resourcesAvailable -= (wDot)/constants.resourceConversionFct;//This should be the case for converting the dmV/spike to concentration of resources
         // For the next timestep
         spine.PreDiffusion();
     }

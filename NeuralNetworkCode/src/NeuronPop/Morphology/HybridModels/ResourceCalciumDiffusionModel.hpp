@@ -31,7 +31,7 @@ class ResourceCalciumDiffusionModel : public BranchedMorphology {
     double postCalciumDecayTau{};
 
     double availResourcesRatio{};
-    double resourceConversionFct{};
+
     
     double calciumBasal{};
     // TStepInt preSpikeDelaySteps{}; // either we calculate the modulus here

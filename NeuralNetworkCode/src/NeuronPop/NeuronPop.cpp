@@ -192,7 +192,7 @@ void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry> &morphologyPara
     } else {
         morphology.back()->CheckParameters(morphologyParameters);
     }
-    if (!hasPlasticity){
+    if (!hasPlasticity){ //This should never happen logically
         throw "Error, cannot use PModelSynapse without a plasticity model";
     }
 }

@@ -222,12 +222,13 @@ void Synapse::FillWaitingMatrix(NeuronInt spiker, std::vector<double> &&currents
     // {geometry->GetTargetList(spiker)}; std::vector<int> *tD =
     // geometry->GetDistributionD(spiker);
     std::vector<std::pair<NeuronInt, BaseSpinePtr>> &singleTargetList = targetSpineList.at(spiker);
-    for (NeuronInt targetNeuronIndex : std::ranges::views::iota(0, static_cast<NeuronInt>(singleTargetList.size()))) {
+    for (NeuronInt targetNeuronIndex : std::ranges::views::iota(0, static_cast<NeuronInt>(singleTargetList.size()))) {// In large synaptic operations this is a major slowdown probably
         // int delay {GetDistributionD(targetNeuronIndex,spiker)}; // get
         // individual synaptic delay between spiker and target
+        //GPU acceleration might not be feasible because of the modulus operation. https://stackoverflow.com/questions/12252826/modular-arithmetic-on-the-gpu
         size_t matrixIndex{(static_cast<size_t>(this->infoGlobal->timeStep) +
                             static_cast<size_t>(GetDistributionD(targetNeuronIndex, spiker))) %
-                           static_cast<size_t>(Dmax + 1)};
+                           static_cast<size_t>(Dmax + 1)};//Here if you could feed the timestep, the distribution d matrix, and the spiker number, plus the currents vector plus the target vector.
         // std::cout<<delay<<"-"<<matrixIndex<<"-"<<waitingMatrix.at(synapticTargetList.at(spiker).at(targetNeuronIndex).first).size()<<"-"<<targetNeuronIndex<<"\n";
         // std::lock_guard<std::mutex> _lockMutex(_waitingMatrixMutexLock);
         waitingMatrix.at(singleTargetList.at(targetNeuronIndex).first).at(matrixIndex) +=

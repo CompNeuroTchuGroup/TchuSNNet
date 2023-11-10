@@ -68,11 +68,12 @@ void ResourceCalciumDiffusionModel::LoadParameters(const std::vector<FileEntry> 
         } else if (parameterName.find("calciumBasal") != std::string::npos) {
             this->calciumBasal      = (std::stod(parameterValues.at(0)));
         } else if (parameterName.find("resourceConversionFct") != std::string::npos) {
-            this->resourceConversionFct      = (std::stod(parameterValues.at(0)));
+            this->constants.resourceConversionFct      = (std::stod(parameterValues.at(0)));
         }
     }
     this->constants.calciumInfluxBasal=calciumBasal*constants.calciumExtrusionCtt;
-    this->constants.initialResources=this->constants.initialWeight/resourceConversionFct/availResourcesRatio;
+    this->constants.initialResources=this->constants.initialWeight/constants.resourceConversionFct/availResourcesRatio;
+    this->constants.reaction11Ctt*=constants.resourceConversionFct;
     this->constants.preCalciumRiseRate=1/preCalciumRiseTau;
     this->constants.preCalciumDecayRate=1/preCalciumDecayTau;
     this->constants.postCalciumRiseRate=1/postCalciumRiseTau;
@@ -114,7 +115,7 @@ void ResourceCalciumDiffusionModel::CheckParameters(const std::vector<FileEntry>
             throw "kNine was not consistent in plasticity model parameters.";
         } else if (parameterName.find("kTen") != std::string::npos && this->constants.reaction10Ctt      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep) {
             throw "kTen was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("kEleven") != std::string::npos && this->constants.reaction11Ctt      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep) {
+        } else if (parameterName.find("kEleven") != std::string::npos && this->constants.reaction11Ctt/constants.resourceConversionFct      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep) {
             throw "kEleven was not consistent in plasticity model parameters.";
         } else if (parameterName.find("kTwelve") != std::string::npos && this->constants.reaction12Ctt      != std::stod(parameterValues.at(0))*infoGlobal->dtTimestep) {
             throw "kTwelve was not consistent in plasticity model parameters.";
@@ -142,8 +143,8 @@ void ResourceCalciumDiffusionModel::CheckParameters(const std::vector<FileEntry>
             throw "preCalciumDelay was not consistent in plasticity model parameters.";
         } else if (parameterName.find("nonlinearNMDAFactor") != std::string::npos && this->constants.nonlinearFactorNMDA      != (std::stod(parameterValues.at(0)))) {
             throw "preCalciumDelay was not consistent in plasticity model parameters.";
-        } else if (parameterName.find("resourceConversionFct") != std::string::npos && this->resourceConversionFct      != (std::stod(parameterValues.at(0)))) {
-            throw "#mV*nM^-1 Conversion factor from nM to mV";
+        } else if (parameterName.find("resourceConversionFct") != std::string::npos && this->constants.resourceConversionFct      != (std::stod(parameterValues.at(0)))) {
+            throw "#mV*uM^-1 Conversion factor from nM to mV";
 
         } else if (parameterName.find("calciumBasal") != std::string::npos && this->calciumBasal      != (std::stod(parameterValues.at(0)))) {
             throw "preCalciumDelay was not consistent in plasticity model parameters.";
@@ -182,7 +183,7 @@ void ResourceCalciumDiffusionModel::SaveParameters(std::ofstream &wParameterFile
     wParameterFile << "\t" << "#From K inactive to K active, using CaM\n";
     wParameterFile << neuronIdentificator << "kTen\t\t" << std::to_string(this->constants.reaction10Ctt/infoGlobal->dtTimestep) << " #k units";
     wParameterFile << "\t" << "#From K active to K inactive, using CaM\n";
-    wParameterFile << neuronIdentificator << "kEleven\t\t" << std::to_string(this->constants.reaction11Ctt/infoGlobal->dtTimestep) << " #k units";
+    wParameterFile << neuronIdentificator << "kEleven\t\t" << std::to_string(this->constants.reaction11Ctt/constants.resourceConversionFct/infoGlobal->dtTimestep) << " #k units";
     wParameterFile << "\t" << "#From resources to weight\n";
     wParameterFile << neuronIdentificator << "kTwelve\t\t" << std::to_string(this->constants.reaction12Ctt/infoGlobal->dtTimestep) << " #k units";
     wParameterFile << "\t" << "#From weight to resources\n";
@@ -216,7 +217,7 @@ void ResourceCalciumDiffusionModel::SaveParameters(std::ofstream &wParameterFile
     wParameterFile << "\t" << "#Delay of the prespike calcium influx\n";
     wParameterFile << neuronIdentificator << "calciumExtrusion\t\t" << std::to_string(this->constants.calciumExtrusionCtt/infoGlobal->dtTimestep) << " #some other units";
     wParameterFile << "\t" << "#Extrusion rate for free calcium\n";
-    wParameterFile << neuronIdentificator << "resourceConversionFct\t\t" << std::to_string(resourceConversionFct) << " #secs.";
+    wParameterFile << neuronIdentificator << "resourceConversionFct\t\t" << std::to_string(constants.resourceConversionFct) << " #secs.";
     wParameterFile << "\t" << "#Conversion from resource molar units () to dmV/sec\n";
 }
 
