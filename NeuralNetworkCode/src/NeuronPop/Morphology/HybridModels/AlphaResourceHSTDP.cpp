@@ -227,6 +227,7 @@ void AlphaResourceHSTDP::Advect() {
         // }
     } else if (CheckIfPreSpikeHappened()) { // Checks if all are empty or some are not. MAy be redundant if frequency is
                                             // high enough.
+        ApplyPreSpikePerturbations();
         std::for_each(alphaBranches.begin(), alphaBranches.end(), [this](AlphaBranch &branch) {
             branch.ApplyTracesOnSpinesLTD(this->GetPostSynapticTrace(), GetLTDBias());
         });
@@ -359,6 +360,16 @@ void AlphaResourceHSTDP::ApplyCoopTraceSpatialProfile(int branchSpineID, AlphaBr
     // Here for every synapse inside the synapse's kernel that has an active counter (count!=countMax) we get the time
     // kernel and then apply the space kernel Take unto account the synaptic GAP and DT!!! This should be done elsewhere
 }
+void AlphaResourceHSTDP::ApplyPreSpikePerturbations() {
+        // branch.preSynapticTraces.at(branchSpinePosition) += 1;
+    // ApplyCoopTraceSpatialProfile(branchSpinePosition, branch);
+    std::for_each(alphaBranches.begin(), alphaBranches.end(), [this](AlphaBranch& branch){
+        for (int spinePosID: branch.spikedSpinesInTheBranch){
+            branch.preSynapticTraces.at(spinePosID) += 1;
+            ApplyCoopTraceSpatialProfile(spinePosID, branch);
+        }
+    });
+}
 // double AlphaResourceHSTDP::CallKernelHashTable(int distanceToCenterInGaps) {
 //     return spatialProfile.at(distanceToCenterInGaps);
 // }
@@ -451,8 +462,8 @@ void AlphaResourceHSTDP::RecordExcitatoryPreSpike(int spikedSpineId) {
     AlphaBranch&          branch       = alphaBranches.at(synapseSpine->branchId);
     int                   branchSpinePosition{synapseSpine->branchPositionId};
     branch.spikedSpinesInTheBranch.push_back(branchSpinePosition);
-    branch.preSynapticTraces.at(branchSpinePosition) += 1;
-    ApplyCoopTraceSpatialProfile(branchSpinePosition, branch);
+    // branch.preSynapticTraces.at(branchSpinePosition) += 1;
+    // ApplyCoopTraceSpatialProfile(branchSpinePosition, branch);
     // branch->cooperativityTraces.at(synapseSpine->branchPositionId)+=1;
     this->totalPreSpikes++;
 }

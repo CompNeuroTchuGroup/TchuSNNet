@@ -30,6 +30,7 @@ void AlphaBranch::PostConnectSetUp(std::vector<BranchedSpinePtr> spineData) {
 }
 
 void AlphaBranch::ApplyTracesOnSpinesLTP() {
+    spikedSpinesInTheBranch.clear();
     // This function exclusively performs LTP, as it is called during a
     // postspike. The cooperativity trace will be added to the presynaptic
     // trace to elicit heterosynaptic plasticity As it is trace-based, all

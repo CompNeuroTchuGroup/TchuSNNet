@@ -69,6 +69,7 @@ public:
     bool CheckIfPreSpikeHappened();
     //bool CheckIfThereIsPairing(RBranchPtr branch, int synapseIDinBranch);
     void ApplyCoopTraceSpatialProfile(int branchSpineID, AlphaBranch& const branchID);
+    void ApplyPreSpikePerturbations();
     // double CallKernelHashTable(int distanceToCenterInGaps);
     //Plasticity events functions
     // void ApplyEffects();//Here we increase the plasticity count of synapse and branch
