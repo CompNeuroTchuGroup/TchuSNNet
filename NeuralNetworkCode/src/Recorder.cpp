@@ -220,13 +220,18 @@ void Recorder::BindNoHeteroSynapsesPerPop(PopInt neuronPop) {
     }
 }
 
+void Recorder::AllocateAndAssignStreamBuffer(std::ofstream &outputStream) {
+    bufferPtrs.push_back(std::make_unique<std::vector<char>>(customBufferSize));
+    outputStream.rdbuf()->pubsetbuf(bufferPtrs.back()->data(), customBufferSize);
+}
+
 void Recorder::WriteHeader(std::ofstream& fileStream) const {
     fileStream <<  "#*****************************************************************\n";
     fileStream <<  "# Time and Title: " << dateTime << " -- " << simulationTitle << "\n";
     fileStream <<  "#*****************************************************************\n";
 }
 
-void Recorder::makeInputCopies(const std::string& inputFileAddress) {
+void Recorder::MakeInputCopies(const std::string& inputFileAddress) {
     //Parameters file
     std::ifstream  sourceFile(inputFileAddress, std::ios::binary);
     std::ofstream  copiedFile(this->GetDirectoryPath() + "_inputParametersCopy.txt",   std::ios::binary);
@@ -323,43 +328,46 @@ void Recorder::WriteDataHeaderHeatmap() {
 
 
 	for (PopInt neuronPop : std::ranges::views::iota(0,totalNeuronPops)) {
-        fileStreams.heatmapStreamVector.emplace_back(std::ofstream(this->GetHeatmapFilename() + std::to_string(neuronPop)+".dat", std::ofstream::out | std::ofstream::trunc));
-		WriteHeader(fileStreams.heatmapStreamVector.at(neuronPop));
-		fileStreams.heatmapStreamVector.at(neuronPop) << "# Population:" + std::to_string(neuronPop) + "\n";
-		fileStreams.heatmapStreamVector.at(neuronPop) << "# Dimension:" + std::to_string(dim) + "\n";
-		fileStreams.heatmapStreamVector.at(neuronPop) << "# L=" + std::to_string(infoGlobal->xAxisLength) + "\n";
-		fileStreams.heatmapStreamVector.at(neuronPop) << "#************************************\n";
+        std::ofstream heatmapFile;
+        AllocateAndAssignStreamBuffer(heatmapFile);
+        heatmapFile.open(this->GetHeatmapFilename() + std::to_string(neuronPop)+".dat", std::ofstream::out | std::ofstream::trunc);
+        fileStreams.heatmapStreamVector.push_back(heatmapFile);
+		WriteHeader(fileStreams.heatmapStreamVector.back());
+		fileStreams.heatmapStreamVector.back() << "# Population:" + std::to_string(neuronPop) + "\n";
+		fileStreams.heatmapStreamVector.back() << "# Dimension:" + std::to_string(dim) + "\n";
+		fileStreams.heatmapStreamVector.back() << "# L=" + std::to_string(infoGlobal->xAxisLength) + "\n";
+		fileStreams.heatmapStreamVector.back() << "#************************************\n";
 		if (dim == 1) {
-			fileStreams.heatmapStreamVector.at(neuronPop) << "# column 1 : t (secs.) \n";
-			fileStreams.heatmapStreamVector.at(neuronPop) << "# columnn n+1: r_" + std::to_string(neuronPop) + "(Hz) for neurons in position:\n";
-			fileStreams.heatmapStreamVector.at(neuronPop) << "#\t\t (n-1) * " + std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "  <  x  <  n * " + std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "\n";
+			fileStreams.heatmapStreamVector.back() << "# column 1 : t (secs.) \n";
+			fileStreams.heatmapStreamVector.back() << "# columnn n+1: r_" + std::to_string(neuronPop) + "(Hz) for neurons in position:\n";
+			fileStreams.heatmapStreamVector.back() << "#\t\t (n-1) * " + std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "  <  x  <  n * " + std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "\n";
 		}
 		else {
-			fileStreams.heatmapStreamVector.at(neuronPop) << "# column 1 : t (secs.) \n";
-			fileStreams.heatmapStreamVector.at(neuronPop) << "# columnn n+1: r_" + std::to_string(neuronPop) + "(Hz) for neurons in position:\n";
-			fileStreams.heatmapStreamVector.at(neuronPop) << "#\t\t (n-1)%" + std::to_string(recordedHeatmap) + " * " + std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "  <  x  <  n%" + std::to_string(recordedHeatmap) + " * " + std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "\n";
-			fileStreams.heatmapStreamVector.at(neuronPop) << "#\t\t (n-1)//" + std::to_string(recordedHeatmap) + " * " + std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "  <  y  <  n//" + std::to_string(recordedHeatmap) + " * " + std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "\n";
+			fileStreams.heatmapStreamVector.back() << "# column 1 : t (secs.) \n";
+			fileStreams.heatmapStreamVector.back() << "# columnn n+1: r_" + std::to_string(neuronPop) + "(Hz) for neurons in position:\n";
+			fileStreams.heatmapStreamVector.back() << "#\t\t (n-1)%" + std::to_string(recordedHeatmap) + " * " + std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "  <  x  <  n%" + std::to_string(recordedHeatmap) + " * " + std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "\n";
+			fileStreams.heatmapStreamVector.back() << "#\t\t (n-1)//" + std::to_string(recordedHeatmap) + " * " + std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "  <  y  <  n//" + std::to_string(recordedHeatmap) + " * " + std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "\n";
 		}
 		//legend header
 		if (dim == 1) {
-			fileStreams.heatmapStreamVector.at(neuronPop) << "t\t";
+			fileStreams.heatmapStreamVector.back() << "t\t";
 			for (int xPosition : std::ranges::views::iota(0,recordedHeatmap)) {
-				fileStreams.heatmapStreamVector.at(neuronPop) <<"["<< static_cast<double>(xPosition) / static_cast<double>(recordedHeatmap)*infoGlobal->xAxisLength<<"]\t";
+				fileStreams.heatmapStreamVector.back() <<"["<< static_cast<double>(xPosition) / static_cast<double>(recordedHeatmap)*infoGlobal->xAxisLength<<"]\t";
 			}
 		}
 		else if (dim == 2) {
-			fileStreams.heatmapStreamVector.at(neuronPop) << "t\t";
+			fileStreams.heatmapStreamVector.back() << "t\t";
 			for (int xPosition : std::ranges::views::iota(0,recordedHeatmap)) {
 				for (int yPosition : std::ranges::views::iota(0,recordedHeatmap)) {
-					fileStreams.heatmapStreamVector.at(neuronPop) << "[" << static_cast<double>(xPosition) / static_cast<double>(recordedHeatmap)*infoGlobal->xAxisLength <<","<< static_cast<double>(yPosition) / static_cast<double>(recordedHeatmap)*infoGlobal->xAxisLength << "]\t";
+					fileStreams.heatmapStreamVector.back() << "[" << static_cast<double>(xPosition) / static_cast<double>(recordedHeatmap)*infoGlobal->xAxisLength <<","<< static_cast<double>(yPosition) / static_cast<double>(recordedHeatmap)*infoGlobal->xAxisLength << "]\t";
 				}
 			}
 		}
-		fileStreams.heatmapStreamVector.at(neuronPop) << "\n#************************************\n";
+		fileStreams.heatmapStreamVector.back() << "\n#************************************\n";
 		for (int kIndex : std::ranges::views::iota (1, static_cast<int>(2 + pow(recordedHeatmap, dim)))){
-			fileStreams.heatmapStreamVector.at(neuronPop) << "# " + std::to_string(kIndex) << "  \t";
+			fileStreams.heatmapStreamVector.back() << "# " + std::to_string(kIndex) << "  \t";
         }
-		fileStreams.heatmapStreamVector.at(neuronPop) << "\n";
+		fileStreams.heatmapStreamVector.back() << std::endl;
 	}
 }
 
@@ -369,7 +377,7 @@ void Recorder::WriteDataHeaderAverages(){
     int columnTotal = 1;
 
     //I have not reformatted this function yet because .
-
+    AllocateAndAssignStreamBuffer(this->fileStreams.averagesFileStream);
     this->fileStreams.averagesFileStream.open (this->GetDataFilename(), std::ofstream::out | std::ofstream::trunc);
     WriteHeader(this->fileStreams.averagesFileStream);
     this->fileStreams.averagesFileStream << "#************************************\n";
@@ -440,7 +448,7 @@ void Recorder::WriteDataHeaderAverages(){
     for(int column : std::ranges::views::iota (1, columnTotal)){
         this->fileStreams.averagesFileStream << "#"+std::to_string(column) << "\t\t";
     }
-    this->fileStreams.averagesFileStream << "\n";
+    this->fileStreams.averagesFileStream << std::endl;
 }
 
 void Recorder::WriteDataHeaderRasterplot(){
@@ -448,13 +456,13 @@ void Recorder::WriteDataHeaderRasterplot(){
     if(!recordRasterPlot){
         return;
     }
-
+    AllocateAndAssignStreamBuffer(this->fileStreams.rasterplotFileStream);
     this->fileStreams.rasterplotFileStream.open (GetRasterplotFilename(), std::ofstream::out | std::ofstream::trunc);
     WriteHeader(this->fileStreams.rasterplotFileStream);
     this->fileStreams.rasterplotFileStream << "#1 t (secs.) \t #2 neuron_id \t #3 neuron_pop_id \t\n";
 	this->fileStreams.rasterplotFileStream << "# Note that the recorded neurons are equidistant within the population. Therefore, neuron_id are not necessarily successive numbers\n";
 	this->fileStreams.rasterplotFileStream << "Spike_t\tNeuron_id\tPop_id\n";
-	this->fileStreams.rasterplotFileStream << "#************************************\n";
+	this->fileStreams.rasterplotFileStream << "#************************************"<<std::endl;
 }
 
 void Recorder::WriteDataHeaderPotential(){
@@ -464,6 +472,7 @@ void Recorder::WriteDataHeaderPotential(){
     }
 
     PopInt  totalNeuronPops = neurons->GetTotalPopulations();
+    AllocateAndAssignStreamBuffer(this->fileStreams.potentialFileStream);
     this->fileStreams.potentialFileStream.open(GetPotentialFilename(), std::ofstream::out | std::ofstream::trunc);
 
     WriteHeader(this->fileStreams.potentialFileStream);
@@ -475,7 +484,7 @@ void Recorder::WriteDataHeaderPotential(){
             this->fileStreams.potentialFileStream << "V_" << neuronPop << "_" << neuron <<  "\t";
         }
     }
-	this->fileStreams.potentialFileStream << "\n#************************************\n";
+	this->fileStreams.potentialFileStream << "\n#************************************"<<std::endl;
 }
 
 void Recorder::WriteDataHeaderCurrents(){
@@ -485,6 +494,7 @@ void Recorder::WriteDataHeaderCurrents(){
 
 
     PopInt totalNeuronPops = neurons->GetTotalPopulations();
+    AllocateAndAssignStreamBuffer(this->fileStreams.currentsFileStream);
     this->fileStreams.currentsFileStream.open(GetCurrentsFilename(), std::ofstream::out | std::ofstream::trunc);
 
     WriteHeader(this->fileStreams.currentsFileStream);
@@ -497,7 +507,7 @@ void Recorder::WriteDataHeaderCurrents(){
             // std::cout << neuron<<"_"<<neuronPop << std::endl;
         }
     }
-	this->fileStreams.currentsFileStream << "\n#************************************\n";
+	this->fileStreams.currentsFileStream << "\n#************************************"<<std::endl;
 
 }
 
@@ -508,6 +518,7 @@ void Recorder::WriteDataHeaderCurrentsContribution() {
 	PopInt totalNeuronPops = neurons->GetTotalPopulations();
 	long HeaderIndex{};
 	NeuronInt neuronNumber{};
+    AllocateAndAssignStreamBuffer(this->fileStreams.cCurrentsFileStream);
 	this->fileStreams.cCurrentsFileStream.open(GetCurrentCrontributionFilename(), std::ofstream::out | std::ofstream::trunc);
 
 	WriteHeader(this->fileStreams.cCurrentsFileStream);
@@ -539,7 +550,7 @@ void Recorder::WriteDataHeaderCurrentsContribution() {
 			this->fileStreams.cCurrentsFileStream << "Iffd" << targetPop << "_" << recordedNeuron*neurons->GetNeuronsPop(targetPop) / currentContributionsToRecord.at(targetPop) << "\t";
 		}
 	}
-	this->fileStreams.cCurrentsFileStream << "\n#************************************\n";
+	this->fileStreams.cCurrentsFileStream << "\n#************************************"<<std::endl;
 }
 
 
@@ -547,7 +558,7 @@ void Recorder::WriteDataHeaderSynapseStates() {
     if(!trackSynapses){
         return;
     }
-
+    AllocateAndAssignStreamBuffer(this->fileStreams.synStatesFileStream);
     this->fileStreams.synStatesFileStream.open (this->GetSynapseStateFilename(), std::ofstream::out | std::ofstream::trunc);
     WriteHeader(this->fileStreams.synStatesFileStream);
     this->fileStreams.synStatesFileStream << "#************************************\n";
@@ -556,7 +567,7 @@ void Recorder::WriteDataHeaderSynapseStates() {
 	this->fileStreams.synStatesFileStream << synapses->GetDataHeader(2);
 	this->fileStreams.synStatesFileStream << "t\t"<<synapses->GetUnhashedDataHeader()<< "\n";
     this->fileStreams.synStatesFileStream << "# Attention, Synaptic state data is spike-induced : at each time step, only synapses from which the presynaptic neuron has spiked are measured. Data only tested for CurrentSynapse and MongilloSynapse\n";
-    this->fileStreams.synStatesFileStream << "#************************************\n";
+    this->fileStreams.synStatesFileStream << "#************************************"<<std::endl;
 }
 
 
@@ -567,7 +578,7 @@ void Recorder::WriteDataHeaderHeteroSynapses(){
     }
 
     PopInt totalNeuronPops = neurons->GetTotalPopulations();
-
+    AllocateAndAssignStreamBuffer(this->fileStreams.heteroSynFileStream);
     this->fileStreams.heteroSynFileStream.open(GetHeteroSynapseStateFilename(), std::ofstream::out | std::ofstream::trunc);
     WriteHeader(this->fileStreams.heteroSynFileStream);
 
@@ -592,7 +603,7 @@ void Recorder::WriteDataHeaderHeteroSynapses(){
             }
         }
     }
-    this->fileStreams.heteroSynFileStream << "\n#************************************\n";
+    this->fileStreams.heteroSynFileStream << "\n#************************************"<<std::endl;
 }
 
 void Recorder::WriteDataHeaderHeteroSynapsesOverall(){
@@ -603,6 +614,7 @@ void Recorder::WriteDataHeaderHeteroSynapsesOverall(){
 
     //std::cout << "The file has been properly created!!!!\n";
     PopInt totalNeuronPops = neurons->GetTotalPopulations();
+    AllocateAndAssignStreamBuffer(this->fileStreams.hSOverallFileStream);
     this->fileStreams.hSOverallFileStream.open(GetOverallHeteroSynapseStateFilename(), std::ofstream::out | std::ofstream::trunc);
 
     WriteHeader(this->fileStreams.hSOverallFileStream);
@@ -627,7 +639,7 @@ void Recorder::WriteDataHeaderHeteroSynapsesOverall(){
         }
     }
 
-    this->fileStreams.hSOverallFileStream << "\n#************************************\n";
+    this->fileStreams.hSOverallFileStream << "\n#************************************"<<std::endl;
 }
 
 
@@ -1044,7 +1056,7 @@ void Recorder::WriteFinalDataFile(std::chrono::seconds setupTime, std::chrono::s
 
     std::ofstream wParameterStream(GetParametersFilename(),std::ofstream::out | std::ofstream::app);
     wParameterStream <<  "#*****************************************************************\n";
-    wParameterStream <<  "#Comp. finalized: " << outputString.str()<<"\tdd-mm-yyyy hh:mm:ss\n";
+    wParameterStream <<  "#Comp. finalized: " << outputString.rdbuf()<<"\tdd-mm-yyyy hh:mm:ss\n";
     wParameterStream <<  "#Set-up time:     " << setupTime.count() << " secs.\n";
     wParameterStream <<  "#Simulation time: " << simulationTime.count() << " secs.\n";
     // wParameterStream <<  "#This simulation ran on commit hash: "<<std::string(GIT_COMMIT)<<"\n";

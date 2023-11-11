@@ -9,18 +9,18 @@ void ExponentialCurrentSynapse::ResetWaitingMatrixEntry() {
 
 	if (Dmax > 0) {
 		int nextIndex = (this->infoGlobal->timeStep + 1) % (Dmax + 1);
-        for (std::vector<double>& targetWaitingVector : waitingMatrix){
-            targetWaitingVector.at(nextIndex) += expDecayConstant * targetWaitingVector.at(currentIndex);//exponential synapse
-			targetWaitingVector.at(currentIndex) = 0;//reset
-        }
-		// for (signed long targetNeuron : std::ranges::views::iota(0,targetPop->GetNoNeurons())) {
-		// 	waitingMatrix.at(targetNeuron).at(nextIndex) += expDecayConstant * waitingMatrix.at(targetNeuron).at(currentIndex);//exponential synapse
-		// 	waitingMatrix.at(targetNeuron).at(currentIndex) = 0;//reset
-		// }
+        // for (std::vector<double>& targetWaitingVector : waitingMatrix){
+        //     targetWaitingVector.at(nextIndex) += expDecayConstant * targetWaitingVector.at(currentIndex);//exponential synapse
+		// 	targetWaitingVector.at(currentIndex) = 0;//reset
+        // }
+		for (signed long targetNeuron : std::ranges::views::iota(0,targetPop->GetNoNeurons())) {
+			waitingMatrix.at(nextIndex).at(targetNeuron) += expDecayConstant * waitingMatrix.at(currentIndex).at(targetNeuron);//exponential synapse
+			waitingMatrix.at(currentIndex).at(targetNeuron) = 0;//reset
+		}
 	}
 	else {
-        for (std::vector<double>& targetWaitingVector : waitingMatrix){
-            targetWaitingVector.at(currentIndex) *= expDecayConstant; //* waitingMatrix.at(targetNeuron).at(currentIndex);//reset
+        for (double& targetNeuronIn : waitingMatrix.at(currentIndex)){
+            targetNeuronIn *= expDecayConstant; //* waitingMatrix.at(targetNeuron).at(currentIndex);//reset
         }
 		// for (signed long targetNeuron : std::ranges::views::iota(0,targetPop->GetNoNeurons()))
 		// 	waitingMatrix.at(targetNeuron).at(currentIndex) *= expDecayConstant; //* waitingMatrix.at(targetNeuron).at(currentIndex);//reset

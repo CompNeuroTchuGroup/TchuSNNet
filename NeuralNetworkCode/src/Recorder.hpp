@@ -46,6 +46,9 @@ class Recorder {
     friend class DatafileParser;
 protected:
 
+    std::vector<std::unique_ptr<std::vector<char>>> bufferPtrs;
+    const size_t customBufferSize{131072};
+
     const GlobalSimInfo* infoGlobal;
 
     std::string simulationTitle;
@@ -121,6 +124,8 @@ protected:
     void SetAveragingSteps(double secondsPerBin);
     void BindNoHeteroSynapsesPerPop(PopInt neuronPop);
 
+    void AllocateAndAssignStreamBuffer(std::ofstream& outputStream);
+
 public:
     Recorder(const std::shared_ptr<NeuronPopSample> neurons, const std::shared_ptr<SynapseSample> synapses, const std::shared_ptr<Stimulus> stimulus, std::string baseDirectory, std::vector<FileEntry> inputParameters, std::string titleString, std::string nonIterateTitle, const GlobalSimInfo* infoGlobal);
     ~Recorder()=default;
@@ -164,7 +169,7 @@ public:
     void WriteDistributionD() const ;
     void WriteDistributionJ() const ;
 
-    void makeInputCopies(const std::string& filename);
+    void MakeInputCopies(const std::string& filename);
 
 };
 

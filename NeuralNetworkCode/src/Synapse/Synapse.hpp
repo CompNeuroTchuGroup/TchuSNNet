@@ -118,7 +118,7 @@ public:
     virtual std::vector<double> GetSynapticState(NeuronInt sourceNeuron) const = 0;
 
     // std::valarray<double>			GetCurrentcontribution(int pre_neuron);
-    double GetRecurrentInput(NeuronInt targetNeuron) const { return waitingMatrix.at(targetNeuron).at((this->infoGlobal->timeStep) % (Dmax + 1)); }
+    double GetRecurrentInput(NeuronInt targetNeuron) const { return waitingMatrix.at((this->infoGlobal->timeStep) % (Dmax + 1)).at(targetNeuron); }
 
     // double							GetCumulatedDV() const { return cumulatedDV;}
     // int								GetMaxD() const {return D_max;}

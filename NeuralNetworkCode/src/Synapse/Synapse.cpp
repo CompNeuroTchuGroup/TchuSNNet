@@ -119,9 +119,9 @@ void Synapse::LoadParameters(const std::vector<FileEntry> &synapseParameters) {
         this->Jpot = this->J;
     }
 
-    waitingMatrix.resize(GetNoTargetNeurons());
-    for (NeuronInt targetNeuron : std::ranges::views::iota(0, GetNoTargetNeurons()))
-        waitingMatrix.at(targetNeuron).resize(static_cast<size_t>(Dmax) + 1, 0.0);
+    waitingMatrix.resize(static_cast<size_t>(Dmax) + 1);
+    for (NeuronInt timeIndex : std::ranges::views::iota(0u, static_cast<size_t>(Dmax) + 1))
+        waitingMatrix.at(timeIndex).resize(GetNoTargetNeurons() ,0.0);
     std::vector<FileEntry> connectivityParameters{FilterStringEntries(synapseParameters, "connectivity")};
     geometry->LoadParameters(connectivityParameters);
 }
@@ -231,7 +231,7 @@ void Synapse::FillWaitingMatrix(NeuronInt spiker, std::vector<double> &&currents
                            static_cast<size_t>(Dmax + 1)};//Here if you could feed the timestep, the distribution d matrix, and the spiker number, plus the currents vector plus the target vector.
         // std::cout<<delay<<"-"<<matrixIndex<<"-"<<waitingMatrix.at(synapticTargetList.at(spiker).at(targetNeuronIndex).first).size()<<"-"<<targetNeuronIndex<<"\n";
         // std::lock_guard<std::mutex> _lockMutex(_waitingMatrixMutexLock);
-        waitingMatrix.at(singleTargetList.at(targetNeuronIndex).first).at(matrixIndex) +=
+        waitingMatrix.at(matrixIndex).at(singleTargetList.at(targetNeuronIndex).first) +=
             currents.at(targetNeuronIndex); // add spiker to waiting matrix
     }
 }
@@ -249,17 +249,18 @@ void Synapse::SetSeed(int inputSeed) {
 
 void Synapse::ResetWaitingMatrixEntry() {
     long index{(this->infoGlobal->timeStep) % (Dmax + 1)};
-    for (std::vector<double> &targetNeuronWaitingVector : waitingMatrix) {
-        targetNeuronWaitingVector.at(index) = 0;
-    }
+    std::fill(waitingMatrix.at(index).begin(), waitingMatrix.at(index).end(), 0.0);
+    // for (std::vector<double> &targetNeuronWaitingVector : waitingMatrix) {
+    //     targetNeuronWaitingVector.at(index) = 0;
+    // }
 }
 
 void Synapse::ReadWaitingMatrixEntry(std::vector<double> &synaptic_dV, std::mutex &_syndVMutex) {
-    long                        index{(this->infoGlobal->timeStep) % (Dmax + 1)};
     double                      currentPlaceholder{};
-    std::lock_guard<std::mutex> _lockMutex(_syndVMutex);
-    for (NeuronInt targetNeuron : std::ranges::views::iota(0, GetNoTargetNeurons())) {
-        currentPlaceholder = waitingMatrix.at(targetNeuron).at(index);
+    std::vector<double>& indexedVector{waitingMatrix.at((this->infoGlobal->timeStep) % (Dmax + 1))};
+    std::lock_guard<std::mutex> _lockMutex(_syndVMutex);//Necessary for synDV
+    for (NeuronInt targetNeuron : std::ranges::views::iota(0, GetNoTargetNeurons())) { ///Could redo as an accumulate plus a transform, but memory accession is worse
+        currentPlaceholder = indexedVector.at(targetNeuron);
         this->cumulatedDV += currentPlaceholder;//This one is not threadsafe either
         synaptic_dV.at(targetNeuron) += currentPlaceholder; // This is the only non-threadsafe
                                                             // line for par, while par_unseq I

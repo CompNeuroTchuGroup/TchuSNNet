@@ -42,7 +42,7 @@ public:
 
     void  Simulate();
 
-    void makeInputCopies(const std::string&);
+    void MakeInputCopies(const std::string&);
     Recorder& GetRecorderReference(){return *recorder;}
 };
 

@@ -166,7 +166,7 @@ int main(int argc, char* argv[]) {
             try{
                 NeuralNetwork neuralNetwork(base,parameterEntriesCopy);
                 neuralNetwork.Simulate();
-                neuralNetwork.makeInputCopies(inputFileAddress);
+                neuralNetwork.MakeInputCopies(inputFileAddress);
                 DatafileParser parser(neuralNetwork.GetRecorderReference());
                 //neuralNetwork.~NeuralNetwork(); //This line is doing shennanigans I think
                 parser.parse();
