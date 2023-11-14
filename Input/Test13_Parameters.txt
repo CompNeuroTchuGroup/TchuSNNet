@@ -92,38 +92,36 @@ synapses_1_0_pmodel_synapticGap			1.000000 #μm	#Distance between synapse spines
 synapses_1_0_pmodel_distributeWeights		false #μm	#Distance between synapse spines.
 synapses_1_0_pmodel_noBranches		1		#This specifies the number of branchings in the dendritic tree FOR EVERY EXISTING BRANCH. Total isolated branches are 2^n. More than 28 will cause integer overflow
 synapses_1_0_pmodel_synapseAllocation		ordered		#'ordered' synapse allocation will allocate synapses from the branch node to the end of the branch. 'random' will allocate random positions in each branch
-synapses_1_0_pmodel_kinasesTotal 1
-synapses_1_0_pmodel_phosphatasesTotal 1
-synapses_1_0_pmodel_calmodulinTotal 1 
-synapses_1_0_pmodel_neurograninTotal 1 
-synapses_1_0_pmodel_kOne
-synapses_1_0_pmodel_kTwo
-synapses_1_0_pmodel_kThree
-synapses_1_0_pmodel_kFour
-synapses_1_0_pmodel_kFive
-synapses_1_0_pmodel_kSix
-synapses_1_0_pmodel_kSeven
-synapses_1_0_pmodel_kEight
-synapses_1_0_pmodel_kNine
-synapses_1_0_pmodel_kTen
-synapses_1_0_pmodel_kEleven
-synapses_1_0_pmodel_kTwelve
-synapses_1_0_pmodel_resourceDiffusion
-synapses_1_0_pmodel_calciumDiffusion
-synapses_1_0_pmodel_calciumExtrusion
-synapses_1_0_pmodel_initialWeight
-synapses_1_0_pmodel_availResourcesRatio
-synapses_1_0_pmodel_prespikeCalcium
-synapses_1_0_pmodel_postspikeCalcium
+synapses_1_0_pmodel_kinasesTotal 138
+synapses_1_0_pmodel_phosphatasesTotal 8
+synapses_1_0_pmodel_calmodulinTotal 40
+synapses_1_0_pmodel_neurograninTotal 40 
+synapses_1_0_pmodel_kOne 1e+8
+synapses_1_0_pmodel_kTwo 1.2e+8
+synapses_1_0_pmodel_kThree 1.22e+4
+synapses_1_0_pmodel_kFour 1.14e+4
+synapses_1_0_pmodel_kFive 23
+synapses_1_0_pmodel_kSix 0.07498
+synapses_1_0_pmodel_kSeven 6.3
+synapses_1_0_pmodel_kEight 4e-2
+synapses_1_0_pmodel_kNine 2.87
+synapses_1_0_pmodel_kTen 1.1
+synapses_1_0_pmodel_kEleven 0.005555
+synapses_1_0_pmodel_kTwelve 0.021875
+synapses_1_0_pmodel_resourceDiffusion 2.25
+synapses_1_0_pmodel_calciumDiffusion 200
+synapses_1_0_pmodel_calciumExtrusion 100
+synapses_1_0_pmodel_initialWeight 0.02
+synapses_1_0_pmodel_availResourcesRatio 0.6
+synapses_1_0_pmodel_prespikeCalcium 0.7
+synapses_1_0_pmodel_postspikeCalcium 16
 synapses_1_0_pmodel_preCalciumRiseTau 0.001
 synapses_1_0_pmodel_preCalciumDecayTau 0.003
 synapses_1_0_pmodel_postCalciumRiseTau 0.0002
 synapses_1_0_pmodel_postCalciumDecayTau 0.0012
 synapses_1_0_pmodel_nonlinearNMDAFactor 4
-synapses_1_0_pmodel_
-synapses_1_0_pmodel_
-synapses_1_0_pmodel_resourceConversionFct
-synapses_1_0_pmodel_calciumBasal 0.05
+synapses_1_0_pmodel_resourceConversionFct 1.53e-14
+synapses_1_0_pmodel_calciumBasal 0.08
 
 ##### The weight of this model is defined as wI=beta*alphaI/(omega+branch-sum(alpha)), where alphaI= alphaBasal + alphaStimulus*exp(-dt/alphaStimTau) 
 ########### Connectivity ################

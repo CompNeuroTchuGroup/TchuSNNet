@@ -150,7 +150,7 @@ void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry> &morphologyPara
                 if (parameterValues.at(0) == IDstringMonoDendriteSTDPTazerart) {
                     for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
                         (void)neuron;//Does nothing, removes warning on unused vars
-                        this->morphology.push_back(std::make_unique<MonoDendriteSTDPTazerart>(this->infoGlobal));
+                        this->morphology.push_back(std::make_unique<MonoDendriteSTDPTazerart>(this->infoGlobal)); //this conversion works but I do not remember why. Implicit downcasting through the move operation?
                         this->morphology.back()->LoadParameters(morphologyParameters);
                         this->hasPlasticity=true;
                     }
@@ -171,7 +171,7 @@ void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry> &morphologyPara
                 } else if (parameterValues.at(0) == IDstringTraceResourceHSTDP) {
                     for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
                         (void)neuron;//Does nothing, removes warning on unused vars
-                        this->morphology.push_back(std::make_unique<AlphaResourceHSTDP>(this->infoGlobal)); //Remove, will not  be used
+                        this->morphology.push_back(std::make_unique<AlphaResourceHSTDP>(this->infoGlobal)); 
                         this->morphology.back()->LoadParameters(morphologyParameters);
                         this->hasPlasticity=true;
                         this->isBranched=true;
@@ -179,7 +179,7 @@ void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry> &morphologyPara
                 } else if (parameterValues.at(0) == IDstringResourceCalciumDiffusion) {
                     for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
                         (void)neuron;//Does nothing, removes warning on unused vars
-                        this->morphology.push_back(std::make_unique<ResourceCalciumDiffusionModel>(this->infoGlobal)); //Remove, will not  be used
+                        this->morphology.push_back(std::make_unique<ResourceCalciumDiffusionModel>(this->infoGlobal));
                         this->morphology.back()->LoadParameters(morphologyParameters);
                         this->hasPlasticity=true;
                         this->isBranched=true;

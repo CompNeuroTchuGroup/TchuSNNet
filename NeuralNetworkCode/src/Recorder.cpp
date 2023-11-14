@@ -222,7 +222,7 @@ void Recorder::BindNoHeteroSynapsesPerPop(PopInt neuronPop) {
 
 void Recorder::AllocateAndAssignStreamBuffer(std::ofstream &outputStream) {
     bufferPtrs.push_back(std::make_unique<std::vector<char>>(customBufferSize));
-    outputStream.rdbuf()->pubsetbuf(bufferPtrs.back()->data(), customBufferSize);
+    outputStream.rdbuf()->pubsetbuf(bufferPtrs.back()->data(), customBufferSize);//Second argument is supposed to be the size of buffer in number of chars, NOT BITS
 }
 
 void Recorder::WriteHeader(std::ofstream& fileStream) const {

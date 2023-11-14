@@ -49,7 +49,7 @@ void CaDiffusionBranch::Advect() {
     // container index-1. When the end is reached, you do the diffusion of last container.
     double inactiveCalmodulin{}, kDot{}, nDot{}, kPDot{}, wDot{}, camDot{}, ngDot{}; // inactivePhosphatases{},inactiveKinases{}, unboundNeurogranin{}; is only used once, so you can
                                                                                      // calculate it in place
-    const Constants constants{this->constants};                                                                                 
+    const Constants CONST{this->constants};                                                                                 
     size_t lastIndex{CaResSpines.size() - 1};
     // PreSpikeCalciumInflux(std::move(step));
     // I apologize in advance, as this function requires being run with spatial and temporal locality for max speed.
@@ -62,66 +62,66 @@ void CaDiffusionBranch::Advect() {
             continue;
         }
         //Here we influx calcium with the nonlinear traces
-        spine.preTransientIncrease -=spine.preTransientIncrease*constants.preCalciumDecayRate; //This is B in Graupner and Brunel appendix
-        spine.preTransient+=constants.preCalciumFluxFactor*(spine.preTransientIncrease-spine.preTransient*constants.preCalciumRiseRate);//This is A in appendix
-        spine.postTransientIncrease -=spine.postTransientIncrease*constants.postCalciumDecayRate; //This is F in Graupner and Brunel appendix
-        spine.postTransient+=constants.postCalciumFluxFactor*(spine.postTransientIncrease-spine.postTransient*constants.postCalciumRiseRate);//This is E in appendix
+        spine.preTransientIncrease -=spine.preTransientIncrease*CONST.preCalciumDecayRate; //This is B in Graupner and Brunel appendix
+        spine.preTransient+=CONST.preCalciumFluxFactor*(spine.preTransientIncrease-spine.preTransient*CONST.preCalciumRiseRate);//This is A in appendix
+        spine.postTransientIncrease -=spine.postTransientIncrease*CONST.postCalciumDecayRate; //This is F in Graupner and Brunel appendix
+        spine.postTransient+=CONST.postCalciumFluxFactor*(spine.postTransientIncrease-spine.postTransient*CONST.postCalciumRiseRate);//This is E in appendix
         //Here we add the traces plus the basal flux to the calcium
         spine.calciumFree+=spine.preTransient+spine.postTransient;
         //Until here, now first reactions
-        inactiveCalmodulin = constants.calmodulinTotal - spine.calmodulinActive - spine.calmodulinNeurogranin;
+        inactiveCalmodulin = CONST.calmodulinTotal - spine.calmodulinActive - spine.calmodulinNeurogranin;
         // 2nd, neurogranin constants.reaction (might swap for third)
-        ngDot = constants.reaction1Ctt * (constants.neurograninTotal - spine.calmodulinNeurogranin) * (inactiveCalmodulin)-constants.reaction2Ctt * spine.calmodulinNeurogranin;
+        ngDot = CONST.reaction1Ctt * (CONST.neurograninTotal - spine.calmodulinNeurogranin) * (inactiveCalmodulin)-CONST.reaction2Ctt * spine.calmodulinNeurogranin;
         spine.calmodulinNeurogranin += ngDot;
         inactiveCalmodulin -= ngDot;
         // 3rd Ca-CaM constants.reaction (might swap again) with NG consumption
-        camDot = constants.reaction3Ctt * std::pow(spine.calciumFree, 2) * inactiveCalmodulin - constants.reaction4Ctt * spine.calmodulinActive;
+        camDot = CONST.reaction3Ctt * std::pow(spine.calciumFree, 2) * inactiveCalmodulin - CONST.reaction4Ctt * spine.calmodulinActive;
         spine.calmodulinActive += camDot;
         spine.calciumFree -= 2 * camDot;
         // ORDERING
         //  4th calcineurin binding
-        nDot = constants.reaction5Ctt * (constants.calcineurinTotal - spine.calcineurinActive) * spine.calmodulinActive - constants.reaction6Ctt * spine.calcineurinActive;
+        nDot = CONST.reaction5Ctt * (CONST.calcineurinTotal - spine.calcineurinActive) * spine.calmodulinActive - CONST.reaction6Ctt * spine.calcineurinActive;
         spine.calcineurinActive += nDot;
         // 5th kinase autophosphorylation
-        kPDot = constants.reaction7Ctt * spine.kinasesCaM * (spine.kinasesCaM + spine.kinasesPhospho) - constants.reaction8Ctt * spine.calcineurinActive * spine.kinasesPhospho;
+        kPDot = CONST.reaction7Ctt * spine.kinasesCaM * (spine.kinasesCaM + spine.kinasesPhospho) - CONST.reaction8Ctt * spine.calcineurinActive * spine.kinasesPhospho;
         spine.kinasesPhospho += kPDot;
         spine.kinasesCaM -= kPDot;
         // 6th kinase activation via CaM -kP
-        kDot = constants.reaction9Ctt * (constants.kinasesTotal - spine.kinasesCaM - spine.kinasesPhospho) - constants.reaction10Ctt * spine.kinasesCaM;
+        kDot = CONST.reaction9Ctt * (CONST.kinasesTotal - spine.kinasesCaM - spine.kinasesPhospho) - CONST.reaction10Ctt * spine.kinasesCaM;
         spine.kinasesCaM += kDot;
         // ORDERING
         //  7th active CaM consumption by Ndot and Kdot (not kPdot)
         spine.calmodulinActive -= nDot + kDot;
         // 8th Change in synapse spine size/weight
-        wDot = constants.reaction11Ctt * spine.resourcesAvailable * (spine.kinasesCaM + spine.kinasesPhospho) - constants.reaction12Ctt * spine.weight * spine.calcineurinActive;
+        wDot = CONST.reaction11Ctt * spine.resourcesAvailable * (spine.kinasesCaM + spine.kinasesPhospho) - CONST.reaction12Ctt * spine.weight * spine.calcineurinActive;
         spine.weight += wDot;
         // 9th Consumption of resources by weight change
-        spine.resourcesAvailable -= (wDot)/constants.resourceConversionFct;//This should be the case for converting the dmV/spike to concentration of resources
+        spine.resourcesAvailable -= (wDot)/CONST.resourceConversionFct;//This should be the case for converting the dmV/spike to concentration of resources
         // For the next timestep
         spine.PreDiffusion();
     }
     //  Both diffusion functions are executed simultaneously for temporal locality
     // First boundary case
     // Diffusion of calcium
-    CaResSpines.at(0).calciumFree += constants.caDiffusionFct * (-CaResSpines.at(0).calciumOldStep + CaResSpines.at(1).calciumOldStep);
-    CaResSpines.at(0).calciumFree += constants.calciumInfluxBasal-CaResSpines.at(0).calciumFree * constants.calciumExtrusionCtt;
+    CaResSpines.at(0).calciumFree += CONST.caDiffusionFct * (-CaResSpines.at(0).calciumOldStep + CaResSpines.at(1).calciumOldStep);
+    CaResSpines.at(0).calciumFree += CONST.calciumInfluxBasal-CaResSpines.at(0).calciumFree * CONST.calciumExtrusionCtt;
     // Diffusion of resources
-    CaResSpines.at(0).resourcesAvailable += constants.resourceDiffusionFct * (-CaResSpines.at(0).resourcesOldStep + CaResSpines.at(1).resourcesOldStep);
+    CaResSpines.at(0).resourcesAvailable += CONST.resourceDiffusionFct * (-CaResSpines.at(0).resourcesOldStep + CaResSpines.at(1).resourcesOldStep);
     for (size_t spineIndex : std::ranges::views::iota(1u, lastIndex)) {
         // Diffusion of calcium
         CaResSpines.at(spineIndex).calciumFree +=
-            constants.caDiffusionFct * (-2 * CaResSpines.at(spineIndex).calciumOldStep + CaResSpines.at(spineIndex - 1).calciumOldStep + CaResSpines.at(spineIndex + 1).calciumOldStep);
-        CaResSpines.at(spineIndex).calciumFree += constants.calciumInfluxBasal-CaResSpines.at(spineIndex).calciumFree * constants.calciumExtrusionCtt;
+            CONST.caDiffusionFct * (-2 * CaResSpines.at(spineIndex).calciumOldStep + CaResSpines.at(spineIndex - 1).calciumOldStep + CaResSpines.at(spineIndex + 1).calciumOldStep);
+        CaResSpines.at(spineIndex).calciumFree += CONST.calciumInfluxBasal-CaResSpines.at(spineIndex).calciumFree * CONST.calciumExtrusionCtt;
         // Diffusion of resources
         CaResSpines.at(spineIndex).resourcesAvailable +=
-            constants.resourceDiffusionFct * (-2 * CaResSpines.at(spineIndex).resourcesOldStep + CaResSpines.at(spineIndex - 1).resourcesOldStep + CaResSpines.at(spineIndex + 1).resourcesOldStep);
+            CONST.resourceDiffusionFct * (-2 * CaResSpines.at(spineIndex).resourcesOldStep + CaResSpines.at(spineIndex - 1).resourcesOldStep + CaResSpines.at(spineIndex + 1).resourcesOldStep);
     }
     // Last boundary case
     //  Diffusion of calcium
-    CaResSpines.at(lastIndex).calciumFree += constants.caDiffusionFct * (-CaResSpines.at(lastIndex).calciumOldStep + CaResSpines.at(lastIndex - 1).calciumOldStep);
-    CaResSpines.at(lastIndex).calciumFree += constants.calciumInfluxBasal-CaResSpines.at(lastIndex).calciumFree * constants.calciumExtrusionCtt;
+    CaResSpines.at(lastIndex).calciumFree += CONST.caDiffusionFct * (-CaResSpines.at(lastIndex).calciumOldStep + CaResSpines.at(lastIndex - 1).calciumOldStep);
+    CaResSpines.at(lastIndex).calciumFree += CONST.calciumInfluxBasal-CaResSpines.at(lastIndex).calciumFree * CONST.calciumExtrusionCtt;
     // Diffusion of resources
-    CaResSpines.at(lastIndex).resourcesAvailable += constants.resourceDiffusionFct * (-CaResSpines.at(lastIndex).resourcesOldStep + CaResSpines.at(lastIndex - 1).resourcesOldStep);
+    CaResSpines.at(lastIndex).resourcesAvailable += CONST.resourceDiffusionFct * (-CaResSpines.at(lastIndex).resourcesOldStep + CaResSpines.at(lastIndex - 1).resourcesOldStep);
 }
 void CaDiffusionBranch::PostSpikeCalciumFlux() {
     double nonlinearFactor{constants.nonlinearFactorNMDA};
