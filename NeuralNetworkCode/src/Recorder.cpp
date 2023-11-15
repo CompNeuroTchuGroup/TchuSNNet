@@ -331,7 +331,7 @@ void Recorder::WriteDataHeaderHeatmap() {
         std::ofstream heatmapFile;
         AllocateAndAssignStreamBuffer(heatmapFile);
         heatmapFile.open(this->GetHeatmapFilename() + std::to_string(neuronPop)+".dat", std::ofstream::out | std::ofstream::trunc);
-        fileStreams.heatmapStreamVector.push_back(heatmapFile);
+        fileStreams.heatmapStreamVector.push_back(std::move(heatmapFile));
 		WriteHeader(fileStreams.heatmapStreamVector.back());
 		fileStreams.heatmapStreamVector.back() << "# Population:" + std::to_string(neuronPop) + "\n";
 		fileStreams.heatmapStreamVector.back() << "# Dimension:" + std::to_string(dim) + "\n";

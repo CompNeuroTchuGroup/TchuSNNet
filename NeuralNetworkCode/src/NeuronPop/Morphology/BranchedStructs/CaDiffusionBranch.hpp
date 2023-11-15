@@ -33,7 +33,7 @@ struct Constants{ //currently 19 + the prespike/postspike calcium and the prespi
 
     
     double resourceDiffusionFct;//Consider delta x squared already here
-    double resourceConversionFct{};
+    double resourceConversionFct;
     double calciumInfluxBasal;
     double initialResources, initialWeight;
 

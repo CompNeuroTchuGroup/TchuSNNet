@@ -154,71 +154,72 @@ void ResourceCalciumDiffusionModel::CheckParameters(const std::vector<FileEntry>
 
 void ResourceCalciumDiffusionModel::SaveParameters(std::ofstream &wParameterFile, std::string neuronIdentificator) const {
     BranchedMorphology::SaveParameters(wParameterFile, neuronIdentificator);
-    wParameterFile << neuronIdentificator << "kinasesTotal\t\t" << std::to_string(this->constants.kinasesTotal) << " #uM/spine";
+    //Parameter outputs should not be written in std::to_string unless you are confident that the value will not be too small for the I/O to work as intended, or you will lose information in the Parameter.txt file
+    wParameterFile << neuronIdentificator << "kinasesTotal\t\t" << (this->constants.kinasesTotal) << " #uM/spine";
     wParameterFile << "\t" << "#Concentration of CaMKII in the synapse spine\n";
-    wParameterFile << neuronIdentificator << "phosphatasesTotal\t\t" << std::to_string(this->constants.calcineurinTotal) << " #uM/spine";
+    wParameterFile << neuronIdentificator << "phosphatasesTotal\t\t" << (this->constants.calcineurinTotal) << " #uM/spine";
     wParameterFile << "\t" << "#Concentration of calcineurin in the synapse spine\n";
-    wParameterFile << neuronIdentificator << "calmodulinTotal\t\t" << std::to_string(this->constants.calmodulinTotal) << " #uM/spine";
+    wParameterFile << neuronIdentificator << "calmodulinTotal\t\t" << (this->constants.calmodulinTotal) << " #uM/spine";
     wParameterFile << "\t" << "#Concentration of CaM in the synapse spine\n";
-    wParameterFile << neuronIdentificator << "neurograninTotal\t\t" << std::to_string(this->constants.neurograninTotal) << " #uM/spine";
+    wParameterFile << neuronIdentificator << "neurograninTotal\t\t" << (this->constants.neurograninTotal) << " #uM/spine";
     wParameterFile << "\t" << "#Concentration of neurogranin in the synapse spine\n";
 
-    wParameterFile << neuronIdentificator << "kOne\t\t" <<std::scientific<< std::to_string(this->constants.reaction1Ctt/infoGlobal->dtTimestep) << " #uM^{-1} s^{-1}";
+    wParameterFile << neuronIdentificator << "kOne\t\t" <<(this->constants.reaction1Ctt/infoGlobal->dtTimestep) << " #uM^{-1} s^{-1}";
     wParameterFile << "\t" << "#From CaM and Ng to CaMNg\n";
-    wParameterFile << neuronIdentificator << "kTwo\t\t" <<std::scientific<< std::to_string(this->constants.reaction2Ctt/infoGlobal->dtTimestep) << " #s^{-1}";
+    wParameterFile << neuronIdentificator << "kTwo\t\t" <<(this->constants.reaction2Ctt/infoGlobal->dtTimestep) << " #s^{-1}";
     wParameterFile << "\t" << "#From CaMNg to CaM and Ng\n";    
-    wParameterFile << neuronIdentificator << "kThree\t\t" <<std::scientific<< std::to_string(this->constants.reaction3Ctt/infoGlobal->dtTimestep) << " #uM^{-1} s^{-1}";
+    wParameterFile << neuronIdentificator << "kThree\t\t" <<(this->constants.reaction3Ctt/infoGlobal->dtTimestep) << " #uM^{-1} s^{-1}";
     wParameterFile << "\t" << "#From CaM and Ca to active CaM\n";
-    wParameterFile << neuronIdentificator << "kFour\t\t" <<std::scientific<< std::to_string(this->constants.reaction4Ctt/infoGlobal->dtTimestep) << " #s^{-1}";
+    wParameterFile << neuronIdentificator << "kFour\t\t" <<(this->constants.reaction4Ctt/infoGlobal->dtTimestep) << " #s^{-1}";
     wParameterFile << "\t" << "#From active CaM to CaM and Ca\n";
-    wParameterFile << neuronIdentificator << "kFive\t\t" <<std::scientific<< std::to_string(this->constants.reaction5Ctt/infoGlobal->dtTimestep) << " #uM^{-1} s^{-1}";
+    wParameterFile << neuronIdentificator << "kFive\t\t" <<(this->constants.reaction5Ctt/infoGlobal->dtTimestep) << " #uM^{-1} s^{-1}";
     wParameterFile << "\t" << "#From N inactive to N active, using CaM\n";
-    wParameterFile << neuronIdentificator << "kSix\t\t" <<std::scientific<< std::to_string(this->constants.reaction6Ctt/infoGlobal->dtTimestep) << " #s^{-1}";
+    wParameterFile << neuronIdentificator << "kSix\t\t" <<(this->constants.reaction6Ctt/infoGlobal->dtTimestep) << " #s^{-1}";
     wParameterFile << "\t" << "#From N active to N inactive, using CaM\n";
-    wParameterFile << neuronIdentificator << "kSeven\t\t" <<std::scientific<< std::to_string(this->constants.reaction7Ctt/infoGlobal->dtTimestep) << " #uM^{-1} s^{-1}";
+    wParameterFile << neuronIdentificator << "kSeven\t\t" <<(this->constants.reaction7Ctt/infoGlobal->dtTimestep) << " #uM^{-1} s^{-1}";
     wParameterFile << "\t" << "#From K bound to CaM to phosphorylated K\n";
-    wParameterFile << neuronIdentificator << "kEight\t\t" <<std::scientific<< std::to_string(this->constants.reaction8Ctt/infoGlobal->dtTimestep) << " #u M^{-1} s^{-1}";
+    wParameterFile << neuronIdentificator << "kEight\t\t" <<(this->constants.reaction8Ctt/infoGlobal->dtTimestep) << " #u M^{-1} s^{-1}";
     wParameterFile << "\t" << "#From phosphorylated K to K bound to CaM\n";
-    wParameterFile << neuronIdentificator << "kNine\t\t" <<std::scientific<< std::to_string(this->constants.reaction9Ctt/infoGlobal->dtTimestep) << " #u M^{-1} s^{-1}";
+    wParameterFile << neuronIdentificator << "kNine\t\t" <<(this->constants.reaction9Ctt/infoGlobal->dtTimestep) << " #u M^{-1} s^{-1}";
     wParameterFile << "\t" << "#From K inactive to K active, using CaM\n";
-    wParameterFile << neuronIdentificator << "kTen\t\t" <<std::scientific<< std::to_string(this->constants.reaction10Ctt/infoGlobal->dtTimestep) << " #u M^{-1} s^{-1}";
+    wParameterFile << neuronIdentificator << "kTen\t\t" <<(this->constants.reaction10Ctt/infoGlobal->dtTimestep) << " #u M^{-1} s^{-1}";
     wParameterFile << "\t" << "#From K active to K inactive, using CaM\n";
-    wParameterFile << neuronIdentificator << "kEleven\t\t" <<std::scientific<< std::to_string(this->constants.reaction11Ctt/constants.resourceConversionFct/infoGlobal->dtTimestep) << " #u M^{-1} s^{-1}";
+    wParameterFile << neuronIdentificator << "kEleven\t\t" <<(this->constants.reaction11Ctt/constants.resourceConversionFct/infoGlobal->dtTimestep) << " #u M^{-1} s^{-1}";
     wParameterFile << "\t" << "#From resources to weight\n";
-    wParameterFile << neuronIdentificator << "kTwelve\t\t" <<std::scientific<< std::to_string(this->constants.reaction12Ctt/infoGlobal->dtTimestep) << " #u M^{-1} s^{-1}";
+    wParameterFile << neuronIdentificator << "kTwelve\t\t" <<(this->constants.reaction12Ctt/infoGlobal->dtTimestep) << " #u M^{-1} s^{-1}";
     wParameterFile << "\t" << "#From weight to resources\n";
 
-    wParameterFile << neuronIdentificator << "resourceDiffusion\t" << std::to_string(this->constants.resourceDiffusionFct*std::pow(synapticGap, 2)/infoGlobal->dtTimestep) << " #some units";
+    wParameterFile << neuronIdentificator << "resourceDiffusion\t" << (this->constants.resourceDiffusionFct*std::pow(synapticGap, 2)/infoGlobal->dtTimestep) << " #um^{2} s^{-1}";
     wParameterFile << "\t" << "#Diffusion constant of resources used to increase synapse size\n";
-    wParameterFile << neuronIdentificator << "calciumDiffusion\t" << std::to_string(this->constants.caDiffusionFct*std::pow(synapticGap, 2)/infoGlobal->dtTimestep) << " #some units";
+    wParameterFile << neuronIdentificator << "calciumDiffusion\t" << (this->constants.caDiffusionFct*std::pow(synapticGap, 2)/infoGlobal->dtTimestep) << " #um^{2} s^{-1}";
     wParameterFile << "\t" << "#Diffusion constant of free calcium in the branch\n";
 
 
-    wParameterFile << neuronIdentificator << "initialWeight\t\t" << std::to_string(this->constants.initialWeight) << " #dmV/spine";
+    wParameterFile << neuronIdentificator << "initialWeight\t\t" << (this->constants.initialWeight) << " #mV/spike";
     wParameterFile << "\t" << "#Initial weight value\n";
-    wParameterFile << neuronIdentificator << "availResourcesRatio\t\t" << std::to_string(this->availResourcesRatio) << " #/spine";
+    wParameterFile << neuronIdentificator << "availResourcesRatio\t\t" << (this->availResourcesRatio) << "#-";
     wParameterFile << "\t" << "#Initial amount of resources for each segment of the dendrite\n";
-    wParameterFile << neuronIdentificator << "prespikeCalcium\t\t" << std::to_string(this->prespikeCalcium) << " #nM/spike";
+    wParameterFile << neuronIdentificator << "prespikeCalcium\t\t" << (this->prespikeCalcium) << " #nM/spike";
     wParameterFile << "\t" << "#Total influx of calcium with a prespike\n";
-    wParameterFile << neuronIdentificator << "postspikeCalcium\t\t" << std::to_string(this->postspikeCalcium) << " #nM/spike";
+    wParameterFile << neuronIdentificator << "postspikeCalcium\t\t" << (this->postspikeCalcium) << " #nM/spike";
     wParameterFile << "\t" << "#Total influx of calcium with a postspike\n";
-    wParameterFile << neuronIdentificator << "preCalciumRiseTau\t\t" << std::to_string(static_cast<double>(this->preCalciumRiseTau)/infoGlobal->dtTimestep) << " #secs.";
+    wParameterFile << neuronIdentificator << "preCalciumRiseTau\t\t" << (static_cast<double>(this->preCalciumRiseTau)/infoGlobal->dtTimestep) << " #secs.";
     wParameterFile << "\t" << "#Delay of the prespike calcium influx\n";
-    wParameterFile << neuronIdentificator << "preCalciumDecayTau\t\t" << std::to_string(static_cast<double>(this->preCalciumDecayTau)/infoGlobal->dtTimestep) << " #secs.";
+    wParameterFile << neuronIdentificator << "preCalciumDecayTau\t\t" << (static_cast<double>(this->preCalciumDecayTau)/infoGlobal->dtTimestep) << " #secs.";
     wParameterFile << "\t" << "#Delay of the prespike calcium influx\n";
-    wParameterFile << neuronIdentificator << "postCalciumRiseTau\t\t" << std::to_string(static_cast<double>(this->postCalciumRiseTau)/infoGlobal->dtTimestep) << " #secs.";
+    wParameterFile << neuronIdentificator << "postCalciumRiseTau\t\t" << (static_cast<double>(this->postCalciumRiseTau)/infoGlobal->dtTimestep) << " #secs.";
     wParameterFile << "\t" << "#Delay of the prespike calcium influx\n";
-    wParameterFile << neuronIdentificator << "postCalciumDecayTau\t\t" << std::to_string(static_cast<double>(this->postCalciumDecayTau)/infoGlobal->dtTimestep) << " #secs.";
+    wParameterFile << neuronIdentificator << "postCalciumDecayTau\t\t" << (static_cast<double>(this->postCalciumDecayTau)/infoGlobal->dtTimestep) << " #secs.";
     wParameterFile << "\t" << "#Delay of the prespike calcium influx\n";
-    wParameterFile << neuronIdentificator << "nonlinearNMDAFactor\t\t" << std::to_string(static_cast<double>(this->constants.nonlinearFactorNMDA)) << " #secs.";
+    wParameterFile << neuronIdentificator << "nonlinearNMDAFactor\t\t" <<(static_cast<double>(this->constants.nonlinearFactorNMDA)) << " #-";
     wParameterFile << "\t" << "#Delay of the prespike calcium influx\n";
 
-    wParameterFile << neuronIdentificator << "calciumBasal\t\t" << std::to_string(calciumBasal) << " #secs.";
+    wParameterFile << neuronIdentificator << "calciumBasal\t\t" <<(calciumBasal) << " #uM";
     wParameterFile << "\t" << "#Delay of the prespike calcium influx\n";
-    wParameterFile << neuronIdentificator << "calciumExtrusion\t\t" << std::to_string(this->constants.calciumExtrusionCtt/infoGlobal->dtTimestep) << " #some other units";
+    wParameterFile << neuronIdentificator << "calciumExtrusion\t\t" << (this->constants.calciumExtrusionCtt/infoGlobal->dtTimestep) << " #s^{-1}";
     wParameterFile << "\t" << "#Extrusion rate for free calcium\n";
-    wParameterFile << neuronIdentificator << "resourceConversionFct\t\t"<<std::scientific << std::to_string(constants.resourceConversionFct) << " #secs.";
-    wParameterFile << "\t" << "#Conversion from resource molar units () to dmV/sec\n";
+    wParameterFile << neuronIdentificator << "resourceConversionFct\t\t"<<(constants.resourceConversionFct) << " #mV s^{-1} uM^{-1}";
+    wParameterFile << "\t" << "#Conversion from resource molar units (uM) to dmV/sec\n";
 }
 
 int ResourceCalciumDiffusionModel::CreateBranch(std::vector<int> anteriorBranches) {

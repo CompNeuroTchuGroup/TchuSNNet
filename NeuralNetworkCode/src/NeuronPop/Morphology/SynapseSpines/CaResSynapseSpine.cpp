@@ -7,8 +7,12 @@ void CaResSynapseSpine::PreDiffusion() {
     //This has to run before reations, and before diffusion. Makes no sense to do both, and makes no sense to actually store the inactive forms in the spine, if we are going to calculate it to the timestep anyway
     // kinasesInactive=kinasesTotal-(kinasesCaM+kinasesPhospho);
     // phosphatasesInactive=calcineurinTotal-phosphatasesInactive;
-    if (calciumFree<0 || resourcesAvailable<0){
-        throw "Negative something happened";
+    if(calciumFree<0 && resourcesAvailable<0){
+        throw "Negative calcium and resources happened";
+    }else if (calciumFree<0){
+        throw "Negative calcium happened";
+    } else if (resourcesAvailable<0){
+        throw "Negative resources happened";
     }
     calciumOldStep=calciumFree;
     resourcesOldStep=resourcesAvailable;

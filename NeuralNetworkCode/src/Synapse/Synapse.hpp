@@ -27,11 +27,16 @@
 
 //
 
-class Synapse
-{
+class Synapse {
 protected:
+
+    std::vector<std::vector<std::pair<NeuronInt, BaseSpinePtr>>> targetSpineList;
+    std::vector<std::vector<double>> waitingMatrix; // Refactor
+    std::vector<std::vector<int>> DelayDDistribution;       // the list with delays D that are associated with the synapses betweeen the sourceNeuron and its target neurons
+    std::vector<std::vector<double>> JCouplingDistribution; // list of synaptic weights J
     // NAMING CONVENTIONS FOR THE CLASS:
     // sourceNeuron == preNeuron, targetNeuron == postNeuron.
+    std::mt19937 generator;
     BranchTargeting branchTarget{};
     const PopPtr sourcePop;
     const PopPtr targetPop; // conductance based synapses need access to membrane potential
@@ -40,11 +45,10 @@ protected:
     std::unique_ptr<Connectivity> geometry;
     GlobalSimInfo *infoGlobal;
 
-    bool userSeed{false}; // by default, seed can be changed
     int seed{};
-    std::mt19937 generator;
+
     // Connected boolean
-    bool isConnectedBool{false};
+
     // Connection strength of neurons
     double J{};
     // double      scaledJ{};
@@ -57,16 +61,14 @@ protected:
     int Dmin{};
     int Dmax{};
     int delayPerMicrometer{};//Has to be in timesteps per micrometer
-    std::vector<std::vector<double>> waitingMatrix; // Refactor
 
     // Cumulated synaptic currents
     double cumulatedDV; // collects all synaptic currents in one time step
 
     // Connectivity data types:::
-    std::vector<std::vector<std::pair<NeuronInt, BaseSpinePtr>>> targetSpineList; // the list with postsynaptic (or target) neurons and syanpseId (Pair<>) for each neuron of the presynaptic population
+ // the list with postsynaptic (or target) neurons and syanpseId (Pair<>) for each neuron of the presynaptic population
     // IMPORTANT: first in pair is target id, second in pair is synapse id, which in ordinary Synapse Objects will be -1.
-    std::vector<std::vector<int>> DelayDDistribution;       // the list with delays D that are associated with the synapses betweeen the sourceNeuron and its target neurons
-    std::vector<std::vector<double>> JCouplingDistribution; // list of synaptic weights J
+    double relativeCouplingStrength{1};
                                                             //	bool						HasPot;
     bool HasDdistribution{true};                            // Either (Jpot and Ppot) or Sigma If not HasJDistribution, then all synapses have the same j
     bool HasJDistribution{true};                            // By default, set as true
@@ -75,7 +77,8 @@ protected:
     // HCS data
     bool hasPlasticityModel{false};
     bool ignoreJDParameters{false};
-    double relativeCouplingStrength{1};
+    bool isConnectedBool{false};
+    bool userSeed{false}; // by default, seed can be changed
 
     // End of HCS data
     // Introduce boolean

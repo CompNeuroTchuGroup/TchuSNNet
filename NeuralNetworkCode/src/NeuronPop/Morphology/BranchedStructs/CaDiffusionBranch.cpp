@@ -124,7 +124,7 @@ void CaDiffusionBranch::Advect() {
     CaResSpines.at(lastIndex).resourcesAvailable += CONST.resourceDiffusionFct * (-CaResSpines.at(lastIndex).resourcesOldStep + CaResSpines.at(lastIndex - 1).resourcesOldStep);
 }
 void CaDiffusionBranch::PostSpikeCalciumFlux() {
-    double nonlinearFactor{constants.nonlinearFactorNMDA};
+    const double nonlinearFactor{constants.nonlinearFactorNMDA};
     for (CaResSynapseSpine &spine : CaResSpines) {
         spine.postTransientIncrease+=(1.+nonlinearFactor*spine.preTransient);
     }

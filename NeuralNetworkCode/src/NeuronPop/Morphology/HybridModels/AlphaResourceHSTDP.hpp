@@ -49,9 +49,8 @@ protected:
 public:
 
     //main Methods
-    AlphaResourceHSTDP()=default;
+    // AlphaResourceHSTDP()=default;
     explicit AlphaResourceHSTDP(GlobalSimInfo* infoGlobal);
-    ~AlphaResourceHSTDP() override = default;
     
     void LoadParameters(const std::vector<FileEntry>& morphologyParameters) override;
     void CheckParameters(const std::vector<FileEntry>& parameters) override;    
