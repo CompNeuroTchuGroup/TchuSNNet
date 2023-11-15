@@ -82,16 +82,18 @@ void CaDiffusionBranch::Advect() {
         //  4th calcineurin binding
         nDot = CONST.reaction5Ctt * (CONST.calcineurinTotal - spine.calcineurinActive) * spine.calmodulinActive - CONST.reaction6Ctt * spine.calcineurinActive;
         spine.calcineurinActive += nDot;
+        spine.calmodulinActive -= nDot;
         // 5th kinase autophosphorylation
         kPDot = CONST.reaction7Ctt * spine.kinasesCaM * (spine.kinasesCaM + spine.kinasesPhospho) - CONST.reaction8Ctt * spine.calcineurinActive * spine.kinasesPhospho;
         spine.kinasesPhospho += kPDot;
         spine.kinasesCaM -= kPDot;
         // 6th kinase activation via CaM -kP
-        kDot = CONST.reaction9Ctt * (CONST.kinasesTotal - spine.kinasesCaM - spine.kinasesPhospho) - CONST.reaction10Ctt * spine.kinasesCaM;
+        kDot = CONST.reaction9Ctt * (CONST.kinasesTotal - spine.kinasesCaM - spine.kinasesPhospho)*spine.calmodulinActive - CONST.reaction10Ctt * spine.kinasesCaM;
         spine.kinasesCaM += kDot;
+        spine.calmodulinActive-= kDot;
         // ORDERING
         //  7th active CaM consumption by Ndot and Kdot (not kPdot)
-        spine.calmodulinActive -= nDot + kDot;
+        // spine.calmodulinActive -= nDot + kDot;//We are not doing this because this could mean negative active calmodulins
         // 8th Change in synapse spine size/weight
         wDot = CONST.reaction11Ctt * spine.resourcesAvailable * (spine.kinasesCaM + spine.kinasesPhospho) - CONST.reaction12Ctt * spine.weight * spine.calcineurinActive;
         spine.weight += wDot;
