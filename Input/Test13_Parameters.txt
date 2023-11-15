@@ -115,10 +115,10 @@ synapses_1_0_pmodel_initialWeight 0.02
 synapses_1_0_pmodel_availResourcesRatio 0.6
 synapses_1_0_pmodel_prespikeCalcium 0.7
 synapses_1_0_pmodel_postspikeCalcium 16
-synapses_1_0_pmodel_preCalciumRiseTau 0.001
-synapses_1_0_pmodel_preCalciumDecayTau 0.003
-synapses_1_0_pmodel_postCalciumRiseTau 0.0002
-synapses_1_0_pmodel_postCalciumDecayTau 0.0012
+synapses_1_0_pmodel_preCalciumRiseTau 0.01
+synapses_1_0_pmodel_preCalciumDecayTau 0.03
+synapses_1_0_pmodel_postCalciumRiseTau 0.002
+synapses_1_0_pmodel_postCalciumDecayTau 0.012
 synapses_1_0_pmodel_nonlinearNMDAFactor 4
 synapses_1_0_pmodel_resourceConversionFct 1.53e-14
 synapses_1_0_pmodel_calciumBasal 0.08
