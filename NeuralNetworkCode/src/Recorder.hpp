@@ -47,18 +47,18 @@ class Recorder {
 protected:
 
     std::vector<std::unique_ptr<std::vector<char>>> bufferPtrs;
-    const size_t customBufferSize{131072};
+    size_t customBufferSize{131072}; //Do not change
 
-    const GlobalSimInfo* infoGlobal;
+    GlobalSimInfo* infoGlobal;
 
     std::string simulationTitle;
     std::string nonIterateTitle;
     std::string directoryPath;
     std::string dateTime;
 
-    const std::shared_ptr<const NeuronPopSample>     neurons;
-    const std::shared_ptr<const SynapseSample>       synapses;
-    const std::shared_ptr<const Stimulus>            stimulus;
+    std::shared_ptr<const NeuronPopSample>     neurons;
+    std::shared_ptr<const SynapseSample>       synapses;
+    std::shared_ptr<const Stimulus>            stimulus;
 
     int         timeStepsPerBin{};
     NeuronInt        noNeuronsConnectivity{};

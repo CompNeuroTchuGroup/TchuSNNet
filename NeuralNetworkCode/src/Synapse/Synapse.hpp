@@ -38,9 +38,9 @@ protected:
     // sourceNeuron == preNeuron, targetNeuron == postNeuron.
     std::mt19937 generator;
     BranchTargeting branchTarget{};
-    const PopPtr sourcePop;
-    const PopPtr targetPop; // conductance based synapses need access to membrane potential
-    const PopInt sourcePopID, targetPopID;
+    PopPtr sourcePop;
+    PopPtr targetPop; // conductance based synapses need access to membrane potential
+    PopInt sourcePopID, targetPopID;
 
     std::unique_ptr<Connectivity> geometry;
     GlobalSimInfo *infoGlobal;

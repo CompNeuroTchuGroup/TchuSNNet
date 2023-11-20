@@ -56,7 +56,7 @@ struct CaDiffusionBranch : public Branch {
     std::vector<CaResSynapseSpine> CaResSpines;//VECTOR ACCOUNTS FOR EMPTY SYNAPSE SLOTS
 
     //Constants
-    const Constants constants;
+    Constants constants;
 
     // int prespikeDelay; This is in Morhpo, given to constructor for matrix. No need to use afterwards.
     //Misc

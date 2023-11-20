@@ -16,12 +16,12 @@
 
 struct Branch{
     //ID
-    const int branchId{};
+    int branchId{};
     //Branched vars
-    const std::vector<int> anteriorBranches{}; 
+    std::vector<int> anteriorBranches{}; 
 
-    const double synapticGap{};    //For now these are identical to the morphology ones, but we will see in the future
-    const double branchLength{};
+    double synapticGap{};    //For now these are identical to the morphology ones, but we will see in the future
+    double branchLength{};
 
     size_t branchSlots{};
 

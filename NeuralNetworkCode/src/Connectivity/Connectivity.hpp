@@ -15,7 +15,7 @@ class Synapse;
 class Connectivity{
 protected:
 
-    const GlobalSimInfo* infoGlobal;
+    GlobalSimInfo* infoGlobal;
     bool                        userSeed{false};//by default, seed can be changed
     int                         seed{};
     std::mt19937  generator;

@@ -22,7 +22,7 @@ protected:
 
     GlobalSimInfo* infoGlobal;
 
-    const PopInt identifier;
+    PopInt identifier;
     NeuronInt   noNeurons{};
     TStepInt refractorySteps{};
     double membraneVTau{};
