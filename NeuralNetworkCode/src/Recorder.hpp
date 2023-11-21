@@ -127,7 +127,7 @@ protected:
     void AllocateAndAssignStreamBuffer(std::ofstream& outputStream);
 
 public:
-    Recorder(const std::shared_ptr<NeuronPopSample> neurons, const std::shared_ptr<SynapseSample> synapses, const std::shared_ptr<Stimulus> stimulus, std::string baseDirectory, std::vector<FileEntry> inputParameters, std::string titleString, std::string nonIterateTitle, const GlobalSimInfo* infoGlobal);
+    Recorder(const std::shared_ptr<NeuronPopSample> neurons, const std::shared_ptr<SynapseSample> synapses, const std::shared_ptr<Stimulus> stimulus, std::string baseDirectory, std::vector<FileEntry> inputParameters, std::string titleString, std::string nonIterateTitle, GlobalSimInfo* infoGlobal);
     ~Recorder()=default;
 
     void WriteDataHeader();

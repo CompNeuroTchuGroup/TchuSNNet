@@ -112,8 +112,8 @@ struct RecorderOpenStreams {
     //std::vector<std::ofstream> neuronOuputFileStreams;
 };
 struct DendriticSubRegion{ //Still under work
-    const char regionID;
-    const std::vector<int> branchesInRegion; //I will have to read this from the morphology LP, every DendriticSubRegion is a line, first input is ID, rest is branchIDs. Then in Synapse you put the DendriticSubRegion where the synapse goes. 
+    char regionID;
+    std::vector<int> branchesInRegion; //I will have to read this from the morphology LP, every DendriticSubRegion is a line, first input is ID, rest is branchIDs. Then in Synapse you put the DendriticSubRegion where the synapse goes. 
     DendriticSubRegion(char regionID, std::vector<int> branchesInRegion);
 };
 
