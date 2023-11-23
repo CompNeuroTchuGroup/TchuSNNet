@@ -13,11 +13,13 @@ struct AlphaBranch : public Branch {
     std::vector<AlphaSynapseSpine> alphaSpines;
     std::vector<AlphaSpinePtr> spinePtrPosition;//CAREFUL! THIS VECTOR IS NOT SORTED AT ANY POINT by SynapseBranchID
     double alphaTotalSum{};
-    double resourceFactor{};
     std::vector<double> preSynapticTraces;//Here is where we look for counts under 10
     std::vector<double> cooperativityTraces;//Here is where we look for counts under 10
+    std::vector<double> spineAlphaStims;
+    std::vector<double> tracePlaceholder;
     double preSynTraceDecay{};
     double coopTraceDecay{};
+    double alphaExpDecay{}, alphaStimBump{}, alphaBasal{}, betaResourcePool{}, omegaOffset{};
     //std::vector<int> potentiationCountSTDP{};//Size of these has to be the amount of synapses in the branch (equal to triggerCount, length divided by gaps) //REMOVED due to redundancy
     //Misc
     // int plasticityBranchEventsThisTimestep{};//Has to be set to zero
@@ -25,9 +27,14 @@ struct AlphaBranch : public Branch {
         //Do we clear() after a trigger or not? Most of the function would be the same, or put some refractory period UNRESOLVED
         //Here we could create a false history of plasticity events
     //Methods
-    AlphaBranch(std::vector<int>anteriorBranches,double gap, double branchLength,  int branchId, double preSynTraceDecay, double coopTraceDecay);
-    AlphaBranch(double gap, double branchLength, int branchId, double preSynTraceDecay, double coopTraceDecay);    
+    AlphaBranch(std::vector<int>anteriorBranches,double gap, double branchLength,  int branchId, double preSynTraceDecay, double coopTraceDecay, double alphaExpDecay, double alphaStimBump, double alphaBasal, double betaResourcePool, double omegaOffset);
+    AlphaBranch(double gap, double branchLength, int branchId, double preSynTraceDecay, double coopTraceDecay, double alphaExpDecay, double alphaStimBump, double alphaBasal, double betaResourcePool, double omegaOffset);    
     void PostConnectSetUp(std::vector<BranchedSpinePtr> spineData) override;
+    
+    void DecayAlphaResources();
+    void ComputeAlphaResources();
+    void ComputeAlphaSums();
+    void ComputeWeights();
         //Count related functions
     void ApplyTracesOnSpinesLTP();
     void ApplyTracesOnSpinesLTD(double postSynapticTrace, double biasLTD);
