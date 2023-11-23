@@ -1,13 +1,13 @@
 //
 // Created by Antoni Bertolin on 14.06.23
 //
-#ifndef _CALCIUM_RESOURCE_DIFFUSION_SYNAPSE_SPINE_CLASS_HEADER_
-#define _CALCIUM_RESOURCE_DIFFUSION_SYNAPSE_SPINE_CLASS_HEADER_
+#ifndef MASS_ACTION_CALCIUM_AND_RESOURCE_BASED_SYNAPSE_SPINE_CLASS_HEADER_
+#define MASS_ACTION_CALCIUM_AND_RESOURCE_BASED_SYNAPSE_SPINE_CLASS_HEADER_
 
 #include "BranchedSynapseSpine.hpp"
 // using double = double; //If we go to long for precision concerns
 
-struct CaResSynapseSpine : public BranchedSynapseSpine {
+struct MACRbPSynapseSpine : public BranchedSynapseSpine {
 
   public:
     bool connected{false};
@@ -34,8 +34,8 @@ struct CaResSynapseSpine : public BranchedSynapseSpine {
     double resourcesOldStep{};
     double resourcesAvailable{};
 
-    CaResSynapseSpine();
-    ~CaResSynapseSpine() override = default;
+    MACRbPSynapseSpine();
+    ~MACRbPSynapseSpine() override = default;
     // End of step
     void PreDiffusion(); // This function MUST run right before diffusion
     // Profile methods

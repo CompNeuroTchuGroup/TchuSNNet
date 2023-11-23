@@ -1,19 +1,19 @@
-#include "CaDiffusionBranch.hpp"
+#include "./MACRbpBranch.hpp"
 
-CaDiffusionBranch::CaDiffusionBranch(std::vector<int> anteriorBranches, double gap, double branchLength, int branchId, Constants constants)
+MACRbPBranch::MACRbPBranch(std::vector<int> anteriorBranches, double gap, double branchLength, int branchId, Constants constants)
     : Branch(anteriorBranches, gap, branchLength, branchId), constants{constants} {
-    CaResSpines.resize(branchLength / gap, CaResSynapseSpine());
-    for (CaResSynapseSpine &spine : CaResSpines) {
+    CaResSpines.resize(branchLength / gap, MACRbPSynapseSpine());
+    for (MACRbPSynapseSpine &spine : CaResSpines) {
         spine.resourcesAvailable = constants.initialResources;
         spine.weight             = constants.initialWeight;
     }
     // waitingMatrix.resize(prespikeDelaySteps, std::vector<double>(branchLength / gap, constants.calciumInfluxBasal));
 }
 
-CaDiffusionBranch::CaDiffusionBranch(double gap, double branchLength, int branchId, Constants constants) : Branch(gap, branchLength, branchId), constants{constants} {
+MACRbPBranch::MACRbPBranch(double gap, double branchLength, int branchId, Constants constants) : Branch(gap, branchLength, branchId), constants{constants} {
 
-    CaResSpines.resize(branchLength / gap, CaResSynapseSpine());
-    for (CaResSynapseSpine &spine : CaResSpines) {
+    CaResSpines.resize(branchLength / gap, MACRbPSynapseSpine());
+    for (MACRbPSynapseSpine &spine : CaResSpines) {
         spine.resourcesAvailable = constants.initialResources;
         // spine.calciumFree        = constants.initialCalcium;
         spine.weight = constants.initialWeight;
@@ -25,7 +25,7 @@ CaDiffusionBranch::CaDiffusionBranch(double gap, double branchLength, int branch
     // waitingMatrix.resize(prespikeDelaySteps, std::vector<double>(branchLength / gap, 0));
 }
 
-void CaDiffusionBranch::PostConnectSetUp(std::vector<BranchedSpinePtr> spineData) {
+void MACRbPBranch::PostConnectSetUp(std::vector<BranchedSpinePtr> spineData) {
     return;
 }
 
@@ -44,7 +44,7 @@ void CaDiffusionBranch::PostConnectSetUp(std::vector<BranchedSpinePtr> spineData
 // }
 
 // void CaDiffusionBranch::Advect(TStepInt step) {
-void CaDiffusionBranch::Advect() {
+void MACRbPBranch::Advect() {
     // A possible ugly optimization is to do the first two iteration containers (if connected), the diffusion of the first container, then iterate from index 2 onwards and do the diffusion of
     // container index-1. When the end is reached, you do the diffusion of last container.
     double inactiveCalmodulin{}, kDot{}, nDot{}, kPDot{}, wDot{}, camDot{}, ngDot{}; // inactivePhosphatases{},inactiveKinases{}, unboundNeurogranin{}; is only used once, so you can
@@ -56,7 +56,7 @@ void CaDiffusionBranch::Advect() {
     // Spatial locality is achieved in the spine vector (not pointers). Temporal locality is achieved by making a mess
     // of a function
     // All constants.reactions happen in a single loop because diffusion is separate
-    for (CaResSynapseSpine &spine : CaResSpines) { // If diffusion does not have to be inside here, we iterate the container
+    for (MACRbPSynapseSpine &spine : CaResSpines) { // If diffusion does not have to be inside here, we iterate the container
         // 1st, calcium input (other function)
         if(!spine.connected){
             continue;
@@ -125,9 +125,9 @@ void CaDiffusionBranch::Advect() {
     // Diffusion of resources
     CaResSpines.at(lastIndex).resourcesAvailable += CONST.resourceDiffusionFct * (-CaResSpines.at(lastIndex).resourcesOldStep + CaResSpines.at(lastIndex - 1).resourcesOldStep);
 }
-void CaDiffusionBranch::PostSpikeCalciumFlux() {
+void MACRbPBranch::PostSpikeCalciumFlux() {
     const double nonlinearFactor{constants.nonlinearFactorNMDA};
-    for (CaResSynapseSpine &spine : CaResSpines) {
+    for (MACRbPSynapseSpine &spine : CaResSpines) {
         spine.postTransientIncrease+=(1.+nonlinearFactor*spine.preTransient);
     }
 }

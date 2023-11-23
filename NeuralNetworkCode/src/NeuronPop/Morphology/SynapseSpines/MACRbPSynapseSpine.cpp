@@ -1,9 +1,9 @@
-#include "CaResSynapseSpine.hpp"
+#include "./MACRbpSynapseSpine.hpp"
 
-CaResSynapseSpine::CaResSynapseSpine(): connected{false} {
+MACRbPSynapseSpine::MACRbPSynapseSpine(): connected{false} {
 }
 
-void CaResSynapseSpine::PreDiffusion() {
+void MACRbPSynapseSpine::PreDiffusion() {
     //This has to run before reations, and before diffusion. Makes no sense to do both, and makes no sense to actually store the inactive forms in the spine, if we are going to calculate it to the timestep anyway
     // kinasesInactive=kinasesTotal-(kinasesCaM+kinasesPhospho);
     // phosphatasesInactive=calcineurinTotal-phosphatasesInactive;
@@ -18,7 +18,7 @@ void CaResSynapseSpine::PreDiffusion() {
     resourcesOldStep=resourcesAvailable;
 }
 
-std::vector<double> CaResSynapseSpine::GetIndividualSynapticProfile() const {
+std::vector<double> MACRbPSynapseSpine::GetIndividualSynapticProfile() const {
     std::vector<double> dataArray(5);
     dataArray.at(0) = this->branchId;
     dataArray.at(1) = this->weight;
@@ -28,7 +28,7 @@ std::vector<double> CaResSynapseSpine::GetIndividualSynapticProfile() const {
     return dataArray;
 }
 
-std::string CaResSynapseSpine::GetIndividualSynapticProfileHeaderInfo() const {
+std::string MACRbPSynapseSpine::GetIndividualSynapticProfileHeaderInfo() const {
     return std::string("{<branch ID>, <weight>, <calcium>, <position ID>, <presynaptic population ID>}");
 
 }

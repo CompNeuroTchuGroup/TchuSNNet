@@ -1,8 +1,8 @@
 //
 // Created by Antoni Bertolin on 15.09.23
 //
-#ifndef RESOURCE_HETERO_SYNAPTIC_PLASTICITY_SHARED_RESOURCES_STDP_TRACE_BASED_HEADER_
-#define RESOURCE_HETERO_SYNAPTIC_PLASTICITY_SHARED_RESOURCES_STDP_TRACE_BASED_HEADER_
+#ifndef RESOURCE_HETERO_GRAUPNER_BRUNEL_CALCIUM_DIFF_BASED_HEADER_
+#define RESOURCE_HETERO_GRAUPNER_BRUNEL_CALCIUM_DIFF_BASED_HEADER_
 
 //List of forward declarations needed to break circular dependencies
 // class BranchedMorphology;
@@ -13,7 +13,7 @@ struct BranchTargeting;
 #include <numeric>
 
 // DEPRECATED
-class AlphaRSharedBHSTDP : public BranchedMorphology {
+class HeteroGraupnerBrunel : public BranchedMorphology {
 //This class models a behaviour based on wi=beta*(alfai/(omega+sum(alfai))), where alfai represents the spine's resources as (Ks*expdt+Kbasal)/(Ns*expdt+Nbasal) with bumps on Ks and Ns
 //It is mathematically provable that this model is equivlaent to the original in a single branch.
 protected:
@@ -55,9 +55,9 @@ protected:
 public:
 
     //main Methods
-    AlphaRSharedBHSTDP()=default;
-    explicit AlphaRSharedBHSTDP(GlobalSimInfo* infoGlobal);
-    ~AlphaRSharedBHSTDP() override = default;
+    HeteroGraupnerBrunel()=default;
+    explicit HeteroGraupnerBrunel(GlobalSimInfo* infoGlobal);
+    ~HeteroGraupnerBrunel() override = default;
     
     void LoadParameters(const std::vector<FileEntry>& morphologyParameters) override;
     void CheckParameters(const std::vector<FileEntry>& parameters) override;    

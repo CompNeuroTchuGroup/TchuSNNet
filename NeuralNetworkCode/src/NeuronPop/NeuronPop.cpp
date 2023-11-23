@@ -176,10 +176,18 @@ void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry> &morphologyPara
                         this->hasPlasticity=true;
                         this->isBranched=true;
                     }
-                } else if (parameterValues.at(0) == IDstringResourceCalciumDiffusion) {
+                } else if (parameterValues.at(0) == IDstringMACRbPModel) {
                     for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
                         (void)neuron;//Does nothing, removes warning on unused vars
-                        this->morphology.push_back(std::make_unique<ResourceCalciumDiffusionModel>(this->infoGlobal));
+                        this->morphology.push_back(std::make_unique<MACRbPModel>(this->infoGlobal));
+                        this->morphology.back()->LoadParameters(morphologyParameters);
+                        this->hasPlasticity=true;
+                        this->isBranched=true;
+                    }
+                }else if (parameterValues.at(0) == IDstringHeteroGraupnerBrunel) {
+                    for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
+                        (void)neuron;//Does nothing, removes warning on unused vars
+                        this->morphology.push_back(std::make_unique<HeteroGraupnerBrunel>(this->infoGlobal));
                         this->morphology.back()->LoadParameters(morphologyParameters);
                         this->hasPlasticity=true;
                         this->isBranched=true;

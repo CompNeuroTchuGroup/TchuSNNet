@@ -50,8 +50,8 @@ struct AlphaSynapseSpine;
 using AlphaSpinePtr = AlphaSynapseSpine*;
 struct CoopSynapseSpine;
 using CoopSpinePtr = std::unique_ptr<CoopSynapseSpine>;
-struct CaResSynapseSpine;
-using CaRsSpinePtr=CaResSynapseSpine*;
+struct MACRbPSynapseSpine;
+using CaRsSpinePtr=MACRbPSynapseSpine*;
 struct Branch;
 using BranchPtr = Branch*;
 struct AlphaBranch;
@@ -185,7 +185,8 @@ const std::string IDstringMonoDendriteSTDPBiWindow{"MonoDendriteSTDPBiWindow"};
 const std::string IDstringMonoDendriteSTDPBiExponential{"MonoDendriteSTDPBiExponential"};
 
 const std::string IDstringTraceResourceHSTDP{"AlphaResourceHSTDP"};
-const std::string IDstringResourceCalciumDiffusion{"ResourceCalciumDiffusion"};
+const std::string IDstringMACRbPModel{"ResourceCalciumDiffusion"};
+const std::string IDstringHeteroGraupnerBrunel{"HeteroGraupnerBrunel"};
 
 // void MultiplyVector (std::vector<signed long> &vector, signed long value);
 // void MultiplyVector (std::vector<double> &vector, double value);

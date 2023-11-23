@@ -1,26 +1,26 @@
 //
 // Created by Antoni Bertolin on 14.06.23
 //
-#ifndef _RESOURCE_CALCIUM_DIFFUSION_HETERO_SYNAPTIC_PLASTICITY_HEADER_
-#define _RESOURCE_CALCIUM_DIFFUSION_HETERO_SYNAPTIC_PLASTICITY_HEADER_
+#ifndef MASS_ACTION_CALCIUM_AND_RESOURCE_BASED_PLASTICITY_HEADER_
+#define MASS_ACTION_CALCIUM_AND_RESOURCE_BASED_PLASTICITY_HEADER_
 
 // List of forward declarations needed to break circular dependencies
 //  class BranchedMorphology;
 struct BranchTargeting;
 #include "../../../GlobalFunctions.hpp"
 #include "../BranchedMorphology.hpp"
-#include "../BranchedStructs/CaDiffusionBranch.hpp"
-#include "../SynapseSpines/CaResSynapseSpine.hpp"
+#include "../BranchedStructs/MACRbPBranch.hpp"
+#include "../SynapseSpines/MACRbPSynapseSpine.hpp"
 #include <numeric>
-using CaResSpinePtr = CaResSynapseSpine *;
+using MACRbpSpinePtr = MACRbPSynapseSpine *;
 
-class ResourceCalciumDiffusionModel : public BranchedMorphology {
-    // This class models changes in weight depending on the concentration of kinases and phosphatases
+class MACRbPModel : public BranchedMorphology {
+    // This will be called the Mass Action Calcium and Resource based Plasticity Model, MACRbP model
   protected:
     Constants constants{};
 
-    std::vector<CaResSpinePtr>     caResSpines;
-    std::vector<CaDiffusionBranch> caDiffBranches;
+    std::vector<MACRbpSpinePtr>     caResSpines;
+    std::vector<MACRbPBranch> caDiffBranches;
     // Constants
     double prespikeCalcium{}, postspikeCalcium{};
     
@@ -39,9 +39,9 @@ class ResourceCalciumDiffusionModel : public BranchedMorphology {
     // TStepInt TStepInput{};//Here is where the input happens
   public:
     // main Methods
-    ResourceCalciumDiffusionModel() = default;
-    explicit ResourceCalciumDiffusionModel(GlobalSimInfo *infoGlobal);
-    ~ResourceCalciumDiffusionModel() override = default;
+    MACRbPModel() = default;
+    explicit MACRbPModel(GlobalSimInfo *infoGlobal);
+    ~MACRbPModel() override = default;
 
     void LoadParameters(const std::vector<FileEntry> &morphologyParameters) override;
     void CheckParameters(const std::vector<FileEntry> &parameters) override;

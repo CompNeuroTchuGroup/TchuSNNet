@@ -1,13 +1,13 @@
 //
 // Created by Antoni Bertolin on 14.06.23
 //
-#include "./AlphaRSharedHSTDP.hpp"
-#include "AlphaRSharedHSTDP.hpp"
+#include "./HeteroGraupnerBrunel.hpp"
+#include "HeteroGraupnerBrunel.hpp"
 
-AlphaRSharedBHSTDP::AlphaRSharedBHSTDP(GlobalSimInfo *infoGlobal) : BranchedMorphology(infoGlobal) {
+HeteroGraupnerBrunel::HeteroGraupnerBrunel(GlobalSimInfo *infoGlobal) : BranchedMorphology(infoGlobal) {
 }
 
-void AlphaRSharedBHSTDP::LoadParameters(const std::vector<FileEntry> &morphologyParameters) {
+void HeteroGraupnerBrunel::LoadParameters(const std::vector<FileEntry> &morphologyParameters) {
 
     // BranchedMorphology::LoadParameters(morphologyParameters);
 
@@ -48,7 +48,7 @@ void AlphaRSharedBHSTDP::LoadParameters(const std::vector<FileEntry> &morphology
     SetUpHashTable();
 }
 
-void AlphaRSharedBHSTDP::CheckParameters(const std::vector<FileEntry> &parameters) {
+void HeteroGraupnerBrunel::CheckParameters(const std::vector<FileEntry> &parameters) {
     BranchedMorphology::CheckParameters(parameters);
     for (auto &[parameterName, parameterValues] : parameters) {
         if (parameterName.find("basalAlpha") != std::string::npos) {
@@ -99,8 +99,8 @@ void AlphaRSharedBHSTDP::CheckParameters(const std::vector<FileEntry> &parameter
     }
 }
 
-void AlphaRSharedBHSTDP::SaveParameters(std::ofstream &wParameterFile, std::string neuronIdentificator) const {
-    AlphaRSharedBHSTDP::SaveParameters(wParameterFile, neuronIdentificator);
+void HeteroGraupnerBrunel::SaveParameters(std::ofstream &wParameterFile, std::string neuronIdentificator) const {
+    HeteroGraupnerBrunel::SaveParameters(wParameterFile, neuronIdentificator);
     wParameterFile << neuronIdentificator << "basalAlpha\t\t\t" << std::to_string(this->alphaBasal);
     wParameterFile << "\t"
                    << "#Alpha at rest, where alpha decays towards\n";
@@ -157,7 +157,7 @@ void AlphaRSharedBHSTDP::SaveParameters(std::ofstream &wParameterFile, std::stri
                       "alphaI= alphaBasal + alphaStimulus*exp(-dt/alphaStimTau) \n";
 }
 
-int AlphaRSharedBHSTDP::CreateBranch(std::vector<int> anteriorBranches) {
+int HeteroGraupnerBrunel::CreateBranch(std::vector<int> anteriorBranches) {
     int branchId{this->GenerateBranchId()};
     if (anteriorBranches.empty()) {
         this->alphaBranches.emplace_back(new
@@ -174,7 +174,7 @@ int AlphaRSharedBHSTDP::CreateBranch(std::vector<int> anteriorBranches) {
     return branchId;
 }
 
-void AlphaRSharedBHSTDP::SetUpHashTable() {
+void HeteroGraupnerBrunel::SetUpHashTable() {
     // Statement 2 of second for loop is done thinking about time steps being in the order of magnitude of 0.1 ms, while
     // the gap is 1 um. If we make the kernel triangular, every "step" is one gap in space and in time it can be any
     // amount of timesteps. To calculate the step relationship, we do:
@@ -204,7 +204,7 @@ void AlphaRSharedBHSTDP::SetUpHashTable() {
     }
 }
 
-void AlphaRSharedBHSTDP::Advect() {
+void HeteroGraupnerBrunel::Advect() {
     // std::for_each(rTBranches.begin(), rTBranches.end(), [this](const ResourceTraceBranch* const branch){
     //     UpdateCoopTrace(branch);
     // });
@@ -249,7 +249,7 @@ void AlphaRSharedBHSTDP::Advect() {
 //     });
 // }
 
-bool AlphaRSharedBHSTDP::CheckIfPreSpikeHappened() {
+bool HeteroGraupnerBrunel::CheckIfPreSpikeHappened() {
     return std::any_of(PAR_UNSEQ, alphaBranches.begin(), alphaBranches.end(),
                        [](const AlphaBranchPtr &branch) { return !branch->spikedSpinesInTheBranch.empty(); });
 }
@@ -264,7 +264,7 @@ bool AlphaRSharedBHSTDP::CheckIfPreSpikeHappened() {
 //     pairingCounter<this->timeKernelLength;})>2;
 // }
 
-void AlphaRSharedBHSTDP::ApplyCoopTraceSpatialProfile(int branchSpineID, AlphaBranch *const currentBranch) {
+void HeteroGraupnerBrunel::ApplyCoopTraceSpatialProfile(int branchSpineID, AlphaBranch *const currentBranch) {
     // This function will evaluate all spines within kernel distance of the synapse spine and queue the alpha stimm
     // effects for each pairing found (queue waiting for postspike) All reference declarations are to reduce indexing
     // times in containers int spinePositionBranchIndex;//,absDistance,timeStepDifference;
@@ -371,7 +371,7 @@ void AlphaRSharedBHSTDP::ApplyCoopTraceSpatialProfile(int branchSpineID, AlphaBr
 //     return kernelHashTable.at(distanceToCenterInGaps).at(timeDifference);
 // }
 
-void AlphaRSharedBHSTDP::Reset() {
+void HeteroGraupnerBrunel::Reset() {
     BranchedMorphology::Reset();
     // this->postSpiked=false;
     // Wrapper plus clearing some of the vectors. Last method to run in chronological order, where we call the ticks and
@@ -383,14 +383,14 @@ void AlphaRSharedBHSTDP::Reset() {
     // DeleteEffects();
 }
 
-void AlphaRSharedBHSTDP::ComputeAlphas() {
+void HeteroGraupnerBrunel::ComputeAlphas() {
     // Here we just need to apply all delta alphas, decay them (before makes more sense, the bump has delta t zero.),
     // sum the result to stationary alpha, then update alpha sums? Yes
     std::for_each(resourceSpineData.begin(), resourceSpineData.end(),
                   [](AlphaSpinePtr const spine) { spine->ComputeAlphaResources(); });
 }
 
-void AlphaRSharedBHSTDP::ComputeWeights() { // This one is the one we call for every branch {
+void HeteroGraupnerBrunel::ComputeWeights() { // This one is the one we call for every branch {
     ComputeAlphaSums();
     resourceMultiplier =
         betaResourcePool /
@@ -399,7 +399,7 @@ void AlphaRSharedBHSTDP::ComputeWeights() { // This one is the one we call for e
                   [this](AlphaSpinePtr const spine) { spine->ComputeWeight(resourceMultiplier); });
 }
 
-void AlphaRSharedBHSTDP::ComputeAlphaSums() {
+void HeteroGraupnerBrunel::ComputeAlphaSums() {
     ComputeAlphas();
     alphaSum = std::accumulate(resourceSpineData.begin(), resourceSpineData.end(), 0.0,
                                [](double accumulator, const AlphaSpinePtr spine) {
@@ -412,7 +412,7 @@ void AlphaRSharedBHSTDP::ComputeAlphaSums() {
 //         spine->SetUpdatedFlag(false);
 //     });
 // }
-void AlphaRSharedBHSTDP::DecayAllTraces() {
+void HeteroGraupnerBrunel::DecayAllTraces() {
     std::for_each(alphaBranches.begin(), alphaBranches.end(), [](AlphaBranchPtr &branch) { branch->DecayAllTraces(); });
     // std::for_each(resourceSpineData.begin(), resourceSpineData.end(), [](ResourceSpinePtr spine){
     //     spine->TickStimulusCounts();
@@ -430,13 +430,13 @@ void AlphaRSharedBHSTDP::DecayAllTraces() {
 //     });
 // }
 
-void AlphaRSharedBHSTDP::RecordPostSpike() {
+void HeteroGraupnerBrunel::RecordPostSpike() {
     this->totalPostSpikes++;
     this->postSpiked = true;
     postSynapticTrace += 1;
 }
 
-void AlphaRSharedBHSTDP::RecordExcitatoryPreSpike(int spikedSpineId) {
+void HeteroGraupnerBrunel::RecordExcitatoryPreSpike(int spikedSpineId) {
     // This function is NOT DELAY COMPATIBLE (careful with the delays in synapse objects)
     // Here only record, afterwards we do the checks
     // Not going down the virtual path because inefficient
@@ -450,7 +450,7 @@ void AlphaRSharedBHSTDP::RecordExcitatoryPreSpike(int spikedSpineId) {
     this->totalPreSpikes++;
 }
 
-void AlphaRSharedBHSTDP::PostConnectSetUp() {
+void HeteroGraupnerBrunel::PostConnectSetUp() {
     BranchedMorphology::PostConnectSetUp();
     if (distributeWeights) {
         std::uniform_real_distribution<double> weightDistribution(-alphaBasal, alphaBasal);
@@ -460,7 +460,7 @@ void AlphaRSharedBHSTDP::PostConnectSetUp() {
     }
 }
 
-BaseSpinePtr AlphaRSharedBHSTDP::AllocateNewSynapse(BranchTargeting &branchTarget) {
+BaseSpinePtr HeteroGraupnerBrunel::AllocateNewSynapse(BranchTargeting &branchTarget) {
     // here I have to set the maxcount of the spine to maxCount too
     // Here sum over the branches.????
     // And cast the proper pointers to the proper baseSpineData vectors.
@@ -493,7 +493,7 @@ BaseSpinePtr AlphaRSharedBHSTDP::AllocateNewSynapse(BranchTargeting &branchTarge
     return this->baseSpineData.back();
 }
 
-std::vector<double> AlphaRSharedBHSTDP::GetOverallSynapticProfile() const {
+std::vector<double> HeteroGraupnerBrunel::GetOverallSynapticProfile() const {
     /*
      * returned array organised as follows:
      * item 1: average synaptic weight
@@ -521,7 +521,7 @@ std::vector<double> AlphaRSharedBHSTDP::GetOverallSynapticProfile() const {
     return dataArray;
 }
 
-std::string AlphaRSharedBHSTDP::GetOverallSynapticProfileHeaderInfo() const {
+std::string HeteroGraupnerBrunel::GetOverallSynapticProfileHeaderInfo() const {
     return std::string("{<average weight>, <total post spikes> ,<total pre spikes>, <total number of spines>}");
 }
 

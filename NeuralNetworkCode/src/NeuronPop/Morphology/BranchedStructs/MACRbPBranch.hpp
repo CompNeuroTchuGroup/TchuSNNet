@@ -1,13 +1,13 @@
 //
 // Created by Antoni Bertolin on 01.10.23
 //
-#ifndef _CALCIUM_RESOURCE_DIFFUSION_BRANCH_STRUCT_HEADER_
-#define _CALCIUM_RESOURCE_DIFFUSION_BRANCH_STRUCT_HEADER_
+#ifndef MASS_ACTION_CALCIUM_AND_RESOURCE_BASED_BRANCH_STRUCT_HEADER_
+#define MASS_ACTION_CALCIUM_AND_RESOURCE_BASED_BRANCH_STRUCT_HEADER_
 
 #include "./Branch.hpp"
 // #include "../BranchedMorphology.hpp"
 #include "../../../GlobalFunctions.hpp"
-#include "../SynapseSpines/CaResSynapseSpine.hpp"
+#include "../SynapseSpines/MACRbpSynapseSpine.hpp"
 struct Constants{ //currently 19 + the prespike/postspike calcium and the prespike calcium influx delay, so 21
     double caDiffusionFct;//Consider delta x squared already here
 
@@ -48,12 +48,12 @@ struct Constants{ //currently 19 + the prespike/postspike calcium and the prespi
     double nonlinearFactorNMDA;
 };
 // include the spine class
-struct CaDiffusionBranch : public Branch {
+struct MACRbPBranch : public Branch {
 
     // std::vector<std::vector<double>> waitingMatrix;//First axis is the position and time 0. Second axis is the time 1, 2, 3. Receives calcium of both prespikes and postspikes
     //We swap vector positions (0,1;1,2;2,3), then set to false last vector. std::iter_swap or std::swap. Test speed in this.
     //Synapse access
-    std::vector<CaResSynapseSpine> CaResSpines;//VECTOR ACCOUNTS FOR EMPTY SYNAPSE SLOTS
+    std::vector<MACRbPSynapseSpine> CaResSpines;//VECTOR ACCOUNTS FOR EMPTY SYNAPSE SLOTS
 
     //Constants
     Constants constants;
@@ -63,8 +63,8 @@ struct CaDiffusionBranch : public Branch {
 
     //Methods
     //Setup
-    CaDiffusionBranch(std::vector<int>anteriorBranches,double gap, double branchLength, int branchId, Constants constants);
-    CaDiffusionBranch(double gap, double branchLength, int branchId, Constants constants);
+    MACRbPBranch(std::vector<int>anteriorBranches,double gap, double branchLength, int branchId, Constants constants);
+    MACRbPBranch(double gap, double branchLength, int branchId, Constants constants);
     void PostConnectSetUp(std::vector<BranchedSpinePtr> spineData) override;
     void PostSpikeCalciumFlux();
     //Input methods

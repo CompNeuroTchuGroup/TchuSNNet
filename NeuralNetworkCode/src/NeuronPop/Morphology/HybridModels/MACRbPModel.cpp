@@ -1,12 +1,11 @@
-#include "./ResourceCalciumDiffusionModel.hpp"
-#include "ResourceCalciumDiffusionModel.hpp"
+#include "./MACRbPModel.hpp"
 
 
-ResourceCalciumDiffusionModel::ResourceCalciumDiffusionModel(GlobalSimInfo *infoGlobal):BranchedMorphology(infoGlobal) {
+MACRbPModel::MACRbPModel(GlobalSimInfo *infoGlobal):BranchedMorphology(infoGlobal) {
 
 }
 
-void ResourceCalciumDiffusionModel::LoadParameters(const std::vector<FileEntry> &morphologyParameters) {
+void MACRbPModel::LoadParameters(const std::vector<FileEntry> &morphologyParameters) {
     BranchedMorphology::LoadParameters(morphologyParameters);
     for (auto &[parameterName, parameterValues] : morphologyParameters) {
         if (parameterName.find("kinasesTotal") != std::string::npos) {
@@ -84,7 +83,7 @@ void ResourceCalciumDiffusionModel::LoadParameters(const std::vector<FileEntry> 
     
 }
 
-void ResourceCalciumDiffusionModel::CheckParameters(const std::vector<FileEntry> &parameters) {
+void MACRbPModel::CheckParameters(const std::vector<FileEntry> &parameters) {
     BranchedMorphology::CheckParameters(parameters);
     for (auto &[parameterName, parameterValues] : parameters) {
         if (parameterName.find("kinasesTotal") != std::string::npos && (this->constants.kinasesTotal != std::stod(parameterValues.at(0)))) {
@@ -152,7 +151,7 @@ void ResourceCalciumDiffusionModel::CheckParameters(const std::vector<FileEntry>
     }
 }
 
-void ResourceCalciumDiffusionModel::SaveParameters(std::ofstream &wParameterFile, std::string neuronIdentificator) const {
+void MACRbPModel::SaveParameters(std::ofstream &wParameterFile, std::string neuronIdentificator) const {
     BranchedMorphology::SaveParameters(wParameterFile, neuronIdentificator);
     //Parameter outputs should not be written in std::to_string unless you are confident that the value will not be too small for the I/O to work as intended, or you will lose information in the Parameter.txt file
     wParameterFile << neuronIdentificator << "kinasesTotal\t\t" << (this->constants.kinasesTotal) << " #uM/spine";
@@ -222,21 +221,21 @@ void ResourceCalciumDiffusionModel::SaveParameters(std::ofstream &wParameterFile
     wParameterFile << "\t" << "#Conversion from resource molar units (uM) to dmV/sec\n";
 }
 
-int ResourceCalciumDiffusionModel::CreateBranch(std::vector<int> anteriorBranches) {
+int MACRbPModel::CreateBranch(std::vector<int> anteriorBranches) {
     int branchId{this->GenerateBranchId()};
     if (!anteriorBranches.empty()) {
-        this->caDiffBranches.emplace_back(CaDiffusionBranch(anteriorBranches,this->synapticGap, this->branchLength,  branchId, constants)); // This vector should be sorted by ID by default (tested).
+        this->caDiffBranches.emplace_back(MACRbPBranch(anteriorBranches,this->synapticGap, this->branchLength,  branchId, constants)); // This vector should be sorted by ID by default (tested).
         this->branches.push_back(static_cast<Branch *>(&this->caDiffBranches.back()));
     } else {
         int branchId{this->GenerateBranchId()};
         this->caDiffBranches.emplace_back(
-            CaDiffusionBranch(this->synapticGap, this->branchLength,  branchId, constants)); // This vector should be sorted by ID by default (tested).
+            MACRbPBranch(this->synapticGap, this->branchLength,  branchId, constants)); // This vector should be sorted by ID by default (tested).
         this->branches.push_back(static_cast<Branch *>(&this->caDiffBranches.back()));
     }
     return branchId;
 }
 
-void ResourceCalciumDiffusionModel::Advect() {
+void MACRbPModel::Advect() {
     // if (!postSpiked){
     //     TStepModded=infoGlobal->timeStep%preSpikeDelaySteps;
     // }
@@ -244,18 +243,18 @@ void ResourceCalciumDiffusionModel::Advect() {
     // TStepModded%=preSpikeDelaySteps;
     // TStepInput=TStepModded+preSpikeDelaySteps+1;
     // TStepInput%=preSpikeDelaySteps;
-    for (CaDiffusionBranch& branch: caDiffBranches){
+    for (MACRbPBranch& branch: caDiffBranches){
         branch.Advect();
         // branch.Advect(TStepModded);
     }
     // TStepModded++;//This is for the postspike calcium influx next timestep
 }
 
-void ResourceCalciumDiffusionModel::RecordPostSpike() {
+void MACRbPModel::RecordPostSpike() {
     // TStepModded=infoGlobal->timeStep%preSpikeDelaySteps;
     this->totalPostSpikes++;
     // this->postSpiked = true;
-    for (CaDiffusionBranch& branch: caDiffBranches){
+    for (MACRbPBranch& branch: caDiffBranches){
         branch.PostSpikeCalciumFlux();
     }
     // for (CaDiffusionBranch& branch: caDiffBranches){
@@ -263,7 +262,7 @@ void ResourceCalciumDiffusionModel::RecordPostSpike() {
     // }
 }
 
-void ResourceCalciumDiffusionModel::RecordExcitatoryPreSpike(int spikedSpineId) {
+void MACRbPModel::RecordExcitatoryPreSpike(int spikedSpineId) {
     // CaResSynapseSpine& synapseSpine = *caResSpines.at(spikedSpineId);
     // CaDiffusionBranch&  branch       = caDiffBranches.at(synapseSpine.branchId);
     // int  branchSpinePosition{synapseSpine.branchPositionId};
@@ -272,13 +271,13 @@ void ResourceCalciumDiffusionModel::RecordExcitatoryPreSpike(int spikedSpineId) 
     this->totalPreSpikes++;
 }
 
-void ResourceCalciumDiffusionModel::PostConnectSetUp() {
-    for (CaDiffusionBranch& branch: caDiffBranches){
+void MACRbPModel::PostConnectSetUp() {
+    for (MACRbPBranch& branch: caDiffBranches){
         branch.PostConnectSetUp(branchedSpineData);
     }
 }
 
-BaseSpinePtr ResourceCalciumDiffusionModel::AllocateNewSynapse(BranchTargeting &branchTarget) {
+BaseSpinePtr MACRbPModel::AllocateNewSynapse(BranchTargeting &branchTarget) {
     int branch{AllocateBranch(branchTarget)};
     int position{PopSynapseSlotFromBranch(branchTarget)};
     // caDiffBranches.at(branch).CaDiffSpines.push_back(CaResSynapseSpine(kinasesTotal, calcineurinTotal, constants.initialWeight));
@@ -303,10 +302,10 @@ BaseSpinePtr ResourceCalciumDiffusionModel::AllocateNewSynapse(BranchTargeting &
     return this->baseSpineData.back();
 }
 
-std::vector<double> ResourceCalciumDiffusionModel::GetOverallSynapticProfile() const {
+std::vector<double> MACRbPModel::GetOverallSynapticProfile() const {
     return std::vector<double>();
 }
 
-std::string ResourceCalciumDiffusionModel::GetOverallSynapticProfileHeaderInfo() const {
+std::string MACRbPModel::GetOverallSynapticProfileHeaderInfo() const {
     return std::string("{None}");
 }
