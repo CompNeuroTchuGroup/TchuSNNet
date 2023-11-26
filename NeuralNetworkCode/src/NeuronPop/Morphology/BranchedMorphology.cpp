@@ -10,13 +10,12 @@ void BranchedMorphology::RecordPostSpike() {
     Morphology::RecordPostSpike();
 }
 
-void BranchedMorphology::RecordExcitatoryPreSpike(int spikedSynapseId) {
+void BranchedMorphology::RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) {
     // This function is NOT DELAY COMPATIBLE (careful with the delays in synapse objects)
-    Morphology::RecordExcitatoryPreSpike(spikedSynapseId);
+    Morphology::RecordExcitatoryPreSpike(spinePtr);
     // this->branches.at(this->branchedSpineData.at(spikedSynapseId)->branchId)->spikedSyn.at(this->branchedSpineData.at(spikedSynapseId)->branchPositionId)=true;
-    BranchedSpinePtr synapseSpine = this->branchedSpineData.at(spikedSynapseId);
-    this->branches.at(synapseSpine->branchId)
-        ->spikedSpinesInTheBranch.push_back(synapseSpine->branchPositionId);
+    this->branches.at(static_cast<BranchedSpinePtr>(spinePtr)->branchId)
+        ->spikedSpinesInTheBranch.push_back(static_cast<BranchedSpinePtr>(spinePtr)->branchPositionId);
 }
 
 void BranchedMorphology::Reset() {

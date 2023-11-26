@@ -88,7 +88,7 @@ public:
     void ComputeAlphaSums(AlphaBranch& const branch);//Called inside recalc weights
     //Record methods
     void RecordPostSpike() override;
-    void RecordExcitatoryPreSpike(int spikedSpineId) override;//Here set the trigger count to 0
+    void RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) override;//Here set the trigger count to 0
     void PostConnectSetUp() override;
     //Allocation methods
     BaseSpinePtr AllocateNewSynapse(BranchTargeting& synapse) override; //Call the Branched one inside before setting all counters

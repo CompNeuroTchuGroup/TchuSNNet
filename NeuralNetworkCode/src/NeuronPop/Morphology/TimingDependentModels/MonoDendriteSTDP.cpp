@@ -87,13 +87,14 @@ void MonoDendriteSTDP::RecordPostSpike() {
     std::fill(this->integratePostSpike.begin(), this->integratePostSpike.end(), true);
 }
 
-void MonoDendriteSTDP::RecordExcitatoryPreSpike(int spikedSpineId) {
+void MonoDendriteSTDP::RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) {
 //This function is NOT DELAY COMPATIBLE (careful with the delays in synapse objects)
-    Morphology::RecordExcitatoryPreSpike(spikedSpineId);
-    this->spikedSpines.at(spikedSpineId) = true;//This does not seem to be correctly implemented
-    this->spikedSpinesId.push_back(spikedSpineId);
-    this->spineDataCoop.at(spikedSpineId)->SetLastSpike(static_cast<double>(this->infoGlobal->timeStep) * this->infoGlobal->dtTimestep); //only coop
-    this->integratePreSpike.at(spikedSpineId) = true;
+//Here the optimization for non-branched is shit, but no one uses this classes anyways
+    Morphology::RecordExcitatoryPreSpike(spinePtr);
+    this->spikedSpines.at(spinePtr->idInMorpho) = true;//This does not seem to be correctly implemented
+    this->spikedSpinesId.push_back(spinePtr->idInMorpho);
+    this->spineDataCoop.at(spinePtr->idInMorpho)->SetLastSpike(static_cast<double>(this->infoGlobal->timeStep) * this->infoGlobal->dtTimestep); //only coop
+    this->integratePreSpike.at(spinePtr->idInMorpho) = true;
 }
 
 void MonoDendriteSTDP::SaveParameters(std::ofstream& wParameterFile, std::string neuronIdentificator) const {

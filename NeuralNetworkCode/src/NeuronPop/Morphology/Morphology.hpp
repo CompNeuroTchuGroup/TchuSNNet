@@ -63,7 +63,7 @@ class Morphology {
 
     virtual void Advect() = 0;
     virtual void RecordPostSpike();
-    virtual void RecordExcitatoryPreSpike(int spikedSynapseId);
+    virtual void RecordExcitatoryPreSpike(BaseSpinePtr spinePtr);
     // Getters
     std::vector<double>         GetIndividualSynapticProfile(signed long synapseId) const;
     std::string                 GetIndividualSynapticProfileHeaderInfo() const;

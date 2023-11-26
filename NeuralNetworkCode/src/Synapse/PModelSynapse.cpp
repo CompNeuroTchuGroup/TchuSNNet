@@ -4,11 +4,12 @@ PModelSynapse::PModelSynapse(PopPtr targetPop, PopPtr sourcePop, GlobalSimInfo *
     hasPlasticityModel=true;
 }
 std::vector<double> PModelSynapse::AdvectSpikers(NeuronInt spiker) {
+    //This is basically the CurrentSynapse AdvectSpikers, but for synapse spine pointers not nullptr
     NeuronInt noTargets{GetNoTargetedSynapses(spiker)};
     std::vector<double> currents(noTargets,0.0);
     for(NeuronInt targetNeuronIndex : std::ranges::views::iota (0, noTargets)){
     // for(NeuronInt targetNeuronIndex{0};targetNeuronIndex<noTargets;targetNeuronIndex++){
-        this->targetPop->RecordExcitatorySynapticSpike(targetSpineList.at(spiker).at(targetNeuronIndex).first, targetSpineList.at(spiker).at(targetNeuronIndex).second->idInMorpho);
+        this->targetPop->RecordExcitatorySynapticSpike(targetSpineList.at(spiker).at(targetNeuronIndex).first, targetSpineList.at(spiker).at(targetNeuronIndex).second);
         currents.at(targetNeuronIndex)=targetSpineList.at(spiker).at(targetNeuronIndex).second->GetWeight();
     }
     return currents;

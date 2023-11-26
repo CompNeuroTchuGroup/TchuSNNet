@@ -272,14 +272,15 @@ void AlphaResourceHSTDP::RecordPostSpike() {
     postSynapticTrace += 1;
 }
 
-void AlphaResourceHSTDP::RecordExcitatoryPreSpike(int spikedSpineId) {
+void AlphaResourceHSTDP::RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) {
     // This function is NOT DELAY COMPATIBLE (careful with the delays in synapse objects)
+    //POINTER CASTING IS FREE PERFORMANCE WISE
     // Here only record, afterwards we do the checks
     // Not going down the virtual path because inefficient
-    AlphaSynapseSpine *synapseSpine = alphaSpines.at(spikedSpineId);
-    AlphaBranch&          branch       = alphaBranches.at(synapseSpine->branchId);
-    int                   branchSpinePosition{synapseSpine->branchPositionId};
-    branch.spikedSpinesInTheBranch.push_back(branchSpinePosition);
+    // AlphaSynapseSpine *synapseSpine = alphaSpines.at(spikedSpineId);
+    // AlphaBranch&          branch       = alphaBranches.at(synapseSpine->branchId);
+    // int                   branchSpinePosition{synapseSpine->branchPositionId};
+    alphaBranches.at(static_cast<AlphaSpinePtr>(spinePtr)->branchId).spikedSpinesInTheBranch.push_back(static_cast<AlphaSpinePtr>(spinePtr)->branchPositionId);
     // branch.preSynapticTraces.at(branchSpinePosition) += 1;
     // ApplyCoopTraceSpatialProfile(branchSpinePosition, branch);
     // branch->cooperativityTraces.at(synapseSpine->branchPositionId)+=1;

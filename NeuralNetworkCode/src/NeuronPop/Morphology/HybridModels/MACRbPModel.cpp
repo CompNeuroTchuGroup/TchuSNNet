@@ -262,11 +262,11 @@ void MACRbPModel::RecordPostSpike() {
     // }
 }
 
-void MACRbPModel::RecordExcitatoryPreSpike(int spikedSpineId) {
+void MACRbPModel::RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) {
     // CaResSynapseSpine& synapseSpine = *caResSpines.at(spikedSpineId);
     // CaDiffusionBranch&  branch       = caDiffBranches.at(synapseSpine.branchId);
     // int  branchSpinePosition{synapseSpine.branchPositionId};
-    caResSpines.at(spikedSpineId)->preTransientIncrease++;
+    static_cast<CaRsSpinePtr>(spinePtr)->preTransientIncrease++;
     // branch.waitingMatrix.at(TStepInput).at(branchSpinePosition)+=prespikeCalcium;
     this->totalPreSpikes++;
 }

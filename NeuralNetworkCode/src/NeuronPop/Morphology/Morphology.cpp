@@ -52,7 +52,7 @@ void Morphology::RecordPostSpike() {
 }
 
 
-void Morphology::RecordExcitatoryPreSpike(int spikedSynapseId) {
+void Morphology::RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) {
         //This function is NOT DELAY COMPATIBLE (careful with the delays in synapse objects)
     //Is there supposed to be a different Inhibitory function?
     this->totalPreSpikes++;

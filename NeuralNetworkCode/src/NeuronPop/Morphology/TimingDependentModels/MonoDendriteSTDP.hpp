@@ -91,7 +91,7 @@ public:
     void Advect() override;
     void Reset() override;
     void RecordPostSpike() override;
-    void RecordExcitatoryPreSpike(int spikedSpineId) override;
+    void RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) override;
 
     void SaveParameters(std::ofstream& wParameterStream, std::string neuronIdentificator) const override;
     void LoadParameters(const std::vector<FileEntry>& parameters) override;
