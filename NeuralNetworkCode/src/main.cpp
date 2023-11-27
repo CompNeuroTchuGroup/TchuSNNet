@@ -133,7 +133,7 @@ int main(int argc, char* argv[]) {
                     if(parEntry.parameterName.compare(parameterEntry1.parameterName) == 0){
                         //This loop will allocate the parameters as long as the iterate parameter is consistent with the actual parameter (this requires the parameter be introduced in the params file properly).
                         size_t indexMultiplier {IsIterateParamConsistent(parEntry, parameterEntry1)};
-                        for(size_t index : std::ranges::views::iota(0u, parEntry.parameterValues.size())){
+                        for(size_t index : std::ranges::views::iota0ull, parEntry.parameterValues.size())){
                             parEntry.parameterValues.at(index) = parameterEntry1.parameterValues.at(indexMultiplier*iterate1Index+index);
                         }
                         std::cout << " " << parameterEntry1.parameterName << " = " << (parameterEntry1.parameterValues.at(iterate1Index*indexMultiplier)) << std::endl;
@@ -145,7 +145,7 @@ int main(int argc, char* argv[]) {
                     if(parEntry.parameterName.compare(parameterEntry2.parameterName) == 0){
                         //This loop will allocate the parameters as long as the iterate parameter is consistent with the actual parameter (this requires the parameter be introduced in the params file properly).
                         size_t indexMultiplier {IsIterateParamConsistent(parEntry, parameterEntry2)};
-                        for(size_t index : std::ranges::views::iota(0u, parEntry.parameterValues.size())){
+                        for(size_t index : std::ranges::views::iota0ull, parEntry.parameterValues.size())){
                             parEntry.parameterValues.at(index) = parameterEntry2.parameterValues.at(indexMultiplier*iterate2Index+index);
                         }
                         // parEntry.parameterValues.at(0) = parameterEntry2.parameterValues.at(iterate2Index);

@@ -36,7 +36,7 @@ void AlphaBranch::DecayAlphaResources() {
 }
 
 void AlphaBranch::ComputeAlphaResources() {
-    for (size_t preSynIndex : std::ranges::views::iota(0u, branchSlots)) {
+    for (size_t preSynIndex : std::ranges::views::iota0ull, branchSlots)) {
         if (spinePtrPosition.at(preSynIndex) != nullptr) {
             spinePtrPosition.at(preSynIndex)->alphaResources = alphaBasal + spineAlphaStims.at(preSynIndex);
             // We append the decay here, its faster? Or not
@@ -67,7 +67,7 @@ void AlphaBranch::ApplyTracesOnSpinesLTP() {
     // synapses are updated according to the trace. The idea behind the
     // equation is to make the trace heavily dependant on the presynaptic trace
     // as no glutamate means no calcium on postspike.
-    // for (size_t preSynIndex : std::ranges::views::iota(0u, branchSlots)) {
+    // for (size_t preSynIndex : std::ranges::views::iota0ull, branchSlots)) {
     //     if (spinePtrPosition.at(preSynIndex) != nullptr) {
     //         spinePtrPosition.at(preSynIndex)
     //             ->AddTraceToAlpha(((1 + cooperativityTraces.at(preSynIndex)) *
