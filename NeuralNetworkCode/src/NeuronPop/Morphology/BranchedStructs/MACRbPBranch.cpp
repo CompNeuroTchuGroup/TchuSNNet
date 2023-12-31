@@ -184,7 +184,11 @@ void MACRbPBranch::Advect() {
   CaResSpines.at(0).resourcesAvailable += ctt.resourceDiffusionFct * (-CaResSpines.at(0).resourcesOldStep + CaResSpines.at(1).resourcesOldStep);
   // #pragma omp parallel for
   // Diffusion loop
-  std::ranges::iota_view<size_t, size_t> range{std::ranges::views::iota(1ull, lastIndex)};
+  // MSVC compiler only
+  // std::ranges::iota_view<size_t, size_t> range{std::ranges::views::iota(1ull, lastIndex)};
+  // All platform compatible
+  // auto type is std::ranges::common_view<std::ranges::take_view<std::ranges::iota_view<unsigned long long, std::unreachable_sentinel_t>>>
+  auto range = std::ranges::common_view(std::views::iota(1ull) | std::views::take(lastIndex - 1));
   std::for_each(PAR, range.begin(), range.end(), [this](size_t spineIndex) {
     const Constants CONST{this->constants};
     // Diffusion of calcium

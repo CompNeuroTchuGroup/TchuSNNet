@@ -50,7 +50,7 @@ void AlphaBranch::ComputeAlphaResources() {
 void AlphaBranch::ComputeAlphaSums() {
   ComputeAlphaResources();
   alphaTotalSum = std::accumulate(alphaSpines.begin(), alphaSpines.end(), 0.0,
-                                  [](double accumulator, const AlphaSynapseSpine &const spine) { return accumulator + spine.alphaResources; });
+                                  [](double accumulator, const AlphaSynapseSpine &spine) { return accumulator + spine.alphaResources; });
 }
 
 void AlphaBranch::ComputeWeights() {

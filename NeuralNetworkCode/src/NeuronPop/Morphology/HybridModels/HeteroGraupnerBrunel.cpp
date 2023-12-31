@@ -414,8 +414,8 @@ void HeteroGraupnerBrunel::RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) {
   // Not going down the virtual path because inefficient
   AlphaSpinePtr synapseSpine{static_cast<AlphaSpinePtr>(spinePtr)};
   int           branchID{synapseSpine->branchId};
-  AlphaBranch  &branch = alphaBranches.at(synapseSpine->branchId);
-  int           branchSpinePosition{synapseSpine->branchPositionId};
+  // AlphaBranch  &branch = alphaBranches.at(synapseSpine->branchId);
+  int branchSpinePosition{synapseSpine->branchPositionId};
   alphaBranches.at(branchID).spikedSpinesInTheBranch.push_back(branchSpinePosition);
   alphaBranches.at(branchID).preSynapticTraces.at(branchSpinePosition) += 1;
   ApplyCoopTraceSpatialProfile(branchSpinePosition, branchID);
