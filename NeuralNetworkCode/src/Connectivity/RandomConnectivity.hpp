@@ -20,7 +20,7 @@ protected:
 
 public:
 
-    RandomConnectivity(Synapse* synapse ,const GlobalSimInfo*  infoGlobal);
+    RandomConnectivity(Synapse* synapse ,GlobalSimInfo*  infoGlobal);
     ~RandomConnectivity() override = default;
 
     virtual void        ConnectNeurons() override;

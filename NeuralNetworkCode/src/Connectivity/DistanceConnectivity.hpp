@@ -24,7 +24,7 @@ protected:
 	int isConnectionExact{};
 public:
 
-	DistanceConnectivity(Synapse* synapse,const GlobalSimInfo*  infoGlobal);
+	DistanceConnectivity(Synapse* synapse,GlobalSimInfo*  infoGlobal);
     ~DistanceConnectivity() override = default;
 
     void                ConnectNeurons();

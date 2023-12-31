@@ -2,7 +2,7 @@
 #include "../Synapse/Synapse.hpp"
 #include "time.h"
 
-DistanceConnectivity::DistanceConnectivity(Synapse* synapse,const GlobalSimInfo*  infoGlobal):Connectivity(synapse,infoGlobal){
+DistanceConnectivity::DistanceConnectivity(Synapse* synapse,GlobalSimInfo*  infoGlobal):Connectivity(synapse,infoGlobal){
 }
 
 void DistanceConnectivity::SaveParameters(std::ofstream& wParameterStream,std::string idString) const{

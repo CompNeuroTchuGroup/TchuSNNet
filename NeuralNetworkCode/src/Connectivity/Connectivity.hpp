@@ -26,7 +26,7 @@ protected:
 
 public:
 
-    Connectivity(Synapse* synapse,const GlobalSimInfo*  infoGlobal);
+    Connectivity(Synapse* synapse, GlobalSimInfo*  infoGlobal);
     virtual ~Connectivity() = default;
 
     // TODO/Suggestion: Replace pointer return with a return by constant reference. YES PLEASE

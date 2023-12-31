@@ -120,7 +120,7 @@ void Synapse::LoadParameters(const std::vector<FileEntry> &synapseParameters) {
     }
 
     waitingMatrix.resize(static_cast<size_t>(Dmax) + 1);
-    for (NeuronInt timeIndex : std::ranges::views::iota0ull, static_cast<size_t>(Dmax) + 1))
+    for (NeuronInt timeIndex : std::ranges::views::iota(0ull, static_cast<size_t>(Dmax) + 1))
         waitingMatrix.at(timeIndex).resize(GetNoTargetNeurons() ,0.0);
     std::vector<FileEntry> connectivityParameters{FilterStringEntries(synapseParameters, "connectivity")};
     geometry->LoadParameters(connectivityParameters);

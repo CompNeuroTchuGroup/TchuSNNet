@@ -2,7 +2,7 @@
 #include "Connectivity.hpp"
 #include "../Synapse/Synapse.hpp"
 
-Connectivity::Connectivity(Synapse* synapse,const GlobalSimInfo*  infoGlobal) : infoGlobal{infoGlobal}, synapse{synapse}{
+Connectivity::Connectivity(Synapse* synapse, GlobalSimInfo*  infoGlobal) : infoGlobal{infoGlobal}, synapse{synapse}{
     std::mt19937  generator(synapse->GetSeed());
     SetSeed(generator);
     // SUGGESTION: Use vector of vectors instead of array of vectors

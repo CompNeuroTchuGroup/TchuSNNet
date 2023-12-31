@@ -1,7 +1,7 @@
 #include "AdjacencyMatrixConnectivity.hpp"
 #include "../Synapse/Synapse.hpp"
 
-AdjacencyMatrixConnectivity::AdjacencyMatrixConnectivity(Synapse* synapse, const GlobalSimInfo* infoGlobal) :Connectivity(synapse, infoGlobal) {
+AdjacencyMatrixConnectivity::AdjacencyMatrixConnectivity(Synapse* synapse, GlobalSimInfo* infoGlobal) :Connectivity(synapse, infoGlobal) {
     NeuronInt    noTargetNeurons = synapse->GetNoTargetNeurons();
     NeuronInt    noSourceNeurons = synapse->GetNoSourceNeurons();
 

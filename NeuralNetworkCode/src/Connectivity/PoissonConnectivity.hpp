@@ -20,7 +20,7 @@ protected:
 
 public:
 
-    PoissonConnectivity(Synapse* synapse,const GlobalSimInfo*  infoGlobal);
+    PoissonConnectivity(Synapse* synapse,GlobalSimInfo*  infoGlobal);
     ~PoissonConnectivity() override = default;
 
     void ConnectNeurons() override;

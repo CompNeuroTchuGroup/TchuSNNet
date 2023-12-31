@@ -1,7 +1,7 @@
 #include "RandomConnectivity.hpp"
 #include "../Synapse/Synapse.hpp"
 
-RandomConnectivity::RandomConnectivity(Synapse* synapse,const GlobalSimInfo*  infoGlobal):Connectivity(synapse,infoGlobal){
+RandomConnectivity::RandomConnectivity(Synapse* synapse,GlobalSimInfo*  infoGlobal):Connectivity(synapse,infoGlobal){
 }
 
 void RandomConnectivity::SaveParameters(std::ofstream& wParameterStream,std::string idString) const{

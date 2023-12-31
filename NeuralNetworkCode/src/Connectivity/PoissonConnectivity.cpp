@@ -1,7 +1,7 @@
 #include "PoissonConnectivity.hpp"
 #include "../Synapse/Synapse.hpp"
 
-PoissonConnectivity::PoissonConnectivity(Synapse* synapse, const GlobalSimInfo* infoGlobal):Connectivity(synapse,infoGlobal){
+PoissonConnectivity::PoissonConnectivity(Synapse* synapse, GlobalSimInfo* infoGlobal):Connectivity(synapse,infoGlobal){
     // std::uniform_int_distribution<int> distribution(0,INT32_MAX);
     // SetSeed(distribution(infoGlobal->globalGenerator));
 }

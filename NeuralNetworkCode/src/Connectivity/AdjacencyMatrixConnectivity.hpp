@@ -22,7 +22,7 @@ protected:
 
 public:
 
-    AdjacencyMatrixConnectivity(Synapse* synapse, const GlobalSimInfo* infoGlobal);
+    AdjacencyMatrixConnectivity(Synapse* synapse, GlobalSimInfo* infoGlobal);
     ~AdjacencyMatrixConnectivity() override = default;
 
     void                ConnectNeurons();
