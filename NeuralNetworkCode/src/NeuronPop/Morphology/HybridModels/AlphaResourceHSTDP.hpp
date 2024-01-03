@@ -1,12 +1,13 @@
 //
 // Created by Antoni Bertolin on 14.06.23
 //
-#ifndef RESOURCE_HETERO_SYNAPTIC_PLASTICITY_STDP_TRACE_BASED_HEADER_
-#define RESOURCE_HETERO_SYNAPTIC_PLASTICITY_STDP_TRACE_BASED_HEADER_
+#ifndef _RESOURCE_HETERO_SYNAPTIC_PLASTICITY_STDP_TRACE_BASED_HPP
+#define _RESOURCE_HETERO_SYNAPTIC_PLASTICITY_STDP_TRACE_BASED_HPP
 
 // List of forward declarations needed to break circular dependencies
 //  class BranchedMorphology;
 struct BranchTargeting;
+
 #include "../../../GlobalFunctions.hpp"
 #include "../BranchedMorphology.hpp"
 #include "../BranchedStructs/AlphaBranch.hpp"

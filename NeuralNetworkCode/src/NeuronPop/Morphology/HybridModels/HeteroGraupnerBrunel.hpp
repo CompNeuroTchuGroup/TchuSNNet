@@ -1,12 +1,13 @@
 //
 // Created by Antoni Bertolin on 15.09.23
 //
-#ifndef RESOURCE_HETERO_GRAUPNER_BRUNEL_CALCIUM_DIFF_BASED_HEADER_
-#define RESOURCE_HETERO_GRAUPNER_BRUNEL_CALCIUM_DIFF_BASED_HEADER_
+#ifndef _RESOURCE_HETERO_GRAUPNER_BRUNEL_CALCIUM_DIFF_BASED_HPP
+#define _RESOURCE_HETERO_GRAUPNER_BRUNEL_CALCIUM_DIFF_BASED_HPP
 
 // List of forward declarations needed to break circular dependencies
 //  class BranchedMorphology;
 struct BranchTargeting;
+
 #include "../../../GlobalFunctions.hpp"
 #include "../BranchedMorphology.hpp"
 #include "../BranchedStructs/AlphaBranch.hpp"
@@ -18,7 +19,6 @@ class HeteroGraupnerBrunel : public BranchedMorphology {
   // (Ks*expdt+Kbasal)/(Ns*expdt+Nbasal) with bumps on Ks and Ns It is mathematically provable that this model is equivlaent to the original in a
   // single branch.
 protected:
-  // Synapse variables
   // Synapse variables
   double alphaBasal{1.0};            // LP and SP
   double alphaStimulusTau{1.0};      // LP and SP store the tau

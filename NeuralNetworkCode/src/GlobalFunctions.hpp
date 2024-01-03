@@ -51,7 +51,7 @@ using AlphaSpinePtr = AlphaSynapseSpine *;
 struct CoopSynapseSpine;
 using CoopSpinePtr = std::unique_ptr<CoopSynapseSpine>;
 struct MACRbPSynapseSpine;
-using CaRsSpinePtr = MACRbPSynapseSpine *;
+using MACRbpSpinePtr = MACRbPSynapseSpine *;
 struct Branch;
 using BranchPtr = Branch *;
 struct AlphaBranch;

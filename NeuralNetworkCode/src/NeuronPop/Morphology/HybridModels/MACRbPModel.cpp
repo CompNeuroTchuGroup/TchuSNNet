@@ -331,7 +331,7 @@ void MACRbPModel::RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) {
   // CaResSynapseSpine& synapseSpine = *caResSpines.at(spikedSpineId);
   // CaDiffusionBranch&  branch       = caDiffBranches.at(synapseSpine.branchId);
   // int  branchSpinePosition{synapseSpine.branchPositionId};
-  static_cast<CaRsSpinePtr>(spinePtr)->preTransientIncrease++;
+  static_cast<MACRbpSpinePtr>(spinePtr)->preTransientIncrease++;
   // branch.waitingMatrix.at(TStepInput).at(branchSpinePosition)+=prespikeCalcium;
   this->totalPreSpikes++;
 }
@@ -346,7 +346,7 @@ BaseSpinePtr MACRbPModel::AllocateNewSynapse(BranchTargeting &branchTarget) {
   int branch{AllocateBranch(branchTarget)};
   int position{PopSynapseSlotFromBranch(branchTarget)};
   // caDiffBranches.at(branch).CaDiffSpines.push_back(CaResSynapseSpine(kinasesTotal, calcineurinTotal, constants.initialWeight));
-  CaRsSpinePtr newSpine = &caDiffBranches.at(branch).CaResSpines.at(position);
+  MACRbpSpinePtr newSpine = &caDiffBranches.at(branch).CaResSpines.at(position);
 
   // this->weightsSum += newSynapse->GetWeight();
   newSpine->idInMorpho = (this->baseSpineData.size()); // this->spineIdGenerator++
