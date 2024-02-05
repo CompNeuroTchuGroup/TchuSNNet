@@ -4,6 +4,7 @@
 #ifndef _MASS_ACTION_CALCIUM_AND_RESOURCE_BASED_SYNAPSE_SPINE_CLASS_HPP
 #define _MASS_ACTION_CALCIUM_AND_RESOURCE_BASED_SYNAPSE_SPINE_CLASS_HPP
 
+#include "../../../GlobalFunctions.hpp"
 #include "BranchedSynapseSpine.hpp"
 #include <string>
 #include <vector>
@@ -40,6 +41,9 @@ public:
   ~MACRbPSynapseSpine() override = default;
   // End of step
   void PreDiffusion(); // This function MUST run right before diffusion
+#ifndef NDEBUG
+  void CheckNegativeValues(const Constants &constants);
+#endif
   // Profile methods
   std::vector<double> GetIndividualSynapticProfile() const override;
   std::string         GetIndividualSynapticProfileHeaderInfo() const override;

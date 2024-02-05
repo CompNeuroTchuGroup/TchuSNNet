@@ -1,4 +1,5 @@
 #include "./MACRbpSynapseSpine.hpp"
+#include "MACRbPSynapseSpine.hpp"
 
 MACRbPSynapseSpine::MACRbPSynapseSpine() : connected{false} {
 }
@@ -8,6 +9,7 @@ void MACRbPSynapseSpine::PreDiffusion() {
   // spine, if we are going to calculate it to the timestep anyway
   //  kinasesInactive=kinasesTotal-(kinasesCaM+kinasesPhospho);
   //  phosphatasesInactive=calcineurinTotal-phosphatasesInactive;
+#ifndef NDEBUG
   if (calciumFree < 0 && resourcesAvailable < 0) {
     throw "Negative calcium and resources happened";
   } else if (calciumFree < 0) {
@@ -15,10 +17,20 @@ void MACRbPSynapseSpine::PreDiffusion() {
   } else if (resourcesAvailable < 0) {
     throw "Negative resources happened";
   }
+#endif
   calciumOldStep   = calciumFree;
   resourcesOldStep = resourcesAvailable;
 }
-
+#ifndef NDEBUG
+void MACRbPSynapseSpine::CheckNegativeValues(const Constants &c) {
+  if (calmodulinActive < 0 || calmodulinNeurogranin < 0 || kinasesCaM < 0 || kinasesPhospho < 0 || calcineurinActive < 0 ||
+      calmodulinNeurogranin > c.neurograninTotal || kinasesCaM + kinasesPhospho > c.kinasesTotal ||
+      calmodulinActive + calmodulinNeurogranin + kinasesCaM + kinasesPhospho + calcineurinActive > c.calmodulinTotal ||
+      calcineurinActive > c.calcineurinTotal) {
+    throw "Negative value exception";
+  }
+}
+#endif
 std::vector<double> MACRbPSynapseSpine::GetIndividualSynapticProfile() const {
   std::vector<double> dataArray(5);
   dataArray.at(0) = this->branchId;

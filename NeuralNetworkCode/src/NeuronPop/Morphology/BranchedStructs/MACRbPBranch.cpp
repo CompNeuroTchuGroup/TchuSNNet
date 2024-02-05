@@ -71,7 +71,8 @@ void MACRbPBranch::Advect() {
       spine.calciumFree += spine.preTransient + spine.postTransient;
       // Until here, now first reactions
       inactiveCalmodulin = CONST.calmodulinTotal - spine.calmodulinActive - spine.calmodulinNeurogranin;
-      // 2nd, neurogranin constants.reaction (might swap for third)
+      // From here
+      //  2nd, neurogranin constants.reaction (might swap for third)
       ngDot = CONST.reaction1Ctt * (CONST.neurograninTotal - spine.calmodulinNeurogranin) * (inactiveCalmodulin)-CONST.reaction2Ctt *
               spine.calmodulinNeurogranin;
       spine.calmodulinNeurogranin += ngDot;
@@ -80,8 +81,9 @@ void MACRbPBranch::Advect() {
       camDot = CONST.reaction3Ctt * std::pow(spine.calciumFree, 2) * inactiveCalmodulin - CONST.reaction4Ctt * spine.calmodulinActive;
       spine.calmodulinActive += camDot;
       spine.calciumFree -= 2 * camDot;
-      // ORDERING
-      //  4th calcineurin binding
+      // To here is the equilibrium
+      //  ORDERING
+      //   4th calcineurin binding
       nDot = CONST.reaction5Ctt * (CONST.calcineurinTotal - spine.calcineurinActive) * spine.calmodulinActive -
              CONST.reaction6Ctt * spine.calcineurinActive;
       spine.calcineurinActive += nDot;
