@@ -48,7 +48,7 @@ void MACRbPBranch::PostConnectSetUp(std::vector<BranchedSpinePtr> spineData) {
 void MACRbPBranch::Advect() {
   // A possible ugly optimization is to do the first two iteration containers (if connected), the diffusion of the first container, then iterate
   // from index 2 onwards and do the diffusion of container index-1. When the end is reached, you do the diffusion of last container.
-  const Constants ctt{this->constants};
+  const Constants ctt{this->constants}; //
   size_t          lastIndex{CaResSpines.size() - 1};
   // PreSpikeCalciumInflux(std::move(step));
   // I apologize in advance, as this function requires being run with spatial and temporal locality for max speed.
@@ -56,60 +56,63 @@ void MACRbPBranch::Advect() {
   // of a function
   // All constants.reactions happen in a single loop because diffusion is separate
   std::for_each(PAR, CaResSpines.begin(), CaResSpines.end(), [ctt](MACRbPSynapseSpine &spine) {
-    double          inactiveCalmodulin{}, kDot{}, nDot{}, kPDot{}, wDot{}, camDot{}, ngDot{};
-    const Constants CONST{ctt};
+    double inactiveCalmodulin{}, kDot{}, nDot{}, kPDot{}, wDot{}, camDot{}, ngDot{};
+    // const Constants ctt{ctt};
     if (spine.connected) {
       // Here we influx calcium with the nonlinear traces
-      spine.preTransientIncrease -= spine.preTransientIncrease * CONST.preCalciumDecayRate; // This is B in Graupner and Brunel appendix
+      spine.preTransientIncrease -= spine.preTransientIncrease * ctt.preCalciumDecayRate; // This is B in Graupner and Brunel appendix
       spine.preTransient +=
-          CONST.preCalciumFluxFactor * (spine.preTransientIncrease - spine.preTransient * CONST.preCalciumRiseRate); // This is A in appendix
+          ctt.preCalciumFluxFactor * (spine.preTransientIncrease - spine.preTransient * ctt.preCalciumRiseRate); // This is A in appendix
 
-      spine.postTransientIncrease -= spine.postTransientIncrease * CONST.postCalciumDecayRate; // This is F in Graupner and Brunel appendix
+      spine.postTransientIncrease -= spine.postTransientIncrease * ctt.postCalciumDecayRate; // This is F in Graupner and Brunel appendix
       spine.postTransient +=
-          CONST.postCalciumFluxFactor * (spine.postTransientIncrease - spine.postTransient * CONST.postCalciumRiseRate); // This is E in appendix
+          ctt.postCalciumFluxFactor * (spine.postTransientIncrease - spine.postTransient * ctt.postCalciumRiseRate); // This is E in appendix
       // Here we add the traces plus the basal flux to the calcium
       spine.calciumFree += spine.preTransient + spine.postTransient;
       // Until here, now first reactions
-      inactiveCalmodulin = CONST.calmodulinTotal - spine.calmodulinActive - spine.calmodulinNeurogranin;
+      inactiveCalmodulin = ctt.calmodulinTotal - spine.calmodulinActive - spine.calmodulinNeurogranin;
       // From here
       //  2nd, neurogranin constants.reaction (might swap for third)
-      ngDot = CONST.reaction1Ctt * (CONST.neurograninTotal - spine.calmodulinNeurogranin) * (inactiveCalmodulin)-CONST.reaction2Ctt *
+      ngDot = ctt.reaction1Ctt * (ctt.neurograninTotal - spine.calmodulinNeurogranin) * (inactiveCalmodulin)-ctt.reaction2Ctt *
               spine.calmodulinNeurogranin;
       spine.calmodulinNeurogranin += ngDot;
       inactiveCalmodulin -= ngDot;
       // 3rd Ca-CaM constants.reaction (might swap again) with NG consumption
-      camDot = CONST.reaction3Ctt * std::pow(spine.calciumFree, 2) * inactiveCalmodulin - CONST.reaction4Ctt * spine.calmodulinActive;
+      camDot = ctt.reaction3Ctt * std::pow(spine.calciumFree, 2) * inactiveCalmodulin - ctt.reaction4Ctt * spine.calmodulinActive;
       spine.calmodulinActive += camDot;
       spine.calciumFree -= 2 * camDot;
       // To here is the equilibrium
       //  ORDERING
       //   4th calcineurin binding
-      nDot = CONST.reaction5Ctt * (CONST.calcineurinTotal - spine.calcineurinActive) * spine.calmodulinActive -
-             CONST.reaction6Ctt * spine.calcineurinActive;
+      nDot =
+          ctt.reaction5Ctt * (ctt.calcineurinTotal - spine.calcineurinActive) * spine.calmodulinActive - ctt.reaction6Ctt * spine.calcineurinActive;
       spine.calcineurinActive += nDot;
       spine.calmodulinActive -= nDot;
       // 5th kinase autophosphorylation
-      kPDot = CONST.reaction7Ctt * spine.kinasesCaM * (spine.kinasesCaM + spine.kinasesPhospho) -
-              CONST.reaction8Ctt * spine.calcineurinActive * spine.kinasesPhospho;
+      kPDot = ctt.reaction7Ctt * spine.kinasesCaM * (spine.kinasesCaM + spine.kinasesPhospho) -
+              ctt.reaction8Ctt * spine.calcineurinActive * spine.kinasesPhospho;
       spine.kinasesPhospho += kPDot;
       spine.kinasesCaM -= kPDot;
       // 6th kinase activation via CaM -kP
-      kDot = CONST.reaction9Ctt * (CONST.kinasesTotal - spine.kinasesCaM - spine.kinasesPhospho) * spine.calmodulinActive -
-             CONST.reaction10Ctt * spine.kinasesCaM;
+      kDot = ctt.reaction9Ctt * (ctt.kinasesTotal - spine.kinasesCaM - spine.kinasesPhospho) * spine.calmodulinActive -
+             ctt.reaction10Ctt * spine.kinasesCaM;
       spine.kinasesCaM += kDot;
       spine.calmodulinActive -= kDot;
       // ORDERING
       //  7th active CaM consumption by Ndot and Kdot (not kPdot)
       // spine.calmodulinActive -= nDot + kDot;//We are not doing this because this could mean negative active calmodulins
       // 8th Change in synapse spine size/weight
-      wDot = CONST.reaction11Ctt * spine.resourcesAvailable * (spine.kinasesCaM + spine.kinasesPhospho) -
-             CONST.reaction12Ctt * spine.weight * spine.calcineurinActive;
+      wDot = ctt.reaction11Ctt * spine.resourcesAvailable * (spine.kinasesCaM + spine.kinasesPhospho) -
+             ctt.reaction12Ctt * spine.weight * spine.calcineurinActive;
       spine.weight += wDot;
       // 9th Consumption of resources by weight change
       spine.resourcesAvailable -=
-          (wDot) / CONST.resourceConversionFct; // This should be the case for converting the dmV/spike to concentration of resources
+          (wDot) / ctt.resourceConversionFct; // This should be the case for converting the dmV/spike to concentration of resources
       // For the next timestep
       spine.PreDiffusion();
+#ifndef NDEBUG
+      spine.CheckNegativeValues(ctt);
+#endif
     }
   });
   // //#pragma omp parallel for
