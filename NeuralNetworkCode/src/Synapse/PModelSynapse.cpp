@@ -68,7 +68,7 @@ void PModelSynapse::SaveParameters(std::ofstream &wParameterStream, std::string 
 }
 
 void PModelSynapse::LoadParameters(const std::vector<FileEntry> &hybridParameters) {
-  branchTarget.setOfPositions.clear();
+  // branchTarget.setOfPositions.clear();//Unnecessary, push_back initializes the vector.
   for (auto &[parameterName, parameterValues] : hybridParameters) {
     if (parameterName.find("targetBranch") != std::string::npos) {
       if (parameterValues.at(0).find("random") != std::string::npos) {
