@@ -302,26 +302,32 @@ void BranchedMorphology::OrderedSynapseAllocation(BranchPtr branch) {
 }
 
 int BranchedMorphology::PopSynapseSlotFromBranch(BranchTargeting &branchTargeting) {
+  // No remaining slots
   if (branches.at(branchTargeting.targetBranch)->openSpineSlots.empty()) {
     throw "No allocatable exception";
   }
   int position{};
   // Position
+  // If there are no set positions from the params file
   if (branchTargeting.setOfPositions.empty()) {
+    // Get the position from the openSlots deque
     position = (branchTargeting.firstSlotTrueLastSlotFalse) ? branches.at(branchTargeting.targetBranch)->openSpineSlots.front()
                                                             : branches.at(branchTargeting.targetBranch)->openSpineSlots.back();
+    // Delete it
     if (branchTargeting.firstSlotTrueLastSlotFalse) {
       branches.at(branchTargeting.targetBranch)->openSpineSlots.pop_front();
     } else {
       branches.at(branchTargeting.targetBranch)->openSpineSlots.pop_back();
     }
   } else {
+    // If set positions in params file find coincidence in open slots
     std::deque<int>::iterator foundPosition{std::find(branches.at(branchTargeting.targetBranch)->openSpineSlots.begin(),
                                                       branches.at(branchTargeting.targetBranch)->openSpineSlots.end(),
                                                       branchTargeting.setOfPositions.back())};
     if (foundPosition == branches.at(branchTargeting.targetBranch)->openSpineSlots.end()) {
       throw "There was no free slot coinciding with set position";
     } else {
+      // If found, erase and allocate
       branches.at(branchTargeting.targetBranch)->openSpineSlots.erase(foundPosition);
       position = branchTargeting.setOfPositions.back();
       branchTargeting.setOfPositions.pop_back();
