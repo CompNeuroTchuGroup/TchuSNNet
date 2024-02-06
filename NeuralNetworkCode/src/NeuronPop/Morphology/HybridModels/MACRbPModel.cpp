@@ -68,10 +68,10 @@ void MACRbPModel::LoadParameters(const std::vector<FileEntry> &morphologyParamet
       this->constants.resourceConversionFct = (std::stod(parameterValues.at(0)));
     }
   }
-  this->constants.calciumInfluxBasal = calciumBasal * constants.calciumExtrusionCtt;
-  this->constants.initialResources   = this->constants.initialWeight / constants.resourceConversionFct / availResourcesRatio;
-  this->constants.reaction11Ctt *= constants.resourceConversionFct;
-  this->constants.preCalciumRiseRate   = 1 / preCalciumRiseTau;
+  this->constants.calciumInfluxBasal = calciumBasal * constants.calciumExtrusionCtt;                                          // REVIEW
+  this->constants.initialResources   = this->constants.initialWeight / constants.resourceConversionFct / availResourcesRatio; // REVIEW
+  this->constants.reaction11Ctt *= constants.resourceConversionFct;                                                           // REVIEW
+  this->constants.preCalciumRiseRate   = 1 / preCalciumRiseTau;                                                               // REVIEW
   this->constants.preCalciumDecayRate  = 1 / preCalciumDecayTau;
   this->constants.postCalciumRiseRate  = 1 / postCalciumRiseTau;
   this->constants.postCalciumDecayRate = 1 / postCalciumDecayTau;
@@ -80,12 +80,12 @@ void MACRbPModel::LoadParameters(const std::vector<FileEntry> &morphologyParamet
       prespikeCalcium * std::pow((((1 / preCalciumDecayTau) - (1 / preCalciumRiseTau)) *
                                   (std::pow(preCalciumRiseTau / preCalciumDecayTau, 1 / (1 - (preCalciumRiseTau / preCalciumDecayTau))) -
                                    std::pow(preCalciumRiseTau / preCalciumDecayTau, 1 / ((preCalciumDecayTau / preCalciumRiseTau) - 1)))),
-                                 -1);
+                                 -1); // REVIEW
   this->constants.postCalciumFluxFactor =
       postspikeCalcium * std::pow((((1 / postCalciumDecayTau) - (1 / postCalciumRiseTau)) *
                                    (std::pow(postCalciumRiseTau / postCalciumDecayTau, 1 / (1 - (postCalciumRiseTau / postCalciumDecayTau))) -
                                     std::pow(postCalciumRiseTau / postCalciumDecayTau, 1 / ((postCalciumDecayTau / postCalciumRiseTau) - 1)))),
-                                  -1);
+                                  -1); // REVIEW
 }
 
 void MACRbPModel::CheckParameters(const std::vector<FileEntry> &parameters) {
