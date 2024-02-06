@@ -110,7 +110,7 @@ synapses_1_0_pmodel_kEleven 0.005555
 synapses_1_0_pmodel_kTwelve 0.021875
 synapses_1_0_pmodel_resourceDiffusion 2.25
 synapses_1_0_pmodel_calciumDiffusion 200
-synapses_1_0_pmodel_calciumExtrusion 100
+synapses_1_0_pmodel_calciumExtrusion 1150
 synapses_1_0_pmodel_initialWeight 0.02
 synapses_1_0_pmodel_availResourcesRatio 0.6
 synapses_1_0_pmodel_prespikeCalcium 0.7

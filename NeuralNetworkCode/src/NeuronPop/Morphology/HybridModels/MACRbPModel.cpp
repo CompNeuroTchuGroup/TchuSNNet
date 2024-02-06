@@ -80,16 +80,12 @@ void MACRbPModel::LoadParameters(const std::vector<FileEntry> &morphologyParamet
   this->constants.postCalciumRiseRate  = 1 / postCalciumRiseTau;
   this->constants.postCalciumDecayRate = 1 / postCalciumDecayTau;
 
-  this->constants.preCalciumFluxFactor =
-      prespikeCalcium * std::pow((((1 / preCalciumDecayTau) - (1 / preCalciumRiseTau)) *
-                                  (std::pow(preCalciumRiseTau / preCalciumDecayTau, 1 / (1 - (preCalciumRiseTau / preCalciumDecayTau))) -
-                                   std::pow(preCalciumRiseTau / preCalciumDecayTau, 1 / ((preCalciumDecayTau / preCalciumRiseTau) - 1)))),
-                                 -1); // REVIEW
-  this->constants.postCalciumFluxFactor =
-      postspikeCalcium * std::pow((((1 / postCalciumDecayTau) - (1 / postCalciumRiseTau)) *
-                                   (std::pow(postCalciumRiseTau / postCalciumDecayTau, 1 / (1 - (postCalciumRiseTau / postCalciumDecayTau))) -
-                                    std::pow(postCalciumRiseTau / postCalciumDecayTau, 1 / ((postCalciumDecayTau / postCalciumRiseTau) - 1)))),
-                                  -1); // REVIEW
+  auto amplitudeNormalization = [](double amplitude, double calcium_tau, double decay_tau) { // The taus need to be in the proper time unit
+    return amplitude / (calcium_tau * std::exp((-calcium_tau * std::log(calcium_tau / decay_tau)) / (calcium_tau - decay_tau)));
+  }; // Checked in python, this is valid
+
+  this->constants.preCalciumFluxFactor  = amplitudeNormalization(prespikeCalcium, 1 / this->constants.calciumExtrusionCtt, preCalciumDecayTau);
+  this->constants.postCalciumFluxFactor = amplitudeNormalization(postspikeCalcium, 1 / this->constants.calciumExtrusionCtt, postCalciumDecayTau);
 }
 
 void MACRbPModel::CheckParameters(const std::vector<FileEntry> &parameters) {
@@ -147,7 +143,7 @@ void MACRbPModel::CheckParameters(const std::vector<FileEntry> &parameters) {
       throw "calciumDiffusion was not consistent in plasticity model parameters.";
     } else if (parameterName.find("calciumExtrusion") != std::string::npos &&
                this->constants.calciumExtrusionCtt != std::stod(parameterValues.at(0)) * infoGlobal->dtTimestep) {
-      throw "calciumBuffering was not consistent in plasticity model parameters.";
+      throw "calciumExtrusion was not consistent in plasticity model parameters.";
     } else if (parameterName.find("initialWeight") != std::string::npos && this->constants.initialWeight != std::stod(parameterValues.at(0))) {
       throw "initialWeight was not consistent in plasticity model parameters.";
     } else if (parameterName.find("availResourcesRatio") != std::string::npos && this->availResourcesRatio != std::stod(parameterValues.at(0))) {
