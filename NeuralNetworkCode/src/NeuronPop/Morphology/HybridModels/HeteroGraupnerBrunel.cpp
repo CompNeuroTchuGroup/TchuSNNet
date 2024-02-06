@@ -159,15 +159,15 @@ void HeteroGraupnerBrunel::SaveParameters(std::ofstream &wParameterFile, std::st
 int HeteroGraupnerBrunel::CreateBranch(std::vector<int> anteriorBranches) {
   int branchId{this->GenerateBranchId()};
   if (anteriorBranches.empty()) {
-    this->alphaBranches.emplace_back(AlphaBranch(anteriorBranches, this->synapticGap, this->branchLength, branchId, STDPExpDecay, coopExpDecay,
-                                                 alphaStimulusExpDecay, baseAlphaStimBump, alphaBasal, betaResourcePool,
-                                                 omegaOffset)); // This vector should be sorted by ID by default (tested).
+    this->alphaBranches.push_back(AlphaBranch(anteriorBranches, this->synapticGap, this->branchLength, branchId, STDPExpDecay, coopExpDecay,
+                                              alphaStimulusExpDecay, baseAlphaStimBump, alphaBasal, betaResourcePool,
+                                              omegaOffset)); // This vector should be sorted by ID by default (tested).
     this->branches.push_back(static_cast<Branch *>(&this->alphaBranches.back()));
   } else {
     int branchId{this->GenerateBranchId()};
-    this->alphaBranches.emplace_back(AlphaBranch(this->synapticGap, this->branchLength, branchId, STDPExpDecay, coopExpDecay, alphaStimulusExpDecay,
-                                                 baseAlphaStimBump, alphaBasal, betaResourcePool,
-                                                 omegaOffset)); // This vector should be sorted by ID by default (tested).
+    this->alphaBranches.push_back(AlphaBranch(this->synapticGap, this->branchLength, branchId, STDPExpDecay, coopExpDecay, alphaStimulusExpDecay,
+                                              baseAlphaStimBump, alphaBasal, betaResourcePool,
+                                              omegaOffset)); // This vector should be sorted by ID by default (tested).
     this->branches.push_back(static_cast<Branch *>(&this->alphaBranches.back()));
   }
   return branchId;

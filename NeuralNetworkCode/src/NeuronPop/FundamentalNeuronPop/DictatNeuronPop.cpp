@@ -94,7 +94,7 @@ void DictatNeuronPop::ReadInstructionsFromFile() {
       continue;
     } else if (line[0] == '>') {
       FileEntry entry{SplitStringToEntry(line)};
-      inputInstructions.at(std::stoi(entry.parameterValues.at(0))).emplace_back(Instruction(entry, infoGlobal->dtTimestep));
+      inputInstructions.at(std::stoi(entry.parameterValues.at(0))).push_back(Instruction(entry, infoGlobal->dtTimestep));
     } else if (line[0] == ' ' || line[0] == '\n') {
       continue;
     } else {

@@ -17,15 +17,14 @@ DatafileParser::DatafileParser(Recorder &recorder) { // revised
   }
   if (recorder.recordRasterPlot) {
     for (PopInt neuronPop : neuronPopRasterIds) {
-      rasterPlotMetadata.emplace_back(recNeuronPopData(recorder.noRasterPlotNeurons.at(neuronPop), recorder.infoGlobal->dtTimestep,
-                                                       static_cast<int>(recorder.infoGlobal->timeStep), neuronPop,
-                                                       recorder.infoGlobal->simulationTime));
+      rasterPlotMetadata.push_back(recNeuronPopData(recorder.noRasterPlotNeurons.at(neuronPop), recorder.infoGlobal->dtTimestep,
+                                                    static_cast<int>(recorder.infoGlobal->timeStep), neuronPop, recorder.infoGlobal->simulationTime));
     }
-    fileNamesToParse.emplace_back(recorder.GetRasterplotFilename());
+    fileNamesToParse.push_back(recorder.GetRasterplotFilename());
     fileTypes.push_back(RasterPlot);
   }
   for (std::string fileName : fileNamesToParse) {
-    filesToParse.emplace_back(std::ifstream(fileName, std::ifstream::in));
+    filesToParse.push_back(std::ifstream(fileName, std::ifstream::in));
   }
   // Here we have to access the recorder to obtain the filepaths/filenames and paths in general (and the metadata)
   // Then we have to convert the filepaths into the proper ifstreams
