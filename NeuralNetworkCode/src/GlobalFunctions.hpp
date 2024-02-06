@@ -127,32 +127,31 @@ struct BranchTargeting { // This is esentially a wrapper for HCS different targe
   std::vector<int> setOfPositions;
 };
 
-struct Constants {       // currently 19 + the prespike/postspike calcium and the prespike calcium influx delay, so 21
-  double caDiffusionFct; // Consider delta x squared already here
+struct Constants { // currently 19 + the prespike/postspike calcium and the prespike calcium influx delay, so 21
 
   double calciumExtrusionCtt; // Consider already exponentiated
+  double calciumInfluxBasal;
 
   double kinasesTotal;     // Upper limit of Kinases (determines, with active, unactive species)
   double calcineurinTotal; // Upper limit of phosphatases (determines, with active, unactive species)
   double calmodulinTotal;  // We just multiply this by the logistic function to get the active ones
   double neurograninTotal; // THIS IS STILL NOT DONE
 
-  double reaction1Ctt;  // From CaM and Ng to CaMNg
-  double reaction2Ctt;  // From CaMNg to CaM and Ng
-  double reaction3Ctt;  // From CaM and Ca to active CaM
-  double reaction4Ctt;  // From active CaM to CaM and Ca
-  double reaction5Ctt;  // From N inactive to N active, using CaM
-  double reaction6Ctt;  // From N active to N inactive, using CaM
-  double reaction7Ctt;  // From K bound to CaM to phosphorylated K
-  double reaction8Ctt;  // From phosphorylated K to K bound to CaM
-  double reaction9Ctt;  // From K inactive to K active, using CaM
-  double reaction10Ctt; // From K active to K inactive, using CaM
-  double reaction11Ctt; // From resources to weight
-  double reaction12Ctt; // From weight to resources
+  int32_t newtonIterations; // For the neurogranin equilibrium
 
+  double reaction1234Ctt; // For the neurogranin equilibrium
+  double reaction5Ctt;    // From N inactive to N active, using CaM
+  double reaction6Ctt;    // From N active to N inactive, using CaM
+  double reaction7Ctt;    // From K bound to CaM to phosphorylated K
+  double reaction8Ctt;    // From phosphorylated K to K bound to CaM
+  double reaction9Ctt;    // From K inactive to K active, using CaM
+  double reaction10Ctt;   // From K active to K inactive, using CaM
+  double reaction11Ctt;   // From resources to weight
+  double reaction12Ctt;   // From weight to resources
+
+  double caDiffusionFct;       // Consider delta x squared already here
   double resourceDiffusionFct; // Consider delta x squared already here
   double resourceConversionFct;
-  double calciumInfluxBasal;
   double initialResources, initialWeight;
 
   double preCalciumFluxFactor;
@@ -164,6 +163,11 @@ struct Constants {       // currently 19 + the prespike/postspike calcium and th
   double postCalciumDecayRate;
 
   double nonlinearFactorNMDA;
+
+  double reaction1Ctt; // From CaM and Ng to CaMNg
+  double reaction2Ctt; // From CaMNg to CaM and Ng
+  double reaction3Ctt; // From CaM and Ca to active CaM
+  double reaction4Ctt; // From active CaM to CaM and Ca
 };
 namespace threadsafe {
 static std::mutex _timeMutex;

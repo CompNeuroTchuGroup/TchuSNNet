@@ -66,8 +66,12 @@ void MACRbPModel::LoadParameters(const std::vector<FileEntry> &morphologyParamet
       this->calciumBasal = (std::stod(parameterValues.at(0)));
     } else if (parameterName.find("resourceConversionFct") != std::string::npos) {
       this->constants.resourceConversionFct = (std::stod(parameterValues.at(0)));
+    } else if (parameterName.find("newtonIterations") != std::string::npos) {
+      this->constants.newtonIterations = (std::stoi(parameterValues.at(0)));
     }
   }
+  this->constants.reaction1234Ctt =
+      this->constants.reaction1Ctt * this->constants.reaction4Ctt / (this->constants.reaction2Ctt * this->constants.reaction3Ctt);
   this->constants.calciumInfluxBasal = calciumBasal * constants.calciumExtrusionCtt;                                          // REVIEW
   this->constants.initialResources   = this->constants.initialWeight / constants.resourceConversionFct / availResourcesRatio; // REVIEW
   this->constants.reaction11Ctt *= constants.resourceConversionFct;                                                           // REVIEW
@@ -172,7 +176,10 @@ void MACRbPModel::CheckParameters(const std::vector<FileEntry> &parameters) {
       throw "#mV*uM^-1 Conversion factor from nM to mV";
 
     } else if (parameterName.find("calciumBasal") != std::string::npos && this->calciumBasal != (std::stod(parameterValues.at(0)))) {
-      throw "preCalciumDelay was not consistent in plasticity model parameters.";
+      throw "calciumBasal was not consistent in plasticity model parameters.";
+    } else if (parameterName.find("newtonIterations") != std::string::npos &&
+               this->constants.newtonIterations != (std::stod(parameterValues.at(0)))) {
+      throw "newtonIterations iterations was not consistent in plasticity model parameters.";
     }
   }
 }
@@ -194,6 +201,9 @@ void MACRbPModel::SaveParameters(std::ofstream &wParameterFile, std::string neur
   wParameterFile << "\t"
                  << "#Concentration of neurogranin in the synapse spine\n";
 
+  wParameterFile << neuronIdentificator << "newtonIterations\t\t" << this->constants.newtonIterations << " #_";
+  wParameterFile << "\t"
+                 << "#Newton iterations for the neurogranin equilibrium\n";
   wParameterFile << neuronIdentificator << "kOne\t\t" << (this->constants.reaction1Ctt / infoGlobal->dtTimestep) << " #uM^{-1} s^{-1}";
   wParameterFile << "\t"
                  << "#From CaM and Ng to CaMNg\n";
