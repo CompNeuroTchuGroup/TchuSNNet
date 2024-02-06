@@ -1,19 +1,20 @@
 #include "./MACRbpBranch.hpp"
 
-MACRbPBranch::MACRbPBranch(std::vector<int> anteriorBranches, double gap, double branchLength, int branchId, Constants constants)
+MACRbPBranch::MACRbPBranch(std::vector<int> anteriorBranches, double gap, double branchLength, int branchId, Constants constants,
+                           MACRbPSynapseSpine spine)
     : Branch(anteriorBranches, gap, branchLength, branchId), constants{constants} {
-  CaResSpines.resize(branchLength / gap, MACRbPSynapseSpine());
-  for (MACRbPSynapseSpine &spine : CaResSpines) {
-    spine.resourcesAvailable = constants.initialResources;
-    spine.weight             = constants.initialWeight;
-  }
+  CaResSpines.resize(branchLength / gap, spine);
+  // for (MACRbPSynapseSpine &spine : CaResSpines) {
+  //   spine.resourcesAvailable = constants.initialResources;
+  //   spine.weight             = constants.initialWeight;
+  // }
   // waitingMatrix.resize(prespikeDelaySteps, std::vector<double>(branchLength / gap, constants.calciumInfluxBasal));
 }
 
-MACRbPBranch::MACRbPBranch(double gap, double branchLength, int branchId, Constants constants)
+MACRbPBranch::MACRbPBranch(double gap, double branchLength, int branchId, Constants constants, MACRbPSynapseSpine spine)
     : Branch(gap, branchLength, branchId), constants{constants} {
 
-  CaResSpines.resize(branchLength / gap, MACRbPSynapseSpine());
+  CaResSpines.resize(branchLength / gap, spine);
   for (MACRbPSynapseSpine &spine : CaResSpines) {
     spine.resourcesAvailable = constants.initialResources;
     spine.weight             = constants.initialWeight;

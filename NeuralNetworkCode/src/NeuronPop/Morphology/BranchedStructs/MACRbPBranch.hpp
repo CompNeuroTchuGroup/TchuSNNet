@@ -27,8 +27,8 @@ struct MACRbPBranch : public Branch {
 
   // Methods
   // Setup
-  MACRbPBranch(std::vector<int> anteriorBranches, double gap, double branchLength, int branchId, Constants constants);
-  MACRbPBranch(double gap, double branchLength, int branchId, Constants constants);
+  MACRbPBranch(std::vector<int> anteriorBranches, double gap, double branchLength, int branchId, Constants constants, MACRbPSynapseSpine spine);
+  MACRbPBranch(double gap, double branchLength, int branchId, Constants constants, MACRbPSynapseSpine spine);
   void PostConnectSetUp(std::vector<BranchedSpinePtr> spineData) override;
   void PostSpikeCalciumFlux();
   // Input methods
