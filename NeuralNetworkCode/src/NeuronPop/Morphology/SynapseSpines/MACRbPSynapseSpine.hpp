@@ -38,7 +38,7 @@ public:
   double resourcesAvailable{};
 
   MACRbPSynapseSpine();
-  MACRbPSynapseSpine(double resources, double calcium);
+  MACRbPSynapseSpine(double weight, double resources, double calcium);
   ~MACRbPSynapseSpine() override = default;
   // End of step
   void PreDiffusion(); // This function MUST run right before diffusion

@@ -4,7 +4,8 @@
 MACRbPSynapseSpine::MACRbPSynapseSpine() : connected{false} {
 }
 
-MACRbPSynapseSpine::MACRbPSynapseSpine(double calcium, double resources) : connected{false}, calciumFree{calcium}, resourcesAvailable{resources} {
+MACRbPSynapseSpine::MACRbPSynapseSpine(double weight, double resources, double calcium)
+    : BranchedSynapseSpine(weight), connected{false}, calciumFree{calcium}, resourcesAvailable{resources} {
 }
 
 void MACRbPSynapseSpine::PreDiffusion() {

@@ -15,6 +15,7 @@ struct BranchedSynapseSpine : public BaseSynapseSpine {
   // int uniqueTreeId{}; Useful only in the indexing of the triangular matrix if implemented
 
   BranchedSynapseSpine()           = default;
+  BranchedSynapseSpine(double weight);
   ~BranchedSynapseSpine() override = default;
   // BranchedSynapseSpine(int distanceFromNode, double lastSpike, double weight, int branchId, int branchPositionId);
 
