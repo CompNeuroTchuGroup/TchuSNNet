@@ -33,20 +33,22 @@ protected:
   double availResourcesRatio{};
 
   double calciumBasal{};
+
+  MACRbPSynapseSpine steady_state_spine;
   // TStepInt preSpikeDelaySteps{}; // either we calculate the modulus here
   // TStepInt TStepModded{};           // Here we store the modulus (only calculated once). We will calculate it every timestep just for safety.
   // TStepInt TStepInput{};//Here is where the input happens
 public:
   // main Methods
   MACRbPModel() = default;
-  explicit MACRbPModel(GlobalSimInfo *infoGlobal);
+  explicit MACRbPModel(GlobalSimInfo *infoGlobal, MACRbPSynapseSpine &spine);
   ~MACRbPModel() override = default;
 
   void LoadParameters(const std::vector<FileEntry> &morphologyParameters) override;
   void CheckParameters(const std::vector<FileEntry> &parameters) override;
   void SaveParameters(std::ofstream &wParameterStream, std::string neuronIdentificator) const override;
 
-  MACRbPSynapseSpine ComputeSteadyState();
+  MACRbPSynapseSpine ComputeSteadyState(MACRbPSynapseSpine &spine);
   int                CreateBranch(std::vector<int> anteriorBranches) override;
 
   std::string GetType() const override { return IDstringTraceResourceHSTDP; };

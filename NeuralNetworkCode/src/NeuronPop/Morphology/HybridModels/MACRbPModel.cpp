@@ -1,7 +1,11 @@
 #include "./MACRbPModel.hpp"
 #include "MACRbPModel.hpp"
 
-MACRbPModel::MACRbPModel(GlobalSimInfo *infoGlobal) : BranchedMorphology(infoGlobal) {
+MACRbPModel::MACRbPModel(GlobalSimInfo *infoGlobal, MACRbPSynapseSpine &spine) : BranchedMorphology(infoGlobal) {
+  if (spine.calmodulinActive == 0) {
+    ComputeSteadyState(spine);
+  }
+  steady_state_spine = spine;
 }
 
 void MACRbPModel::LoadParameters(const std::vector<FileEntry> &morphologyParameters) {
@@ -290,9 +294,12 @@ void MACRbPModel::SaveParameters(std::ofstream &wParameterFile, std::string neur
   wParameterFile << "\t"
                  << "#Conversion from resource molar units (uM) to dmV/sec\n";
 }
-MACRbPSynapseSpine MACRbPModel::ComputeSteadyState() {
-  // Create
-  MACRbPSynapseSpine spine(constants.initialWeight, constants.initialResources, calciumBasal);
+// Remove from here
+MACRbPSynapseSpine MACRbPModel::ComputeSteadyState(MACRbPSynapseSpine &spine) {
+  // Set values
+  spine.calciumFree        = calciumBasal;
+  spine.resourcesAvailable = constants.initialResources;
+  spine.weight             = constants.initialWeight;
   // Time stamp
   auto steady_state_begin = std::chrono::high_resolution_clock::now();
 
@@ -348,23 +355,16 @@ MACRbPSynapseSpine MACRbPModel::ComputeSteadyState() {
 }
 
 int MACRbPModel::CreateBranch(std::vector<int> anteriorBranches) {
-  // Because of class interfaces, I have to do the following
-  MACRbPSynapseSpine spine_template;
-  if (caDiffBranches.empty()) {
-    spine_template = ComputeSteadyState();
-  } else {
-    spine_template = caDiffBranches.back().CaResSpines.back();
-  }
   // After the cheap fix, we do what we used to do
   int branchId{this->GenerateBranchId()};
   if (!anteriorBranches.empty()) {
     this->caDiffBranches.push_back(MACRbPBranch(anteriorBranches, this->synapticGap, this->branchLength, branchId, constants,
-                                                spine_template)); // This vector should be sorted by ID by default (tested).
+                                                steady_state_spine)); // This vector should be sorted by ID by default (tested).
     this->branches.push_back(static_cast<Branch *>(&this->caDiffBranches.back()));
   } else {
     int branchId{this->GenerateBranchId()};
     this->caDiffBranches.push_back(MACRbPBranch(this->synapticGap, this->branchLength, branchId, constants,
-                                                spine_template)); // This vector should be sorted by ID by default (tested).
+                                                steady_state_spine)); // This vector should be sorted by ID by default (tested).
     this->branches.push_back(static_cast<Branch *>(&this->caDiffBranches.back()));
   }
   return branchId;

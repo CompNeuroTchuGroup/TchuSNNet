@@ -25,7 +25,7 @@ struct BaseSynapseSpine {
 
   // Constructors
   BaseSynapseSpine() = default;
-  BaseSynapseSpine(double weight);
+  // BaseSynapseSpine(double weight);
   virtual ~BaseSynapseSpine() = default;
   // BaseSynapseSpine(double weight, double lastSpike);// Not currently in use
   // Methods
