@@ -310,6 +310,11 @@ int BranchedMorphology::PopSynapseSlotFromBranch(BranchTargeting &branchTargetin
   if (branchTargeting.setOfPositions.empty()) {
     position = (branchTargeting.firstSlotTrueLastSlotFalse) ? branches.at(branchTargeting.targetBranch)->openSpineSlots.front()
                                                             : branches.at(branchTargeting.targetBranch)->openSpineSlots.back();
+    if (branchTargeting.firstSlotTrueLastSlotFalse) {
+      branches.at(branchTargeting.targetBranch)->openSpineSlots.pop_front();
+    } else {
+      branches.at(branchTargeting.targetBranch)->openSpineSlots.pop_back();
+    }
   } else {
     std::deque<int>::iterator foundPosition{std::find(branches.at(branchTargeting.targetBranch)->openSpineSlots.begin(),
                                                       branches.at(branchTargeting.targetBranch)->openSpineSlots.end(),
@@ -322,11 +327,7 @@ int BranchedMorphology::PopSynapseSlotFromBranch(BranchTargeting &branchTargetin
       branchTargeting.setOfPositions.pop_back();
     }
   }
-  if (branchTargeting.firstSlotTrueLastSlotFalse) {
-    branches.at(branchTargeting.targetBranch)->openSpineSlots.pop_front();
-  } else {
-    branches.at(branchTargeting.targetBranch)->openSpineSlots.pop_back();
-  }
+
   return position;
 }
 
