@@ -46,7 +46,8 @@ public:
   void CheckParameters(const std::vector<FileEntry> &parameters) override;
   void SaveParameters(std::ofstream &wParameterStream, std::string neuronIdentificator) const override;
 
-  int CreateBranch(std::vector<int> anteriorBranches) override;
+  MACRbPSynapseSpine ComputeSteadyState();
+  int                CreateBranch(std::vector<int> anteriorBranches) override;
 
   std::string GetType() const override { return IDstringTraceResourceHSTDP; };
 

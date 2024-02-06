@@ -1,4 +1,5 @@
 #include "./MACRbPModel.hpp"
+#include "MACRbPModel.hpp"
 
 MACRbPModel::MACRbPModel(GlobalSimInfo *infoGlobal) : BranchedMorphology(infoGlobal) {
 }
@@ -289,17 +290,81 @@ void MACRbPModel::SaveParameters(std::ofstream &wParameterFile, std::string neur
   wParameterFile << "\t"
                  << "#Conversion from resource molar units (uM) to dmV/sec\n";
 }
+MACRbPSynapseSpine MACRbPModel::ComputeSteadyState() {
+  // Create
+  MACRbPSynapseSpine spine(constants.initialWeight, constants.initialResources, calciumBasal);
+  // Time stamp
+  auto steady_state_begin = std::chrono::high_resolution_clock::now();
+
+  // Run loop
+  while (std::abs(spine.resourcesAvailable - spine.resourcesOldStep) > std::numeric_limits<double>::epsilon()) {
+    // Calcium diffusion
+    spine.calciumFree += constants.calciumInfluxBasal - spine.calciumFree * constants.calciumExtrusionCtt;
+    spine.resourcesOldStep = spine.resourcesAvailable;
+
+    double freeNg{constants.neurograninTotal - spine.calmodulinNeurogranin}, epsilon{};
+    for (int i = 0; i < constants.newtonIterations; i++) {
+      epsilon = (constants.reaction1234Ctt * freeNg * spine.calmodulinActive - spine.calmodulinNeurogranin * std::pow(spine.calciumFree, 2)) /
+                (constants.reaction1234Ctt * (freeNg + spine.calmodulinActive) + 4 * spine.calmodulinNeurogranin * spine.calciumFree +
+                 std::pow(spine.calciumFree, 2));
+      freeNg -= epsilon;
+      spine.calmodulinActive -= epsilon;
+      spine.calmodulinNeurogranin += epsilon;
+      spine.calciumFree += 2 * epsilon;
+    }
+
+    double kDot{}, nDot{}, kPDot{}, wDot{};
+    nDot = constants.reaction5Ctt * (constants.calcineurinTotal - spine.calcineurinActive) * spine.calmodulinActive -
+           constants.reaction6Ctt * spine.calcineurinActive;
+    spine.calcineurinActive += nDot;
+    spine.calmodulinActive -= nDot;
+    // 5th kinase autophosphorylation
+    kPDot = constants.reaction7Ctt * spine.kinasesCaM * (spine.kinasesCaM + spine.kinasesPhospho) -
+            constants.reaction8Ctt * spine.calcineurinActive * spine.kinasesPhospho;
+    spine.kinasesPhospho += kPDot;
+    spine.kinasesCaM -= kPDot;
+    // 6th kinase activation via CaM -kP
+    kDot = constants.reaction9Ctt * (constants.kinasesTotal - spine.kinasesCaM - spine.kinasesPhospho) * spine.calmodulinActive -
+           constants.reaction10Ctt * spine.kinasesCaM;
+    spine.kinasesCaM += kDot;
+    spine.calmodulinActive -= kDot;
+    // ORDERING
+    //  7th active CaM consumption by Ndot and Kdot (not kPdot)
+    // spine.calmodulinActive -= nDot + kDot;//We are not doing this because this could mean negative active calmodulins
+    // 8th Change in synapse spine size/weight
+    wDot = constants.reaction11Ctt * spine.resourcesAvailable * (spine.kinasesCaM + spine.kinasesPhospho) -
+           constants.reaction12Ctt * spine.weight * spine.calcineurinActive;
+    spine.weight += wDot;
+    // 9th Consumption of resources by weight change
+    spine.resourcesAvailable -=
+        (wDot) / constants.resourceConversionFct; // This should be the case for converting the dmV/spike to concentration of resources
+    // Store equilibrium in a file? Together with time spent in the calculation? Output only to terminal the time?
+  }
+
+  auto steady_state_end = std::chrono::high_resolution_clock::now();
+  auto ss_time          = std::chrono::duration_cast<std::chrono::seconds>(steady_state_end - steady_state_begin);
+  std::cout << "Time to reach steady state: " << ss_time.count() << '\n';
+  return spine;
+}
 
 int MACRbPModel::CreateBranch(std::vector<int> anteriorBranches) {
+  // Because of class interfaces, I have to do the following
+  MACRbPSynapseSpine spine_template;
+  if (caDiffBranches.empty()) {
+    spine_template = ComputeSteadyState();
+  } else {
+    spine_template = caDiffBranches.back().CaResSpines.back();
+  }
+  // After the cheap fix, we do what we used to do
   int branchId{this->GenerateBranchId()};
   if (!anteriorBranches.empty()) {
-    this->caDiffBranches.emplace_back(MACRbPBranch(anteriorBranches, this->synapticGap, this->branchLength, branchId,
-                                                   constants)); // This vector should be sorted by ID by default (tested).
+    this->caDiffBranches.push_back(MACRbPBranch(anteriorBranches, this->synapticGap, this->branchLength, branchId, constants,
+                                                spine_template)); // This vector should be sorted by ID by default (tested).
     this->branches.push_back(static_cast<Branch *>(&this->caDiffBranches.back()));
   } else {
     int branchId{this->GenerateBranchId()};
-    this->caDiffBranches.emplace_back(
-        MACRbPBranch(this->synapticGap, this->branchLength, branchId, constants)); // This vector should be sorted by ID by default (tested).
+    this->caDiffBranches.push_back(MACRbPBranch(this->synapticGap, this->branchLength, branchId, constants,
+                                                spine_template)); // This vector should be sorted by ID by default (tested).
     this->branches.push_back(static_cast<Branch *>(&this->caDiffBranches.back()));
   }
   return branchId;
