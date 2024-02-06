@@ -4,6 +4,9 @@
 MACRbPSynapseSpine::MACRbPSynapseSpine() : connected{false} {
 }
 
+MACRbPSynapseSpine::MACRbPSynapseSpine(double calcium, double resources) : connected{false}, calciumFree{calcium}, resourcesAvailable{resources} {
+}
+
 void MACRbPSynapseSpine::PreDiffusion() {
   // This has to run before reations, and before diffusion. Makes no sense to do both, and makes no sense to actually store the inactive forms in the
   // spine, if we are going to calculate it to the timestep anyway
