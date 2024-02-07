@@ -268,11 +268,12 @@ void NeuralNetwork::SaveParameterOptions() { // This function should have stuff 
   streamPOptions << "#*************  Heterosynaptic plasticity models ************************************************\n";
   streamPOptions << "#************************************************************************************************\n";
   streamPOptions << "#************************************************\n";
-  std::unique_ptr<MonoDendriteSTDPTazerart> tazden = std::make_unique<MonoDendriteSTDPTazerart>(mockInfo_ptr);
+  std::vector<FileEntry>                    mockParams;
+  std::unique_ptr<MonoDendriteSTDPTazerart> tazden = std::make_unique<MonoDendriteSTDPTazerart>(mockInfo_ptr, mockParams);
   tazden->SaveParameters(streamPOptions, "neurons_0");
 
   streamPOptions << "#*************  Branched dendrites **************************************************************\n";
-  std::unique_ptr<AlphaResourceHSTDP> brhSTDP = std::make_unique<AlphaResourceHSTDP>(mockInfo_ptr);
+  std::unique_ptr<AlphaResourceHSTDP> brhSTDP = std::make_unique<AlphaResourceHSTDP>(mockInfo_ptr, mockParams);
   brhSTDP->SaveParameters(streamPOptions, "neurons_0");
   // Instead of LIF, heteroLIF, put morphology options from Tazerart and HCS and HCP
 
