@@ -3,5 +3,5 @@
 //
 #include "BranchedSynapseSpine.hpp"
 
-BranchedSynapseSpine::BranchedSynapseSpine(double weight) : BaseSynapseSpine(weight) {
-}
+//BranchedSynapseSpine::BranchedSynapseSpine(double weight) : BaseSynapseSpine(weight) {
+//}

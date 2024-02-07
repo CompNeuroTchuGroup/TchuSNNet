@@ -17,5 +17,5 @@
 //     race conditions couplingStrength=rCouplingStrength;
 // }
 
-BaseSynapseSpine::BaseSynapseSpine(double weight) : weight{weight} {
-}
+//BaseSynapseSpine::BaseSynapseSpine(double weight) : weight{weight} {
+//}
