@@ -3,10 +3,12 @@
 //
 #include "Morphology.hpp"
 
-Morphology::Morphology(GlobalSimInfo *infoGlobal) : infoGlobal(infoGlobal), totalPostSpikes(0), totalPreSpikes(0) {
+Morphology::Morphology(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters)
+    : infoGlobal(infoGlobal), totalPostSpikes(0), totalPreSpikes(0) {
   std::uniform_int_distribution<int> distribution(0, INT32_MAX);
   this->seed      = distribution(infoGlobal->globalGenerator);
   this->generator = std::mt19937(this->seed);
+  LoadParameters(morphologyParameters);
 }
 
 void Morphology::LoadParameters(const std::vector<FileEntry> &morphologyParameters) {

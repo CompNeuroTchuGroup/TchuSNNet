@@ -4,7 +4,8 @@
 #include "./HeteroGraupnerBrunel.hpp"
 #include "HeteroGraupnerBrunel.hpp"
 
-HeteroGraupnerBrunel::HeteroGraupnerBrunel(GlobalSimInfo *infoGlobal) : BranchedMorphology(infoGlobal) {
+HeteroGraupnerBrunel::HeteroGraupnerBrunel(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters)
+    : BranchedMorphology(infoGlobal, morphologyParameters) {
 }
 
 void HeteroGraupnerBrunel::LoadParameters(const std::vector<FileEntry> &morphologyParameters) {

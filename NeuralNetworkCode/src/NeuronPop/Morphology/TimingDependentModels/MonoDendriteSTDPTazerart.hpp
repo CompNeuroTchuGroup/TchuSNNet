@@ -28,7 +28,7 @@ protected:
   double beta{};
 
 public:
-  explicit MonoDendriteSTDPTazerart(GlobalSimInfo *infoGlobal);
+  explicit MonoDendriteSTDPTazerart(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters);
   ~MonoDendriteSTDPTazerart() override = default;
   virtual std::string GetType() const override { return IDstringMonoDendriteSTDPTazerart; }
 

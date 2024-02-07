@@ -57,7 +57,7 @@ protected:
 public:
   // main Methods
   HeteroGraupnerBrunel() = default;
-  explicit HeteroGraupnerBrunel(GlobalSimInfo *infoGlobal);
+  explicit HeteroGraupnerBrunel(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters);
   ~HeteroGraupnerBrunel() override = default;
 
   void LoadParameters(const std::vector<FileEntry> &morphologyParameters) override;

@@ -86,7 +86,7 @@ protected:
   double getTimingEffects(const CoopSynapseSpine *const spineA, const CoopSynapseSpine *const spineB) const;
 
 public:
-  explicit MonoDendriteSTDP(GlobalSimInfo *infoGlobal);
+  explicit MonoDendriteSTDP(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters);
   ~MonoDendriteSTDP() override = default;
 
   void Advect() override;

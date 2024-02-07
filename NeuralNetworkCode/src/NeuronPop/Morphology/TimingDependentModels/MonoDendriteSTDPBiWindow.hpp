@@ -24,7 +24,7 @@ protected:
   double tauLTD{};
 
 public:
-  explicit MonoDendriteSTDPBiWindow(GlobalSimInfo *infoGlobal);
+  explicit MonoDendriteSTDPBiWindow(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters);
   ~MonoDendriteSTDPBiWindow() override = default;
   virtual std::string GetType() const override { return IDstringMonoDendriteSTDPBiWindow; }
 

@@ -6,7 +6,8 @@
 //
 #include "MonoDendriteSTDPTazerartRelative.hpp"
 
-MonoDendriteSTDPTazerartRelative::MonoDendriteSTDPTazerartRelative(GlobalSimInfo *infoGlobal) : MonoDendriteSTDP(infoGlobal) {
+MonoDendriteSTDPTazerartRelative::MonoDendriteSTDPTazerartRelative(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters)
+    : MonoDendriteSTDP(infoGlobal, morphologyParameters) {
 }
 
 void MonoDendriteSTDPTazerartRelative::SaveParameters(std::ofstream &wParameterFile, std::string neuronIdentificator) const {

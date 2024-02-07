@@ -41,7 +41,7 @@ protected:
 public:
   // main Methods
   MACRbPModel() = default;
-  explicit MACRbPModel(GlobalSimInfo *infoGlobal, MACRbPSynapseSpine &spine);
+  explicit MACRbPModel(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters, MACRbPSynapseSpine &spine);
   ~MACRbPModel() override = default;
 
   void LoadParameters(const std::vector<FileEntry> &morphologyParameters) override;

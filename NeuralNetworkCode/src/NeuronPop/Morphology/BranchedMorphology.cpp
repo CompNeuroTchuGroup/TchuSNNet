@@ -3,7 +3,8 @@
 //
 #include "./BranchedMorphology.hpp"
 #include "BranchedMorphology.hpp"
-BranchedMorphology::BranchedMorphology(GlobalSimInfo *infoGlobal) : Morphology(infoGlobal) {
+BranchedMorphology::BranchedMorphology(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters)
+    : Morphology(infoGlobal, morphologyParameters) {
 }
 
 void BranchedMorphology::RecordPostSpike() {

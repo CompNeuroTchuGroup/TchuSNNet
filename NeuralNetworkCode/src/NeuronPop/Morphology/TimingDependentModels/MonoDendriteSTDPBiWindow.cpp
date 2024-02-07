@@ -6,7 +6,8 @@
 //
 #include "MonoDendriteSTDPBiWindow.hpp"
 
-MonoDendriteSTDPBiWindow::MonoDendriteSTDPBiWindow(GlobalSimInfo *infoGlobal) : MonoDendriteSTDP(infoGlobal) {
+MonoDendriteSTDPBiWindow::MonoDendriteSTDPBiWindow(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters)
+    : MonoDendriteSTDP(infoGlobal, morphologyParameters) {
 }
 
 void MonoDendriteSTDPBiWindow::SaveParameters(std::ofstream &wParameterFile, std::string neuronIDString) const {

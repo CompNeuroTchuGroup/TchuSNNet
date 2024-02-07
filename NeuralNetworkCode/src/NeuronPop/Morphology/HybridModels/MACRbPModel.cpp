@@ -1,7 +1,8 @@
 #include "./MACRbPModel.hpp"
 #include "MACRbPModel.hpp"
 
-MACRbPModel::MACRbPModel(GlobalSimInfo *infoGlobal, MACRbPSynapseSpine &spine) : BranchedMorphology(infoGlobal) {
+MACRbPModel::MACRbPModel(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters, MACRbPSynapseSpine &spine)
+    : BranchedMorphology(infoGlobal, morphologyParameters) {
   if (spine.calmodulinActive == 0) {
     ComputeSteadyState(spine);
   }

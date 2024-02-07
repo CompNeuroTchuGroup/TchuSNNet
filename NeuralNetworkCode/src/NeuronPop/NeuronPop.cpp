@@ -147,29 +147,26 @@ void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry> &morphologyPara
           for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
             (void)neuron; // Does nothing, removes warning on unused vars
             this->morphology.push_back(std::make_unique<MonoDendriteSTDPTazerart>(
-                this->infoGlobal)); // this conversion works but I do not remember why. Implicit downcasting through the move operation?
-            this->morphology.back()->LoadParameters(morphologyParameters);
+                this->infoGlobal,
+                morphologyParameters)); // this conversion works but I do not remember why. Implicit downcasting through the move operation?
             this->hasPlasticity = true;
           }
         } else if (parameterValues.at(0) == IDstringMonoDendriteSTDPBiWindow) {
           for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
             (void)neuron; // Does nothing, removes warning on unused vars
-            this->morphology.push_back(std::make_unique<MonoDendriteSTDPBiWindow>(this->infoGlobal));
-            this->morphology.back()->LoadParameters(morphologyParameters);
+            this->morphology.push_back(std::make_unique<MonoDendriteSTDPBiWindow>(this->infoGlobal, morphologyParameters));
             this->hasPlasticity = true;
           }
         } else if (parameterValues.at(0) == IDstringMonoDendriteSTDPTazerartRelative) {
           for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
             (void)neuron; // Does nothing, removes warning on unused vars
-            this->morphology.push_back(std::make_unique<MonoDendriteSTDPTazerartRelative>(this->infoGlobal));
-            this->morphology.back()->LoadParameters(morphologyParameters);
+            this->morphology.push_back(std::make_unique<MonoDendriteSTDPTazerartRelative>(this->infoGlobal, morphologyParameters));
             this->hasPlasticity = true;
           }
         } else if (parameterValues.at(0) == IDstringTraceResourceHSTDP) {
           for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
             (void)neuron; // Does nothing, removes warning on unused vars
-            this->morphology.push_back(std::make_unique<AlphaResourceHSTDP>(this->infoGlobal));
-            this->morphology.back()->LoadParameters(morphologyParameters);
+            this->morphology.push_back(std::make_unique<AlphaResourceHSTDP>(this->infoGlobal, morphologyParameters));
             this->hasPlasticity = true;
             this->isBranched    = true;
           }
@@ -177,16 +174,14 @@ void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry> &morphologyPara
           MACRbPSynapseSpine spine; // This will be moved to steady state inside the first constructor
           for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
             (void)neuron; // Does nothing, removes warning on unused vars
-            this->morphology.push_back(std::make_unique<MACRbPModel>(this->infoGlobal, spine));
-            this->morphology.back()->LoadParameters(morphologyParameters);
+            this->morphology.push_back(std::make_unique<MACRbPModel>(this->infoGlobal, morphologyParameters, spine));
             this->hasPlasticity = true;
             this->isBranched    = true;
           }
         } else if (parameterValues.at(0) == IDstringHeteroGraupnerBrunel) {
           for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
             (void)neuron; // Does nothing, removes warning on unused vars
-            this->morphology.push_back(std::make_unique<HeteroGraupnerBrunel>(this->infoGlobal));
-            this->morphology.back()->LoadParameters(morphologyParameters);
+            this->morphology.push_back(std::make_unique<HeteroGraupnerBrunel>(this->infoGlobal, morphologyParameters));
             this->hasPlasticity = true;
             this->isBranched    = true;
           }

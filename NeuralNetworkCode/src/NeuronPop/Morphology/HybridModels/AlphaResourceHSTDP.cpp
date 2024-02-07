@@ -4,7 +4,8 @@
 #include "./AlphaResourceHSTDP.hpp"
 #include "AlphaResourceHSTDP.hpp"
 
-AlphaResourceHSTDP::AlphaResourceHSTDP(GlobalSimInfo *infoGlobal) : BranchedMorphology(infoGlobal) {
+AlphaResourceHSTDP::AlphaResourceHSTDP(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters)
+    : BranchedMorphology(infoGlobal, morphologyParameters) {
 }
 
 void AlphaResourceHSTDP::LoadParameters(const std::vector<FileEntry> &morphologyParameters) {

@@ -41,7 +41,7 @@ protected:
   virtual void Reset() = 0;
 
 public:
-  explicit Morphology(GlobalSimInfo *infoGlobal);
+  explicit Morphology(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters);
   virtual ~Morphology() = default;
 
   virtual void SaveParameters(std::ofstream &wParameterStream, std::string neuronIdentificator) const;

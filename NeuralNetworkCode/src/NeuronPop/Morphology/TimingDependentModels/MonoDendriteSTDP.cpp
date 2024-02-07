@@ -6,7 +6,8 @@
 //
 #include "MonoDendriteSTDP.hpp"
 
-MonoDendriteSTDP::MonoDendriteSTDP(GlobalSimInfo *infoGlobal) : Morphology(infoGlobal), stepWeights(false) {
+MonoDendriteSTDP::MonoDendriteSTDP(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters)
+    : Morphology(infoGlobal, morphologyParameters), stepWeights(false) {
 }
 
 void MonoDendriteSTDP::Advect() {

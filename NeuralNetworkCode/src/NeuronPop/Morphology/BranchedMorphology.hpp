@@ -45,7 +45,7 @@ protected:
                   // static_cast<int>(i)));. Between the two, emplace_back is much cleaner.
   std::vector<BranchedSpinePtr> branchedSpineData; // They are just pointers, what is the worst that can happen by having multiple copies?
 public:
-  explicit BranchedMorphology(GlobalSimInfo *infoGlobal);
+  explicit BranchedMorphology(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters);
   ~BranchedMorphology() = default;
 
   // Methods derived from the MonoDendriteSTDP and Morphology classes
