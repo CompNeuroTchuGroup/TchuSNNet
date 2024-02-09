@@ -56,11 +56,15 @@ public:
   virtual void Advect() = 0;
   virtual void RecordPostSpike();
   virtual void RecordExcitatoryPreSpike(BaseSpinePtr spinePtr);
-  // Getters
-  std::vector<double>         GetIndividualSynapticProfile(signed long synapseId) const;
-  std::string                 GetIndividualSynapticProfileHeaderInfo() const;
+  // Record functions
+  std::vector<double> GetIndividualSynapticProfile(signed long synapseId) const;
+  std::string         GetIndividualSynapticProfileHeaderInfo() const;
+
   virtual std::vector<double> GetOverallSynapticProfile() const;
   virtual std::string         GetOverallSynapticProfileHeaderInfo() const;
+
+  virtual std::vector<double> GetSteadyStateData() const;
+  virtual std::string         GetSteadyStateHeaderInfo() const;
   // virtual void CalcMorphoPlasticityEvents() {return;};
   // friend std::vector<signed long> getSpikedSynapsesFromMorphology(const Morphology&); // This function is not
   // necessary as the spikedSynapses is not used outside of the class

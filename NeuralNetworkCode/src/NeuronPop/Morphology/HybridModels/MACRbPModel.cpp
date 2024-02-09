@@ -447,3 +447,11 @@ std::vector<double> MACRbPModel::GetOverallSynapticProfile() const {
 std::string MACRbPModel::GetOverallSynapticProfileHeaderInfo() const {
   return std::string("{None}");
 }
+
+std::vector<double> MACRbPModel::GetSteadyStateData() const {
+  return std::vector<double>();
+}
+
+std::string MACRbPModel::GetSteadyStateHeaderInfo() const {
+  return std::string();
+}

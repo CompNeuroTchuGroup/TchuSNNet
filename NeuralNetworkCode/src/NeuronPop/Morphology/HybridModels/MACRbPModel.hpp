@@ -65,6 +65,9 @@ public:
   // Record functions
   std::vector<double> GetOverallSynapticProfile() const override;
   std::string         GetOverallSynapticProfileHeaderInfo() const override;
+
+  std::vector<double> GetSteadyStateData() const override;
+  std::string         GetSteadyStateHeaderInfo() const override;
   // void CalcMorphoPlasticityEvents() override;
   // For debugging purposes
   bool IgnoreJDParameters() const override { return true; }
