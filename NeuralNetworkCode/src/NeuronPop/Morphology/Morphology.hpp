@@ -70,6 +70,7 @@ public:
   virtual void   PostConnectSetUp(){};
 
   virtual bool IgnoreJDParameters() const { return false; }
+  virtual bool HasSteadyState() const { return false; }
 };
 
 #endif // NEURALNETWORK_MORPHOLOGY_H

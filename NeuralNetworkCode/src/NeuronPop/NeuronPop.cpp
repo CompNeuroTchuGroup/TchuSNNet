@@ -234,6 +234,25 @@ void NeuronPop::SavePlasticityModel(std::ofstream &wParameterStream, std::string
   }
 }
 
+bool NeuronPop::HasSteadyState() const {
+  if (morphology.empty())
+    return false;
+  else
+    return morphology.at(0)->HasSteadyState();
+}
+
+bool NeuronPop::ignoreJDParameters() const {
+#ifndef NDEBUG
+  if (morphology.empty()) {
+    throw "Logical error jdis";
+  } else {
+    return morphology.at(0)->IgnoreJDParameters();
+  }
+#else
+  return morphology.at(0)->IgnoreJDParameters();
+#endif
+}
+
 // From here on
 
 BaseSpinePtr NeuronPop::AllocateNewSynapse(NeuronInt neuronId, BranchTargeting &branchTarget) {

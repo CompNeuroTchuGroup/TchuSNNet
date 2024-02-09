@@ -110,13 +110,8 @@ public:
   // Dyn_casting optimization methods
   bool HasPlasticityModel() const { return hasPlasticity; }
   bool IsBranchedBool() const { return isBranched; }
-  bool ignoreJDParameters() {
-    if (morphology.empty()) {
-      throw "Logical error jdis";
-    } else {
-      return morphology.at(0)->IgnoreJDParameters();
-    }
-  }
+  bool ignoreJDParameters() const;
+  bool HasSteadyState() const;
 
   // All of the following functions throw to ease the virtualization, but it is a bad coding practice
 

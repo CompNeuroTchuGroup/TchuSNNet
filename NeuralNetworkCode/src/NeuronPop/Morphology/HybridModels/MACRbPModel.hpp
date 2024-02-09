@@ -68,6 +68,7 @@ public:
   // void CalcMorphoPlasticityEvents() override;
   // For debugging purposes
   bool IgnoreJDParameters() const override { return true; }
+  bool HasSteadyState() const override { return true; }
 };
 
 #endif
