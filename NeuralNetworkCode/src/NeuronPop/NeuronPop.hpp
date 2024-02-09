@@ -47,6 +47,7 @@ protected:
   // std::valarray<long>     global_id;  // global neuron id (unique across populations)
   void ClearSpikerVector();
 
+  std::string morphologyType{"None"};
   // Necessary mutex locks
 
   std::mutex _morphologyMutex;
@@ -75,19 +76,14 @@ public:
   double GetPotential(NeuronInt neuron) const { return membraneV.at(neuron); }
 
   virtual std::string GetType() const = 0;
+  std::string         GetMorphologyType() const { return morphologyType; }
   PopInt              GetId() const { return this->identifier; }
 
   int GetNoSynapses() const {
     return std::accumulate(morphology.begin(), morphology.end(), 0,
                            [](int accumulator, const std::unique_ptr<Morphology> &morpho) { return accumulator + morpho->GetNoSynapses(); });
   } // This is purely for virtualization reasons
-  int GetNoBranches() const {
-    if (isBranched) {
-      return static_cast<BranchedMorphology *>(morphology.at(0).get())->GetNoBranches();
-    } else {
-      return 0;
-    }
-  }
+  int    GetNoBranches() const { return static_cast<BranchedMorphology *>(morphology.at(0).get())->GetNoBranches(); }
   int    GetMaxGapDelay(int delayPerGap) const { return (morphology.at(0).get())->GetMaxGapDelay(delayPerGap); }
   double GetSynapticDistanceToSoma(int neuronId, int synapseId) const { return morphology.at(neuronId)->GetSynapticDistanceToSoma(synapseId); }
   //*******************
@@ -121,10 +117,11 @@ public:
   BaseSpinePtr        AllocateNewSynapse(NeuronInt neuronId, BranchTargeting &targeting);
   std::string         GetIndividualSynapticProfileHeaderInfo() const;
   std::string         GetOverallSynapticProfileHeaderInfo() const;
-  std::vector<double> GetIndividualSynapticProfile(NeuronInt neuronId, NeuronInt spineID) const {
-    return this->morphology.at(neuronId)->GetIndividualSynapticProfile(spineID);
-  }
-  std::vector<double> GetOverallSynapticProfile(NeuronInt neuronId) const { return this->morphology.at(neuronId)->GetOverallSynapticProfile(); };
+  std::vector<double> GetIndividualSynapticProfile(NeuronInt neuronId, NeuronInt spineID) const;
+  std::vector<double> GetOverallSynapticProfile(NeuronInt neuronId) const;
+
+  std::vector<std::string> GetSteadyStateVarNames() const;
+  std::vector<double>      GetSteadyStateData() const;
 
   void PostConnectSetUp(); // This function cannot be called without throwing first};
 };

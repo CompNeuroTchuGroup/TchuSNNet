@@ -112,6 +112,24 @@ void Recorder::WriteDistributionJ() const {
   this->synapses->WriteDistributionJ(GetJPotFilename(), noNeuronsJPot);
 }
 
+void Recorder::WriteSteadyStates() const {
+  std::ofstream ssStream(GetSteadyStatesFilename(), std::ofstream::out | std::ofstream::trunc);
+  int           counter{1};
+
+  // Models in neuronPop classes
+  // Models in the Morphology framework
+  for (PopInt popIndex = 0; popIndex < neurons->GetTotalPopulations(); popIndex++) {
+    PopPtr pop{neurons->GetPop(popIndex)};
+    if (pop->HasSteadyState()) {
+      ssStream << "Steady state no. " << counter++ << '\n';
+      ssStream << "Neuron pop. " << pop->GetId() << " with model " << pop->GetMorphologyType() << '\n';
+    }
+  }
+
+  // Models in synapse classes
+  // Models in stimulus classes
+}
+
 void Recorder::SaveParameters(std::ofstream &wParameterStream) const {
   wParameterStream << "#*************************************************\n";
   wParameterStream << "#************** Recorder Parameters **************\n";

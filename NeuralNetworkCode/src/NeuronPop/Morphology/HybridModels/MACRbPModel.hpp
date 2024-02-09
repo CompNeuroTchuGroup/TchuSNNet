@@ -51,7 +51,7 @@ public:
   MACRbPSynapseSpine ComputeSteadyState(MACRbPSynapseSpine &spine);
   int                CreateBranch(std::vector<int> anteriorBranches) override;
 
-  std::string GetType() const override { return IDstringTraceResourceHSTDP; };
+  std::string GetType() const override { return IDstringMACRbPModel; };
 
   // Advect methods
   void Advect() override;
@@ -66,8 +66,8 @@ public:
   std::vector<double> GetOverallSynapticProfile() const override;
   std::string         GetOverallSynapticProfileHeaderInfo() const override;
 
-  std::vector<double> GetSteadyStateData() const override;
-  std::string         GetSteadyStateHeaderInfo() const override;
+  std::vector<double>      GetSteadyStateData() const override;
+  std::vector<std::string> GetSteadyStateVarNames() const override;
   // void CalcMorphoPlasticityEvents() override;
   // For debugging purposes
   bool IgnoreJDParameters() const override { return true; }

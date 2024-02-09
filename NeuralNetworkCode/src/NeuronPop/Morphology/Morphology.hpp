@@ -63,8 +63,8 @@ public:
   virtual std::vector<double> GetOverallSynapticProfile() const;
   virtual std::string         GetOverallSynapticProfileHeaderInfo() const;
 
-  virtual std::vector<double> GetSteadyStateData() const;
-  virtual std::string         GetSteadyStateHeaderInfo() const;
+  virtual std::vector<double>      GetSteadyStateData() const;
+  virtual std::vector<std::string> GetSteadyStateVarNames() const;
   // virtual void CalcMorphoPlasticityEvents() {return;};
   // friend std::vector<signed long> getSpikedSynapsesFromMorphology(const Morphology&); // This function is not
   // necessary as the spikedSynapses is not used outside of the class

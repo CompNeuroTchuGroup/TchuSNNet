@@ -64,11 +64,12 @@ protected:
   NeuronInt noNeuronsDelay{};
   NeuronInt noNeuronsJPot{};
   // AdvRecorder parameters
-  bool                             parserEnabled{false};
-  bool                             trackSynapses{false}; //, writeHistogram;
-  int                              recordedHeatmap{0};
-  int                              initialCurrent{0};
-  int                              startRecordingTime{0};
+  bool parserEnabled{false};
+  bool trackSynapses{false}; //, writeHistogram;
+  int  recordedHeatmap{0};
+  int  initialCurrent{0};
+  int  startRecordingTime{0};
+
   std::vector<NeuronInt>           neuronPotentialsToRecord;
   bool                             recordNeuronPotentials{false};
   std::vector<NeuronInt>           noRasterPlotNeurons;
@@ -153,7 +154,8 @@ public:
   std::string GetCurrentCrontributionFilename() const { return this->directoryPath + simulationTitle + "_CurrentContribution.dat"; }
   std::string GetHeteroSynapseStateFilename() const { return this->directoryPath + simulationTitle + "_HeteroSynapses.dat"; }
   std::string GetOverallHeteroSynapseStateFilename() const { return this->directoryPath + simulationTitle + "_OverallHS.dat"; }
-  std::string GetHeteroBranchedSynapseStateFilename() const { return this->directoryPath + simulationTitle + "_BranchedHS.dat"; }
+  // std::string GetHeteroBranchedSynapseStateFilename() const { return this->directoryPath + simulationTitle + "_BranchedHS.dat"; }
+  std::string GetSteadyStatesFilename() const { return this->directoryPath + simulationTitle + "_steadyStates.dat"; }
 
   void LoadParameters(const std::vector<FileEntry> &input);
   void SaveParameters(std::ofstream &stream) const;
@@ -164,6 +166,7 @@ public:
   void WriteConnectivity() const;
   void WriteDistributionD() const;
   void WriteDistributionJ() const;
+  void WriteSteadyStates() const;
 
   void MakeInputCopies(const std::string &filename);
 };

@@ -144,6 +144,7 @@ void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry> &morphologyPara
     for (auto &[parameterName, parameterValues] : morphologyParameters) {
       if (parameterName.find("pmodel_type") != std::string::npos) {
         if (parameterValues.at(0) == IDstringMonoDendriteSTDPTazerart) {
+          morphologyType = IDstringMonoDendriteSTDPTazerart;
           for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
             (void)neuron; // Does nothing, removes warning on unused vars
             this->morphology.push_back(std::make_unique<MonoDendriteSTDPTazerart>(
@@ -152,18 +153,21 @@ void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry> &morphologyPara
             this->hasPlasticity = true;
           }
         } else if (parameterValues.at(0) == IDstringMonoDendriteSTDPBiWindow) {
+          morphologyType = IDstringMonoDendriteSTDPBiWindow;
           for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
             (void)neuron; // Does nothing, removes warning on unused vars
             this->morphology.push_back(std::make_unique<MonoDendriteSTDPBiWindow>(this->infoGlobal, morphologyParameters));
             this->hasPlasticity = true;
           }
         } else if (parameterValues.at(0) == IDstringMonoDendriteSTDPTazerartRelative) {
+          morphologyType = IDstringMonoDendriteSTDPTazerartRelative;
           for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
             (void)neuron; // Does nothing, removes warning on unused vars
             this->morphology.push_back(std::make_unique<MonoDendriteSTDPTazerartRelative>(this->infoGlobal, morphologyParameters));
             this->hasPlasticity = true;
           }
         } else if (parameterValues.at(0) == IDstringTraceResourceHSTDP) {
+          morphologyType = IDstringTraceResourceHSTDP;
           for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
             (void)neuron; // Does nothing, removes warning on unused vars
             this->morphology.push_back(std::make_unique<AlphaResourceHSTDP>(this->infoGlobal, morphologyParameters));
@@ -171,6 +175,7 @@ void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry> &morphologyPara
             this->isBranched    = true;
           }
         } else if (parameterValues.at(0) == IDstringMACRbPModel) {
+          morphologyType = IDstringMACRbPModel;
           MACRbPSynapseSpine spine; // This will be moved to steady state inside the first constructor
           for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
             (void)neuron; // Does nothing, removes warning on unused vars
@@ -179,6 +184,7 @@ void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry> &morphologyPara
             this->isBranched    = true;
           }
         } else if (parameterValues.at(0) == IDstringHeteroGraupnerBrunel) {
+          morphologyType = IDstringHeteroGraupnerBrunel;
           for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
             (void)neuron; // Does nothing, removes warning on unused vars
             this->morphology.push_back(std::make_unique<HeteroGraupnerBrunel>(this->infoGlobal, morphologyParameters));
@@ -266,6 +272,22 @@ std::string NeuronPop::GetIndividualSynapticProfileHeaderInfo() const {
 
 std::string NeuronPop::GetOverallSynapticProfileHeaderInfo() const {
   return morphology.at(0)->GetOverallSynapticProfileHeaderInfo();
+}
+
+std::vector<double> NeuronPop::GetIndividualSynapticProfile(NeuronInt neuronId, NeuronInt spineID) const {
+  return this->morphology.at(neuronId)->GetIndividualSynapticProfile(spineID);
+}
+
+std::vector<double> NeuronPop::GetOverallSynapticProfile(NeuronInt neuronId) const {
+  return this->morphology.at(neuronId)->GetOverallSynapticProfile();
+}
+
+std::vector<std::string> NeuronPop::GetSteadyStateVarNames() const {
+  return morphology.at(0)->GetSteadyStateVarNames();
+}
+
+std::vector<double> NeuronPop::GetSteadyStateData() const {
+  return morphology.at(0)->GetSteadyStateData();
 }
 
 void NeuronPop::PostConnectSetUp() {

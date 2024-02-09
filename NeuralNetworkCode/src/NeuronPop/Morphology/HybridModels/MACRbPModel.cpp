@@ -452,6 +452,6 @@ std::vector<double> MACRbPModel::GetSteadyStateData() const {
   return std::vector<double>();
 }
 
-std::string MACRbPModel::GetSteadyStateHeaderInfo() const {
-  return std::string();
+std::vector<std::string> MACRbPModel::GetSteadyStateVarNames() const {
+  return std::vector<std::string>();
 }

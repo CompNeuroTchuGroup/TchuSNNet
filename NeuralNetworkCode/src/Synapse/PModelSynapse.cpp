@@ -82,7 +82,9 @@ void PModelSynapse::LoadParameters(const std::vector<FileEntry> &hybridParameter
         this->branchTarget.orderedTargetBranch = true;
       } else {
         this->branchTarget.targetBranch = std::stoi(parameterValues.at(0));
-        if (this->branchTarget.targetBranch >= targetPop->GetNoBranches()) {
+        if (!targetPop->IsBranchedBool())
+          throw "Cannot target branches if there is no branched model.";
+        else if (this->branchTarget.targetBranch >= targetPop->GetNoBranches()) {
           throw "Targeted branch does not exist";
         }
         this->branchTarget.setTargetBranch = true;

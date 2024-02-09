@@ -88,11 +88,12 @@ std::string Morphology::GetOverallSynapticProfileHeaderInfo() const {
 }
 
 std::vector<double> Morphology::GetSteadyStateData() const {
-  return std::vector<double>();
+  return std::vector<double>(1);
 }
 
-std::string Morphology::GetSteadyStateHeaderInfo() const {
-  return "There was an error, the GetSteadyStateData() was called from a class that has\nno overriding version of the function.";
+std::vector<std::string> Morphology::GetSteadyStateVarNames() const {
+  return std::vector<std::string>(
+      1, "There was an error, the GetSteadyStateData() was called from a class that has\nno overriding version of the function.");
 }
 
 std::string Morphology::GetIndividualSynapticProfileHeaderInfo() const {
