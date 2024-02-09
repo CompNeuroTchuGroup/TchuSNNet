@@ -11,6 +11,7 @@ MACRbPModel::MACRbPModel(GlobalSimInfo *infoGlobal, const std::vector<FileEntry>
 }
 
 void MACRbPModel::LoadParameters(const std::vector<FileEntry> &morphologyParameters) {
+  BranchedMorphology::LoadParameters(morphologyParameters);
   for (auto &[parameterName, parameterValues] : morphologyParameters) {
     if (parameterName.find("kinasesTotal") != std::string::npos) {
       this->constants.kinasesTotal = std::stod(parameterValues.at(0));
@@ -92,7 +93,6 @@ void MACRbPModel::LoadParameters(const std::vector<FileEntry> &morphologyParamet
 
   this->constants.preCalciumFluxFactor  = amplitudeNormalization(prespikeCalcium, 1 / this->constants.calciumExtrusionCtt, preCalciumDecayTau);
   this->constants.postCalciumFluxFactor = amplitudeNormalization(postspikeCalcium, 1 / this->constants.calciumExtrusionCtt, postCalciumDecayTau);
-  BranchedMorphology::LoadParameters(morphologyParameters);
 }
 
 void MACRbPModel::CheckParameters(const std::vector<FileEntry> &parameters) {
