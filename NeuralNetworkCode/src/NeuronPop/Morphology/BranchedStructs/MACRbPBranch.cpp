@@ -105,11 +105,11 @@ void MACRbPBranch::Advect() {
       spine.resourcesAvailable -=
           (wDot) / ctt.resourceConversionFct; // This should be the case for converting the dmV/spike to concentration of resources
       // For the next timestep
-      spine.PreDiffusion();
-#ifndef NDEBUG
-      spine.CheckNegativeValues(ctt);
-#endif
     }
+    spine.PreDiffusion();
+#ifndef NDEBUG
+    spine.CheckNegativeValues(ctt);
+#endif
   });
   // DIFFUSION STARTS HERE
   CaResSpines.at(0).calciumFree += ctt.caDiffusionFct * (-CaResSpines.at(0).calciumOldStep + CaResSpines.at(1).calciumOldStep);
