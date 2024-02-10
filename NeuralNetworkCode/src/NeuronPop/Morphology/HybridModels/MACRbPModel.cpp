@@ -360,14 +360,14 @@ int MACRbPModel::CreateBranch(std::vector<int> anteriorBranches) {
   // After the cheap fix, we do what we used to do
   int branchId{this->GenerateBranchId()};
   if (!anteriorBranches.empty()) {
-    this->caDiffBranches.push_back(MACRbPBranch(anteriorBranches, this->synapticGap, this->branchLength, branchId, constants,
+    this->MACRbPBranches.push_back(MACRbPBranch(anteriorBranches, this->synapticGap, this->branchLength, branchId, constants,
                                                 steady_state_spine)); // This vector should be sorted by ID by default (tested).
-    this->branches.push_back(static_cast<Branch *>(&this->caDiffBranches.back()));
+    this->branches.push_back(static_cast<Branch *>(&this->MACRbPBranches.back()));
   } else {
     int branchId{this->GenerateBranchId()};
-    this->caDiffBranches.push_back(MACRbPBranch(this->synapticGap, this->branchLength, branchId, constants,
+    this->MACRbPBranches.push_back(MACRbPBranch(this->synapticGap, this->branchLength, branchId, constants,
                                                 steady_state_spine)); // This vector should be sorted by ID by default (tested).
-    this->branches.push_back(static_cast<Branch *>(&this->caDiffBranches.back()));
+    this->branches.push_back(static_cast<Branch *>(&this->MACRbPBranches.back()));
   }
   return branchId;
 }
@@ -380,7 +380,7 @@ void MACRbPModel::Advect() {
   // TStepModded%=preSpikeDelaySteps;
   // TStepInput=TStepModded+preSpikeDelaySteps+1;
   // TStepInput%=preSpikeDelaySteps;
-  for (MACRbPBranch &branch : caDiffBranches) {
+  for (MACRbPBranch &branch : MACRbPBranches) {
     branch.Advect();
     // branch.Advect(TStepModded);
   }
@@ -391,7 +391,7 @@ void MACRbPModel::RecordPostSpike() {
   // TStepModded=infoGlobal->timeStep%preSpikeDelaySteps;
   this->totalPostSpikes++;
   // this->postSpiked = true;
-  for (MACRbPBranch &branch : caDiffBranches) {
+  for (MACRbPBranch &branch : MACRbPBranches) {
     branch.PostSpikeCalciumFlux();
   }
   // for (CaDiffusionBranch& branch: caDiffBranches){
@@ -410,7 +410,7 @@ void MACRbPModel::RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) {
 }
 
 void MACRbPModel::PostConnectSetUp() {
-  for (MACRbPBranch &branch : caDiffBranches) {
+  for (MACRbPBranch &branch : MACRbPBranches) {
     branch.PostConnectSetUp(branchedSpineData);
   }
 }
@@ -419,7 +419,7 @@ BaseSpinePtr MACRbPModel::AllocateNewSynapse(BranchTargeting &branchTarget) {
   int branch{AllocateBranch(branchTarget)};
   int position{PopSynapseSlotFromBranch(branchTarget)};
   // caDiffBranches.at(branch).CaDiffSpines.push_back(CaResSynapseSpine(kinasesTotal, calcineurinTotal, constants.initialWeight));
-  MACRbpSpinePtr newSpine = &caDiffBranches.at(branch).CaResSpines.at(position);
+  MACRbpSpinePtr newSpine = &MACRbPBranches.at(branch).MACRbPspines.at(position);
 
   // this->weightsSum += newSynapse->GetWeight();
   newSpine->idInMorpho = (this->baseSpineData.size()); // this->spineIdGenerator++
@@ -435,17 +435,29 @@ BaseSpinePtr MACRbPModel::AllocateNewSynapse(BranchTargeting &branchTarget) {
   // Storage (other)
   this->baseSpineData.push_back(static_cast<BaseSpinePtr>(newSpine));
   this->branchedSpineData.push_back(static_cast<BranchedSpinePtr>(newSpine));
-  this->caResSpines.push_back(newSpine);
+  // this->MACRbPSpines.push_back(newSpine);
 
   return this->baseSpineData.back();
 }
 
 std::vector<double> MACRbPModel::GetOverallSynapticProfile() const {
-  return std::vector<double>();
+  // What could we put here? Weight disparity(deviation of weight between neighbouring spines)? Avg weight might help
+  std::vector<double> dataArray(4);
+  size_t              noSpines{this->baseSpineData.size()};
+  double              total_weight{};
+  for (const MACRbPBranch &branch : MACRbPBranches) {
+    total_weight += branch.GetTotalWeight();
+  }
+
+  dataArray.at(0) = total_weight / noSpines;
+  dataArray.at(1) = this->totalPostSpikes;
+  dataArray.at(2) = this->totalPreSpikes;
+  dataArray.at(3) = noSpines;
+  return dataArray;
 }
 
 std::string MACRbPModel::GetOverallSynapticProfileHeaderInfo() const {
-  return std::string("{None}");
+  return std::string("{<average weight>, <total post spikes> ,<total pre spikes>, <total number of spines>}");
 }
 
 std::vector<double> MACRbPModel::GetSteadyStateData() const {

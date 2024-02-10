@@ -19,8 +19,8 @@ class MACRbPModel : public BranchedMorphology {
 protected:
   Constants constants{};
 
-  std::vector<MACRbpSpinePtr> caResSpines;
-  std::vector<MACRbPBranch>   caDiffBranches;
+  // std::vector<MACRbpSpinePtr> MACRbPSpines;
+  std::vector<MACRbPBranch> MACRbPBranches;
   // Constants
   double prespikeCalcium{}, postspikeCalcium{};
 
