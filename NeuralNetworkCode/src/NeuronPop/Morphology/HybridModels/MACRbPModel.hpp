@@ -45,6 +45,7 @@ public:
   ~MACRbPModel() override = default;
 
   void LoadParameters(const std::vector<FileEntry> &morphologyParameters) override;
+  void PreCalculateParameters();
   void CheckParameters(const std::vector<FileEntry> &parameters) override;
   void SaveParameters(std::ofstream &wParameterStream, std::string neuronIdentificator) const override;
 

@@ -77,6 +77,10 @@ void MACRbPModel::LoadParameters(const std::vector<FileEntry> &morphologyParamet
       this->constants.newtonIterations = (std::stoi(parameterValues.at(0)));
     }
   }
+  PreCalculateParameters();
+}
+
+void MACRbPModel::PreCalculateParameters() {
   this->constants.reaction1234Ctt =
       this->constants.reaction1Ctt * this->constants.reaction4Ctt / (this->constants.reaction2Ctt * this->constants.reaction3Ctt);
   this->constants.calciumInfluxBasal = calciumBasal * constants.calciumExtrusionCtt;
@@ -292,9 +296,9 @@ void MACRbPModel::SaveParameters(std::ofstream &wParameterFile, std::string neur
   wParameterFile << neuronIdentificator << "calciumExtrusion\t\t" << (this->constants.calciumExtrusionCtt / infoGlobal->dtTimestep) << " #s^{-1}";
   wParameterFile << "\t"
                  << "#Extrusion rate for free calcium\n";
-  wParameterFile << neuronIdentificator << "resourceConversionFct\t\t" << (constants.resourceConversionFct) << " #mV s^{-1} uM^{-1}";
+  wParameterFile << neuronIdentificator << "resourceConversionFct\t\t" << (constants.resourceConversionFct) << " #mV spike^{-1} uM^{-1}";
   wParameterFile << "\t"
-                 << "#Conversion from resource molar units (uM) to dmV/sec\n";
+                 << "#Conversion from resource molar units (uM) to dmV/spike\n";
 }
 // Remove from here
 MACRbPSynapseSpine MACRbPModel::ComputeSteadyState(MACRbPSynapseSpine &spine) {
