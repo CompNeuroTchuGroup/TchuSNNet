@@ -29,11 +29,18 @@ MACRbPBranch::MACRbPBranch(double gap, double branchLength, int branchId, Consta
 
 void MACRbPBranch::PostConnectSetUp(std::vector<BranchedSpinePtr> spineData) {
   // If it is ever necessary to release the weight of unconnected synapses as free resources, uncomment the next lines of code.
-  for (MACRbPSynapseSpine &spine : MACRbPspines) {
-    if (!spine.connected) {
-      spine.resourcesAvailable
-    }
-  }
+  // double extraResources{};
+  // for (const MACRbPSynapseSpine &spine : MACRbPspines) {
+  //   if (!spine.connected) {
+  //     extraResources += spine.weight / constants.resourceConversionFct;
+  //   }
+  // }
+  // double extra_alloc_resources{extraResources / static_cast<double>(MACRbPspines.size())};
+  // // for (MACRbPSynapseSpine &spine : MACRbPspines) {
+  // //   spine.resourcesAvailable += extra_alloc_resources;
+  // // }
+  // std::transform(PAR_UNSEQ, MACRbPspines.begin(), MACRbPspines.end(), MACRbPspines.begin(),
+  //                [extra_alloc_resources](MACRbPSynapseSpine &spine) { spine.resourcesAvailable += extra_alloc_resources; });
 }
 
 void MACRbPBranch::Advect() {
