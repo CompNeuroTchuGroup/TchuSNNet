@@ -1,9 +1,10 @@
 #include "./MACRbpBranch.hpp"
+#include "MACRbPBranch.hpp"
 
 MACRbPBranch::MACRbPBranch(std::vector<int> anteriorBranches, double gap, double branchLength, int branchId, Constants constants,
                            MACRbPSynapseSpine spine)
     : Branch(anteriorBranches, gap, branchLength, branchId), constants{constants} {
-  CaResSpines.resize(branchLength / gap, spine);
+  MACRbPspines.resize(branchLength / gap, spine);
   // for (MACRbPSynapseSpine &spine : CaResSpines) {
   //   spine.resourcesAvailable = constants.initialResources;
   //   spine.weight             = constants.initialWeight;
@@ -14,8 +15,8 @@ MACRbPBranch::MACRbPBranch(std::vector<int> anteriorBranches, double gap, double
 MACRbPBranch::MACRbPBranch(double gap, double branchLength, int branchId, Constants constants, MACRbPSynapseSpine spine)
     : Branch(gap, branchLength, branchId), constants{constants} {
 
-  CaResSpines.resize(branchLength / gap, spine);
-  for (MACRbPSynapseSpine &spine : CaResSpines) {
+  MACRbPspines.resize(branchLength / gap, spine);
+  for (MACRbPSynapseSpine &spine : MACRbPspines) {
     spine.resourcesAvailable = constants.initialResources;
     spine.weight             = constants.initialWeight;
     spine.PreDiffusion();
@@ -27,7 +28,12 @@ MACRbPBranch::MACRbPBranch(double gap, double branchLength, int branchId, Consta
 }
 
 void MACRbPBranch::PostConnectSetUp(std::vector<BranchedSpinePtr> spineData) {
-  return;
+  // If it is ever necessary to release the weight of unconnected synapses as free resources, uncomment the next lines of code.
+  for (MACRbPSynapseSpine &spine : MACRbPspines) {
+    if (!spine.connected) {
+      spine.resourcesAvailable
+    }
+  }
 }
 
 void MACRbPBranch::Advect() {
@@ -39,7 +45,7 @@ void MACRbPBranch::Advect() {
   // Spatial locality is achieved in the spine vector (not pointers). Temporal locality is achieved by making a mess
   // of a function
   // All constants.reactions happen in a single loop because diffusion is separate
-  std::for_each(PAR, CaResSpines.begin(), CaResSpines.end(), [ctt](MACRbPSynapseSpine &spine) {
+  std::for_each(PAR, MACRbPspines.begin(), MACRbPspines.end(), [ctt](MACRbPSynapseSpine &spine) {
     // const Constants ctt{ctt};
     if (spine.connected) {
       // Here we influx calcium with the nonlinear traces
@@ -112,37 +118,46 @@ void MACRbPBranch::Advect() {
 #endif
   });
   // DIFFUSION STARTS HERE
-  CaResSpines.at(0).calciumFree += ctt.caDiffusionFct * (-CaResSpines.at(0).calciumOldStep + CaResSpines.at(1).calciumOldStep);
-  CaResSpines.at(0).calciumFree += ctt.calciumInfluxBasal - CaResSpines.at(0).calciumFree * ctt.calciumExtrusionCtt;
+  MACRbPspines.at(0).calciumFree += ctt.caDiffusionFct * (-MACRbPspines.at(0).calciumOldStep + MACRbPspines.at(1).calciumOldStep);
+  MACRbPspines.at(0).calciumFree += ctt.calciumInfluxBasal - MACRbPspines.at(0).calciumFree * ctt.calciumExtrusionCtt;
   // Diffusion of resources
-  CaResSpines.at(0).resourcesAvailable += ctt.resourceDiffusionFct * (-CaResSpines.at(0).resourcesOldStep + CaResSpines.at(1).resourcesOldStep);
+  MACRbPspines.at(0).resourcesAvailable += ctt.resourceDiffusionFct * (-MACRbPspines.at(0).resourcesOldStep + MACRbPspines.at(1).resourcesOldStep);
 
-  size_t lastIndex{CaResSpines.size() - 1};
+  size_t lastIndex{MACRbPspines.size() - 1};
   auto   range = std::ranges::common_view(std::views::iota(1ull) | std::views::take(lastIndex - 1));
   std::for_each(PAR, range.begin(), range.end(), [this](size_t spineIndex) {
     const Constants CONST{this->constants};
     // Diffusion of calcium
-    CaResSpines.at(spineIndex).calciumFree +=
-        CONST.caDiffusionFct * (-2 * CaResSpines.at(spineIndex).calciumOldStep + CaResSpines.at(spineIndex - 1).calciumOldStep +
-                                CaResSpines.at(spineIndex + 1).calciumOldStep);
-    CaResSpines.at(spineIndex).calciumFree += CONST.calciumInfluxBasal - CaResSpines.at(spineIndex).calciumFree * CONST.calciumExtrusionCtt;
+    MACRbPspines.at(spineIndex).calciumFree +=
+        CONST.caDiffusionFct * (-2 * MACRbPspines.at(spineIndex).calciumOldStep + MACRbPspines.at(spineIndex - 1).calciumOldStep +
+                                MACRbPspines.at(spineIndex + 1).calciumOldStep);
+    MACRbPspines.at(spineIndex).calciumFree += CONST.calciumInfluxBasal - MACRbPspines.at(spineIndex).calciumFree * CONST.calciumExtrusionCtt;
     // Diffusion of resources
-    CaResSpines.at(spineIndex).resourcesAvailable +=
-        CONST.resourceDiffusionFct * (-2 * CaResSpines.at(spineIndex).resourcesOldStep + CaResSpines.at(spineIndex - 1).resourcesOldStep +
-                                      CaResSpines.at(spineIndex + 1).resourcesOldStep);
+    MACRbPspines.at(spineIndex).resourcesAvailable +=
+        CONST.resourceDiffusionFct * (-2 * MACRbPspines.at(spineIndex).resourcesOldStep + MACRbPspines.at(spineIndex - 1).resourcesOldStep +
+                                      MACRbPspines.at(spineIndex + 1).resourcesOldStep);
   });
   // Last boundary case
   //  Diffusion of calcium
-  CaResSpines.at(lastIndex).calciumFree +=
-      ctt.caDiffusionFct * (-CaResSpines.at(lastIndex).calciumOldStep + CaResSpines.at(lastIndex - 1).calciumOldStep);
-  CaResSpines.at(lastIndex).calciumFree += ctt.calciumInfluxBasal - CaResSpines.at(lastIndex).calciumFree * ctt.calciumExtrusionCtt;
+  MACRbPspines.at(lastIndex).calciumFree +=
+      ctt.caDiffusionFct * (-MACRbPspines.at(lastIndex).calciumOldStep + MACRbPspines.at(lastIndex - 1).calciumOldStep);
+  MACRbPspines.at(lastIndex).calciumFree += ctt.calciumInfluxBasal - MACRbPspines.at(lastIndex).calciumFree * ctt.calciumExtrusionCtt;
   // Diffusion of resources
-  CaResSpines.at(lastIndex).resourcesAvailable +=
-      ctt.resourceDiffusionFct * (-CaResSpines.at(lastIndex).resourcesOldStep + CaResSpines.at(lastIndex - 1).resourcesOldStep);
+  MACRbPspines.at(lastIndex).resourcesAvailable +=
+      ctt.resourceDiffusionFct * (-MACRbPspines.at(lastIndex).resourcesOldStep + MACRbPspines.at(lastIndex - 1).resourcesOldStep);
+}
+
+double MACRbPBranch::GetTotalWeight() const {
+  return std::reduce(MACRbPspines.begin(), MACRbPspines.end(), 0.0, [](double accumulator, const MACRbPSynapseSpine &spine) {
+    if (spine.connected)
+      return accumulator + spine.weight;
+    else
+      return accumulator;
+  });
 }
 void MACRbPBranch::PostSpikeCalciumFlux() {
   const double nonlinearFactor{constants.nonlinearFactorNMDA};
-  for (MACRbPSynapseSpine &spine : CaResSpines) {
+  for (MACRbPSynapseSpine &spine : MACRbPspines) {
     spine.postTransientIncrease += (1. + nonlinearFactor * spine.preTransient);
   }
 }

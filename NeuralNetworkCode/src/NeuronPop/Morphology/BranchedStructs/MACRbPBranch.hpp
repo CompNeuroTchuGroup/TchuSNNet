@@ -17,7 +17,7 @@ struct MACRbPBranch : public Branch {
   // prespikes and postspikes
   // We swap vector positions (0,1;1,2;2,3), then set to false last vector. std::iter_swap or std::swap. Test speed in this.
   // Synapse access
-  std::vector<MACRbPSynapseSpine> CaResSpines; // VECTOR ACCOUNTS FOR EMPTY SYNAPSE SLOTS
+  std::vector<MACRbPSynapseSpine> MACRbPspines; // VECTOR ACCOUNTS FOR EMPTY SYNAPSE SLOTS
 
   // Constants
   Constants constants;
@@ -37,5 +37,8 @@ struct MACRbPBranch : public Branch {
   //  concentration already and we just add.
   // Reaction methods
   void Advect(); // All done in the scope of the branch!
+
+  // Data retrieval
+  double GetTotalWeight() const;
 };
 #endif
