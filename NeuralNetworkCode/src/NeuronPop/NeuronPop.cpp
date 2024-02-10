@@ -79,13 +79,13 @@ void NeuronPop::ClearSpikerVector() {
   // everywhere (tested and faster in MVSC)
   std::swap(spikerNeurons, spikerNeuronsPrevdt);
   spikerNeurons.clear();
-  std::transform(std::execution::unseq, previousSpikeDistance.begin(), previousSpikeDistance.end(), previousSpikeDistance.begin(),
+  std::transform(PAR_UNSEQ, previousSpikeDistance.begin(), previousSpikeDistance.end(), previousSpikeDistance.begin(),
                  std::bind(std::plus<TStepInt>(), std::placeholders::_1, 1));
 }
 
 void NeuronPop::AdvectPlasticityModel() {
   if (this->hasPlasticity) {
-    std::for_each(std::execution::unseq, spikerNeurons.begin(), spikerNeurons.end(), [this](NeuronInt spiker) { RecordPostSpike(spiker); });
+    std::for_each(PAR_UNSEQ, spikerNeurons.begin(), spikerNeurons.end(), [this](NeuronInt spiker) { RecordPostSpike(spiker); });
     std::for_each(PAR_UNSEQ, morphology.begin(), morphology.end(), [](std::unique_ptr<Morphology> &singleMorphology) { singleMorphology->Advect(); });
   }
 }

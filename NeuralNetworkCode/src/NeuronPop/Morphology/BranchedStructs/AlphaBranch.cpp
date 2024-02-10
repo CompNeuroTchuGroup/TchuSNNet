@@ -118,8 +118,8 @@ void AlphaBranch::DecayAllTraces() {
   // something equivalent to a lambda function).
   //  To understand what is going on :
   //  https://www.youtube.com/watch?v=1nNKeCFtBDI
-  std::transform(std::execution::unseq, preSynapticTraces.begin(), preSynapticTraces.end(), preSynapticTraces.begin(),
+  std::transform(PAR_UNSEQ, preSynapticTraces.begin(), preSynapticTraces.end(), preSynapticTraces.begin(),
                  std::bind(std::multiplies<double>(), std::placeholders::_1, preSynTraceDecay));
-  std::transform(std::execution::unseq, cooperativityTraces.begin(), cooperativityTraces.end(), cooperativityTraces.begin(),
+  std::transform(PAR_UNSEQ, cooperativityTraces.begin(), cooperativityTraces.end(), cooperativityTraces.begin(),
                  std::bind(std::multiplies<double>(), std::placeholders::_1, coopTraceDecay));
 }

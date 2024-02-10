@@ -20,11 +20,11 @@ std::vector<double> MongilloSynapseContinuous::AdvectSpikers(NeuronInt spiker) {
 
   std::vector<double> currents(noTargetNeurons);
   // std::cout << "Synapse " << this->GetIdStr() << "\n";
-  std::transform(std::execution::unseq, y_MongilloC.at(spiker).begin(), y_MongilloC.at(spiker).end(), y_MongilloC.at(spiker).begin(),
+  std::transform(PAR_UNSEQ, y_MongilloC.at(spiker).begin(), y_MongilloC.at(spiker).end(), y_MongilloC.at(spiker).begin(),
                  std::bind(std::multiplies<double>(), std::placeholders::_1, exptf));
-  std::transform(std::execution::unseq, y_MongilloC.at(spiker).begin(), y_MongilloC.at(spiker).end(), y_MongilloC.at(spiker).begin(),
+  std::transform(PAR_UNSEQ, y_MongilloC.at(spiker).begin(), y_MongilloC.at(spiker).end(), y_MongilloC.at(spiker).begin(),
                  [this](double y_MonC) { return y_MonC + u_MongilloC * (1 - y_MonC); });
-  std::transform(std::execution::unseq, x_MongilloC.at(spiker).begin(), x_MongilloC.at(spiker).end(), x_MongilloC.at(spiker).begin(),
+  std::transform(PAR_UNSEQ, x_MongilloC.at(spiker).begin(), x_MongilloC.at(spiker).end(), x_MongilloC.at(spiker).begin(),
                  [exptd](double x_MonC) { return 1 - (1 - x_MonC) * exptd; });
 
   for (NeuronInt targetNeuron : std::ranges::views::iota(0, noTargetNeurons)) {
