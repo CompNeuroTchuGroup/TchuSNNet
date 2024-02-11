@@ -64,21 +64,21 @@ void SynapseSample::SaveSynapseType(std::string parameterName, std::string type,
 
 void SynapseSample::SetUpSynapse(PopInt targetPop, PopInt sourcePop, std::string type, std::vector<FileEntry> synapseParameters) {
   if (type == IDstringCurrentSynapse || type == IDstringHeteroSynapse) {
-    synapses.at(targetPop).at(sourcePop) = std::make_unique<CurrentSynapse>(neurons->GetPop(targetPop), neurons->GetPop(sourcePop), infoGlobal);
+    synapses.at(targetPop).at(sourcePop) = std::make_unique<CurrentSynapse>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
   } else if (type == IDstringMongilloSynapse) {
-    synapses.at(targetPop).at(sourcePop) = std::make_unique<MongilloSynapse>(neurons->GetPop(targetPop), neurons->GetPop(sourcePop), infoGlobal);
+    synapses.at(targetPop).at(sourcePop) = std::make_unique<MongilloSynapse>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
   } else if (type == IDstringMongilloSynapseContinuous) {
     synapses.at(targetPop).at(sourcePop) =
-        std::make_unique<MongilloSynapseContinuous>(neurons->GetPop(targetPop), neurons->GetPop(sourcePop), infoGlobal);
+        std::make_unique<MongilloSynapseContinuous>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
   } else if (type == IDstringPRGSynapseContinuous) {
-    synapses.at(targetPop).at(sourcePop) = std::make_unique<PRGSynapseContinuous>(neurons->GetPop(targetPop), neurons->GetPop(sourcePop), infoGlobal);
+    synapses.at(targetPop).at(sourcePop) = std::make_unique<PRGSynapseContinuous>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
   } else if (type == IDstringExponentialCurrentSynapse) {
     synapses.at(targetPop).at(sourcePop) =
-        std::make_unique<ExponentialCurrentSynapse>(neurons->GetPop(targetPop), neurons->GetPop(sourcePop), infoGlobal);
+        std::make_unique<ExponentialCurrentSynapse>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
   } else if (type == IDstringPowerLawSynapse) {
-    synapses.at(targetPop).at(sourcePop) = std::make_unique<PowerLawSynapse>(neurons->GetPop(targetPop), neurons->GetPop(sourcePop), infoGlobal);
+    synapses.at(targetPop).at(sourcePop) = std::make_unique<PowerLawSynapse>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
   } else if (type == IDstringPlasticityModelSynapse) {
-    synapses.at(targetPop).at(sourcePop) = std::make_unique<PModelSynapse>(neurons->GetPop(targetPop), neurons->GetPop(sourcePop), infoGlobal);
+    synapses.at(targetPop).at(sourcePop) = std::make_unique<PModelSynapse>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
   }
   synapses.at(targetPop).at(sourcePop)->LoadParameters(synapseParameters);
 }

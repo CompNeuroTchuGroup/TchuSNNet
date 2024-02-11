@@ -36,14 +36,15 @@ public:
   //*******************
   // Get-Functions
   //*******************
-  NeuronInt                     GetTotalNeurons() const { return infoGlobal->totalNeurons; }
-  PopInt                        GetTotalPopulations() const { return this->noPopulations; }
-  NeuronInt                     GetNeuronsPop(PopInt popId) const { return neuronPops.at(popId)->GetNoNeurons(); }
-  PopPtr                        GetPop(PopInt popId) const { return neuronPops.at(popId); }
-  SynInt                        GetNoSynapses(PopInt popId) const { return neuronPops.at(popId)->GetNoSynapses(); }
-  const std::vector<NeuronInt> &GetSpikers(PopInt neuronPop) const {
-    return neuronPops.at(neuronPop)->GetSpikers();
-  } // This function is called in RecordRasterplot()
+  NeuronInt GetTotalNeurons() const { return infoGlobal->totalNeurons; }
+  PopInt    GetTotalPopulations() const { return this->noPopulations; }
+  NeuronInt GetNeuronsPop(PopInt popId) const { return neuronPops.at(popId)->GetNoNeurons(); }
+  PopPtr    GetPopPtr(PopInt popId) { return neuronPops.at(popId); }
+  cPopPtr   GetcPopPtr(PopInt popId) const { return std::const_pointer_cast<const NeuronPop>(neuronPops.at(popId)); }
+  SynInt    GetNoSynapses(PopInt popId) const { return neuronPops.at(popId)->GetNoSynapses(); }
+
+  const std::vector<NeuronInt> &GetSpikers(PopInt neuronPop) const { return neuronPops.at(neuronPop)->GetSpikers(); }
+  // This function is called in RecordRasterplot()
   const std::vector<NeuronInt> &GetSpikersPrevDt(PopInt neuronPop) const { return neuronPops.at(neuronPop)->GetSpikersPrevDt(); }
   double                        GetXPosition(PopInt neuronPop, NeuronInt neuron) const { return neuronPops.at(neuronPop)->GetXPosition(neuron); }
   double                        GetYPosition(PopInt neuronPop, NeuronInt neuron) const { return neuronPops.at(neuronPop)->GetYPosition(neuron); }

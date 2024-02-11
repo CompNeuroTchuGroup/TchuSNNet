@@ -119,7 +119,7 @@ void Recorder::WriteSteadyStates() const {
   // Models in neuronPop classes
   // Models in the Morphology framework
   for (PopInt popIndex = 0; popIndex < neurons->GetTotalPopulations(); popIndex++) {
-    PopPtr pop{neurons->GetPop(popIndex)};
+    cPopPtr pop{neurons->GetcPopPtr(popIndex)};
     if (pop->HasSteadyState()) {
       ssStream << "Steady state no. " << counter++ << '\n';
       ssStream << "Neuron pop. " << pop->GetId() << " with model " << pop->GetMorphologyType() << '\n';
@@ -248,8 +248,8 @@ void Recorder::SetAveragingSteps(double secondsPerBin) {
 }
 
 void Recorder::BindNoHeteroSynapsesPerPop(PopInt neuronPop) {
-  if ((heteroSynTracker.at(neuronPop).second > neurons->GetPop(neuronPop)->GetNoSynapses()) || (heteroSynTracker.at(neuronPop).second < 0)) {
-    heteroSynTracker.at(neuronPop).second = neurons->GetPop(neuronPop)->GetNoSynapses();
+  if ((heteroSynTracker.at(neuronPop).second > neurons->GetcPopPtr(neuronPop)->GetNoSynapses()) || (heteroSynTracker.at(neuronPop).second < 0)) {
+    heteroSynTracker.at(neuronPop).second = neurons->GetcPopPtr(neuronPop)->GetNoSynapses();
   }
 }
 
@@ -274,9 +274,12 @@ void Recorder::MakeInputCopies(const std::string &inputFileAddress) {
   sourceFile.close();
   // DictatFiles
   for (PopInt neuronPop : std::ranges::views::iota(0, neurons->GetTotalPopulations())) {
-    std::shared_ptr<DictatNeuronPop> dictatPtr = std::dynamic_pointer_cast<DictatNeuronPop>(neurons->GetPop(neuronPop));
+    std::shared_ptr<const DictatNeuronPop> dictatPtr = std::dynamic_pointer_cast<const DictatNeuronPop>(neurons->GetcPopPtr(neuronPop));
     if (dictatPtr != nullptr) {
-      dictatPtr->CloseInputStream();
+      // Here I am possibly introducing an overhead. The input stream from the pop is not closed, and as such could consume extra resources but that
+      // is all.
+      // It _should_ not be a bug
+      //  dictatPtr->CloseInputStream();
       std::ifstream sourceFile(dictatPtr->GetInputFileAddress(), std::ios::binary);
       std::ofstream copiedFile(this->directoryPath + nonIterateTitle + "_DictatNeuronPop_" + std::to_string(dictatPtr->GetId()) + "_spikers.txt",
                                std::ios::binary);
@@ -637,9 +640,9 @@ void Recorder::WriteDataHeaderHeteroSynapses() {
   for (PopInt neuronPop : std::ranges::views::iota(0, totalNeuronPops)) {
     BindNoHeteroSynapsesPerPop(neuronPop);
     if (heteroSynTracker.at(neuronPop).first != 0 && heteroSynTracker.at(neuronPop).second != 0 &&
-        this->neurons->GetPop(neuronPop)->HasPlasticityModel()) {
+        this->neurons->GetcPopPtr(neuronPop)->HasPlasticityModel()) {
       this->fileStreams.heteroSynFileStream << "#Pop. " << neuronPop << " profile -> "
-                                            << this->neurons->GetPop(neuronPop)->GetIndividualSynapticProfileHeaderInfo() << " \n";
+                                            << this->neurons->GetcPopPtr(neuronPop)->GetIndividualSynapticProfileHeaderInfo() << " \n";
     }
   }
 
@@ -654,7 +657,7 @@ void Recorder::WriteDataHeaderHeteroSynapses() {
 
   for (PopInt neuronPop : std::ranges::views::iota(0, totalNeuronPops)) {
     if (heteroSynTracker.at(neuronPop).second == 0 || heteroSynTracker.at(neuronPop).first == 0 ||
-        !this->neurons->GetPop(neuronPop)->HasPlasticityModel()) {
+        !this->neurons->GetcPopPtr(neuronPop)->HasPlasticityModel()) {
       continue;
     }
     for (NeuronInt neuron : std::ranges::views::iota(0, heteroSynTracker.at(neuronPop).first)) {
@@ -681,9 +684,9 @@ void Recorder::WriteDataHeaderHeteroSynapsesOverall() {
   for (PopInt neuronPop : std::ranges::views::iota(0, totalNeuronPops)) {
     BindNoHeteroSynapsesPerPop(neuronPop);
     if (heteroSynTracker.at(neuronPop).first != 0 && heteroSynTracker.at(neuronPop).second != 0 &&
-        this->neurons->GetPop(neuronPop)->HasPlasticityModel()) {
+        this->neurons->GetcPopPtr(neuronPop)->HasPlasticityModel()) {
       this->fileStreams.hSOverallFileStream << "#Pop. " << neuronPop << " Overall Profile -> "
-                                            << this->neurons->GetPop(neuronPop)->GetOverallSynapticProfileHeaderInfo() << " \n";
+                                            << this->neurons->GetcPopPtr(neuronPop)->GetOverallSynapticProfileHeaderInfo() << " \n";
     }
   }
   this->fileStreams.hSOverallFileStream << "\n#************************************\n";
@@ -699,7 +702,7 @@ void Recorder::WriteDataHeaderHeteroSynapsesOverall() {
 
   for (PopInt neuronPop : std::ranges::views::iota(0, totalNeuronPops)) {
     if (heteroSynTracker.at(neuronPop).second == 0 || heteroSynTracker.at(neuronPop).first == 0 ||
-        !this->neurons->GetPop(neuronPop)->HasPlasticityModel()) {
+        !this->neurons->GetcPopPtr(neuronPop)->HasPlasticityModel()) {
       continue;
     }
     for (NeuronInt neuron : std::ranges::views::iota(0, heteroSynTracker.at(neuronPop).first)) {
@@ -981,14 +984,14 @@ void Recorder::RecordHeteroSynapses() {
   SaveDoubleFile(this->fileStreams.heteroSynFileStream, static_cast<double>(infoGlobal->timeStep) * infoGlobal->dtTimestep, 5);
 
   for (PopInt neuronPop : std::ranges::views::iota(0, neurons->GetTotalPopulations())) {
-    if (!this->neurons->GetPop(neuronPop)->HasPlasticityModel() || heteroSynTracker.at(neuronPop).second == 0 ||
+    if (!this->neurons->GetcPopPtr(neuronPop)->HasPlasticityModel() || heteroSynTracker.at(neuronPop).second == 0 ||
         heteroSynTracker.at(neuronPop).first == 0) {
       continue;
     }
     for (NeuronInt neuron : std::ranges::views::iota(0, heteroSynTracker.at(neuronPop).first)) {
       for (signed long synapse : std::ranges::views::iota(0, heteroSynTracker.at(neuronPop).second)) {
-        SaveTupleOfDoublesFile(this->fileStreams.heteroSynFileStream, this->neurons->GetPop(neuronPop)->GetIndividualSynapticProfile(neuron, synapse),
-                               5);
+        SaveTupleOfDoublesFile(this->fileStreams.heteroSynFileStream,
+                               this->neurons->GetcPopPtr(neuronPop)->GetIndividualSynapticProfile(neuron, synapse), 5);
       }
     }
   }
@@ -1003,12 +1006,12 @@ void Recorder::RecordHeteroSynapsesOverall() {
   SaveDoubleFile(this->fileStreams.hSOverallFileStream, static_cast<double>(infoGlobal->timeStep) * infoGlobal->dtTimestep, 5);
 
   for (PopInt neuronPop : std::ranges::views::iota(0, neurons->GetTotalPopulations())) {
-    if (!this->neurons->GetPop(neuronPop)->HasPlasticityModel() || heteroSynTracker.at(neuronPop).second == 0 ||
+    if (!this->neurons->GetcPopPtr(neuronPop)->HasPlasticityModel() || heteroSynTracker.at(neuronPop).second == 0 ||
         heteroSynTracker.at(neuronPop).first == 0) {
       continue;
     }
     for (NeuronInt neuron : std::ranges::views::iota(0, heteroSynTracker.at(neuronPop).first)) {
-      SaveTupleOfDoublesFile(this->fileStreams.hSOverallFileStream, this->neurons->GetPop(neuronPop)->GetOverallSynapticProfile(neuron), 5);
+      SaveTupleOfDoublesFile(this->fileStreams.hSOverallFileStream, this->neurons->GetcPopPtr(neuronPop)->GetOverallSynapticProfile(neuron), 5);
       // Here is selecting only the average weight per neuron, with precision 5 digits.
     }
   }
