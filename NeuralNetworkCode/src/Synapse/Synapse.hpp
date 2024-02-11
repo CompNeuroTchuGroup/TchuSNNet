@@ -99,9 +99,9 @@ protected:
   }
   // double GetCouplingStrengthTrainablePlasticity(signed long sourceNeuron, signed long targetNeuron); //Move to new class, where virtual function
   // goes Necessary mutex locks
-  std::mutex _waitingMatrixMutexLock;
-  void       AllocateSynapseStandard(NeuronInt targetNeuron, NeuronInt sourceNeuron);
-  void       AllocateSynapseWithPlasticity(NeuronInt targetNeuron, NeuronInt sourceNeuron);
+  // std::mutex _waitingMatrixMutexLock;
+  void AllocateSynapseStandard(NeuronInt targetNeuron, NeuronInt sourceNeuron);
+  void AllocateSynapseWithPlasticity(NeuronInt targetNeuron, NeuronInt sourceNeuron);
 
 public:
   Synapse(PopPtr targetNeurons, PopPtr sourceNeurons, GlobalSimInfo *infoGlobal);
