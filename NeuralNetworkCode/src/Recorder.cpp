@@ -254,9 +254,18 @@ void Recorder::BindNoHeteroSynapsesPerPop(PopInt neuronPop) {
 }
 
 void Recorder::AllocateAndAssignStreamBuffer(std::ofstream &outputStream) {
-  char *rdbuf_memory = new char[recordBufferSize];
-  outputStream.rdbuf()->pubsetbuf(rdbuf_memory,
-                                  recordBufferSize); // Second argument is supposed to be the size of buffer in number of chars, NOT BITS
+  try {
+    char *rdbuf_memory = new char[recordBufferSize];
+    outputStream.rdbuf()->pubsetbuf(rdbuf_memory, recordBufferSize);
+    // Second argument is supposed to be the size of buffer in number of chars, NOT BITS
+    // When rdbuf points to the buffer, it takes ownership of the memory!
+  } catch (const std::bad_alloc &e) {
+    // Memory allocation failed
+    std::cerr << "Failed to allocate memory for stream buffer: " << e.what() << std::endl;
+    // Optionally, perform any cleanup or error handling here
+    // For example, close the output stream or throw the exception again
+    throw; // Rethrow the exception to propagate it to the caller
+  }
 }
 
 void Recorder::WriteHeader(std::ofstream &fileStream) const {
