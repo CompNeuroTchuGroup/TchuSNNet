@@ -30,11 +30,13 @@ protected:
   std::vector<std::vector<bool>>       synapseStates;
   PopInt                               totalNeuronPops;
 
-  std::mutex _syndVMutex;
+  std::vector<std::mutex> _syndVMutex;
 
   void LoadParameters(const std::vector<FileEntry> &synapseParameters);
   void SaveSynapseType(std::string parameterName, std::string type, const std::vector<FileEntry> &synapseParameters);
   void SetUpSynapse(PopInt targetPop, PopInt sourcePop, std::string type, std::vector<FileEntry> synapseParameters);
+  void CheckSeeds();
+  void SetUpMutexes();
 
 public:
   SynapseSample(std::shared_ptr<NeuronPopSample> neurons, std::vector<FileEntry> &synapseParameters, GlobalSimInfo *infoGlobal);

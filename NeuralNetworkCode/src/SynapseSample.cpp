@@ -30,63 +30,17 @@ SynapseSample::SynapseSample(std::shared_ptr<NeuronPopSample> neurons, std::vect
 void SynapseSample::LoadParameters(const std::vector<FileEntry> &synapseParameters) {
 
   for (auto &[parameterName, parameterValues] : synapseParameters) {
-    if ((parameterName.find("type") != std::string::npos) && ((parameterName.find("connectivity") == std::string::npos))) {
+    if ((parameterName.find("type") != std::string::npos) && ((parameterName.find("connectivity") == std::string::npos)) &&
+        (parameterName.find("pmodel") == std::string::npos)) {
       // I think this line is incorrect. If what we are looking for is the synapse type, this is not it. If we want to see connectivity type (for init
       // reasons) then yes
       SaveSynapseType(parameterName, parameterValues.at(0), synapseParameters);
     }
-    // if(parameterName.find("generalSynapseSeed") != std::string::npos){
-    //     generalSynapseSeed = std::stoi(parameterValues.at(0));
-    // }
   }
-
-  // if(infoGlobal->globalSeed != -1){
-  //     std::uniform_int_distribution<int> distribution(0,INT32_MAX);
-  //     generalSynapseSeed = distribution(infoGlobal->globalGenerator);
-  // }
-
-  // if(generalSynapseSeed >= 0){
-  //     //Find totalNeuronPops^2 different seed parameterValues
-  //     std::mt19937 generator;
-  //     std::uniform_int_distribution<int> distribution(0,INT32_MAX);
-  //     generator = std::mt19937(generalSynapseSeed);
-
-  //     for(PopInt neuronPop : range(0, totalNeuronPops)){
-  //         for(int j = 0; j < totalNeuronPops; j++){
-  //             synapses[i][j]->SetSeed(&generator);
-  //         }
-  //     }
-  // }
 
   // Check seeds (SEPARATE FUNCTION for each neuronPop)
-  for (PopInt popIterator1 : std::ranges::views::iota(0, totalNeuronPops)) {
-    for (PopInt popIterator2 : std::ranges::views::iota(0, totalNeuronPops)) {
-      for (PopInt popIterator3 : std::ranges::views::iota(0, totalNeuronPops)) {
-        for (PopInt popIterator4 : std::ranges::views::iota(0, totalNeuronPops)) {
-          if (!GetConnectedState(popIterator1, popIterator2) || !GetConnectedState(popIterator3, popIterator4)) {
-            continue;
-          }
-          if ((synapses.at(popIterator1).at(popIterator2)->GetSeed() == synapses.at(popIterator3).at(popIterator4)->GetSeed()) &&
-              (popIterator1 > popIterator3 || popIterator2 > popIterator4)) {
-            std::cout << "WARNING! Same Seeds in Connections of Populations " << popIterator1 << "_" << popIterator2 << " and " << popIterator3 << "_"
-                      << popIterator4 << std::endl;
-          }
-        }
-      }
-    }
-  }
-  /*
-  // Get maximal synaptic delay across all synapse populations
-  int curr_max = 0;
-  for(PopInt neuronPop : std::ranges::views::iota(0, totalNeuronPops)){
-      for(int j = 0; j < totalNeuronPops; j++){
-          curr_max = synapses[i][j]->GetMaxD();
-          if(global_D_max < curr_max){
-              global_D_max = curr_max;
-          }
-      }
-  }
-  */
+  CheckSeeds();
+  SetUpMutexes();
 }
 
 void SynapseSample::SaveSynapseType(std::string parameterName, std::string type, const std::vector<FileEntry> &synapseParameters) {
@@ -129,6 +83,29 @@ void SynapseSample::SetUpSynapse(PopInt targetPop, PopInt sourcePop, std::string
   synapses.at(targetPop).at(sourcePop)->LoadParameters(synapseParameters);
 }
 
+void SynapseSample::CheckSeeds() {
+  for (PopInt popIterator1 : std::ranges::views::iota(0, totalNeuronPops)) {
+    for (PopInt popIterator2 : std::ranges::views::iota(0, totalNeuronPops)) {
+      for (PopInt popIterator3 : std::ranges::views::iota(0, totalNeuronPops)) {
+        for (PopInt popIterator4 : std::ranges::views::iota(0, totalNeuronPops)) {
+          if (!GetConnectedState(popIterator1, popIterator2) || !GetConnectedState(popIterator3, popIterator4)) {
+            continue;
+          }
+          if ((synapses.at(popIterator1).at(popIterator2)->GetSeed() == synapses.at(popIterator3).at(popIterator4)->GetSeed()) &&
+              (popIterator1 > popIterator3 || popIterator2 > popIterator4)) {
+            std::cout << "WARNING! Same Seeds in Connections of Populations " << popIterator1 << "_" << popIterator2 << " and " << popIterator3 << "_"
+                      << popIterator4 << std::endl;
+          }
+        }
+      }
+    }
+  }
+}
+
+void SynapseSample::SetUpMutexes() {
+  _syndVMutex = std::vector<std::mutex>(totalNeuronPops);
+}
+
 void SynapseSample::SaveParameters(std::ofstream &wParameterStream) const {
 
   std::string synapsePrefix;
@@ -157,8 +134,9 @@ void SynapseSample::Advect(std::vector<std::vector<double>> &synaptic_dV) {
   // for (Synapse* synapse : connectedSynapses) {
   //             synapse->Advect(synaptic_dV.at(synapse->GetTargetPopID()));
   // }
-  std::for_each(PAR, connectedSynapses.begin(), connectedSynapses.end(),
-                [&synaptic_dV, this](Synapse *synapse) { synapse->Advect(synaptic_dV.at(synapse->GetTargetPopID()), this->_syndVMutex); });
+  std::for_each(PAR, connectedSynapses.begin(), connectedSynapses.end(), [&synaptic_dV, this](Synapse *synapse) {
+    synapse->Advect(synaptic_dV.at(synapse->GetTargetPopID()), this->_syndVMutex.at(synapse->GetTargetPopID()));
+  });
 }
 
 void SynapseSample::Reset() {
@@ -176,7 +154,7 @@ void SynapseSample::ConnectNeurons() {
       }
     }
   }
-  std::for_each(std::execution::par, connectedSynapses.begin(), connectedSynapses.end(), [](Synapse *synapse) {
+  std::for_each(PAR, connectedSynapses.begin(), connectedSynapses.end(), [](Synapse *synapse) {
     std::cout << "Connecting neuronPop. " << synapse->GetSourcePopID() << " with neuronPop. " << synapse->GetTargetPopID() << "...\n" << std::endl;
     synapse->ConnectNeurons();
     synapse->SetDistributionD();
