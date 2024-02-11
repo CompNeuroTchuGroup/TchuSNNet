@@ -262,7 +262,7 @@ bool NeuronPop::ignoreJDParameters() const {
 // From here on
 
 BaseSpinePtr NeuronPop::AllocateNewSynapse(NeuronInt neuronId, BranchTargeting &branchTarget) {
-  std::lock_guard<std::mutex> _guardedMutexLock(_morphologyMutex);
+  std::lock_guard<std::mutex> _guardedMutexLock(_connectMutex);
   return morphology.at(neuronId)->AllocateNewSynapse(branchTarget);
 }
 
@@ -291,7 +291,7 @@ std::vector<double> NeuronPop::GetSteadyStateData() const {
 }
 
 void NeuronPop::PostConnectSetUp() {
-  std::lock_guard<std::mutex> _guardedMutexLock(_morphologyMutex);
+  std::lock_guard<std::mutex> _guardedMutexLock(_connectMutex);
   if (!morphology.empty()) {
     std::for_each(morphology.begin(), morphology.end(), [](std::unique_ptr<Morphology> &singleMorphology) { singleMorphology->PostConnectSetUp(); });
   }

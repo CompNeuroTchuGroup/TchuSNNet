@@ -50,7 +50,7 @@ protected:
   std::string morphologyType{"None"};
   // Necessary mutex locks
 
-  std::mutex _morphologyMutex;
+  std::mutex _connectMutex;
 
 public:
   // constructor
