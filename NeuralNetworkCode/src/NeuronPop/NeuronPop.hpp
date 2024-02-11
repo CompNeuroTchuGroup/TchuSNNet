@@ -79,10 +79,7 @@ public:
   std::string         GetMorphologyType() const { return morphologyType; }
   PopInt              GetId() const { return this->identifier; }
 
-  int GetNoSynapses() const {
-    return std::accumulate(morphology.begin(), morphology.end(), 0,
-                           [](int accumulator, const std::unique_ptr<Morphology> &morpho) { return accumulator + morpho->GetNoSynapses(); });
-  } // This is purely for virtualization reasons
+  SynInt GetNoSynapses() const; // This is purely for virtualization reasons
   int    GetNoBranches() const { return static_cast<BranchedMorphology *>(morphology.at(0).get())->GetNoBranches(); }
   int    GetMaxGapDelay(int delayPerGap) const { return (morphology.at(0).get())->GetMaxGapDelay(delayPerGap); }
   double GetSynapticDistanceToSoma(int neuronId, int synapseId) const { return morphology.at(neuronId)->GetSynapticDistanceToSoma(synapseId); }

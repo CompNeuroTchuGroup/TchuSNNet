@@ -27,8 +27,8 @@ class NeuronPopSample {
 protected:
   GlobalSimInfo *infoGlobal;
 
-  PopInt              noPopulations{};
-  std::vector<PopPtr> neuronPops;
+  PopInt                 noPopulations{};
+  std::vector<NeuronPop> neuronPops;
 
 public:
   NeuronPopSample(std::vector<FileEntry> neuronParameters, GlobalSimInfo *infoGlobal);
@@ -40,6 +40,7 @@ public:
   PopInt                        GetTotalPopulations() const { return this->noPopulations; }
   NeuronInt                     GetNeuronsPop(PopInt popId) const { return neuronPops.at(popId)->GetNoNeurons(); }
   PopPtr                        GetPop(PopInt popId) const { return neuronPops.at(popId); }
+  SynInt    GetNoSynapses(PopInt popId) const { return neuronPops.at(popId).GetNoSynapses(); }
   const std::vector<NeuronInt> &GetSpikers(PopInt neuronPop) const {
     return neuronPops.at(neuronPop)->GetSpikers();
   } // This function is called in RecordRasterplot()

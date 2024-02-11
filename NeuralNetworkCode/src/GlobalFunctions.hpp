@@ -38,6 +38,7 @@
 using PopInt    = signed int;
 using NeuronInt = signed long;
 using TStepInt  = long;
+using SynInt    = long;
 class Synapse;
 using SynapsePtr = std::unique_ptr<Synapse>;
 class NeuronPop;

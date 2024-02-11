@@ -9,6 +9,11 @@ NeuronPop::NeuronPop(GlobalSimInfo *globalInfo, PopInt inputID) : infoGlobal{glo
   generator = std::mt19937(seed);
 }
 
+SynInt NeuronPop::GetNoSynapses() const {
+  return std::reduce(morphology.begin(), morphology.end(), static_cast<SynInt>(0),
+                     [](SynInt accumulator, const std::unique_ptr<Morphology> &morpho) { return accumulator + morpho->GetNoSynapses(); });
+}
+
 void NeuronPop::SetNeurons() {
 
   // std::mt19937 generatorPreviousSpikes(seedInitialPreviousSpike);

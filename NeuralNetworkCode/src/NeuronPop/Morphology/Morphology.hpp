@@ -52,7 +52,7 @@ public:
 
   virtual BaseSpinePtr AllocateNewSynapse(BranchTargeting &synapse) = 0;
   double               GenerateSynapticWeight(); // Here we generate the synaptic weight to be allocated when a synapse is allocated
-  int                  GetNoSynapses() const { return static_cast<int>(baseSpineData.size()); }
+  SynInt               GetNoSynapses() const { return static_cast<SynInt>(baseSpineData.size()); }
   virtual std::string  GetType() const = 0;
 
   virtual void Advect() = 0;
