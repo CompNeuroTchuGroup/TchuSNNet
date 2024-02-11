@@ -45,8 +45,7 @@ class Recorder {
   friend class DatafileParser;
 
 protected:
-  std::vector<std::unique_ptr<std::vector<char>>> bufferPtrs;
-  size_t                                          customBufferSize{131072}; // Do not change
+  static constexpr size_t recordBufferSize{131072}; // Do not change, optimal buffer size for data recording
 
   GlobalSimInfo *infoGlobal;
 
