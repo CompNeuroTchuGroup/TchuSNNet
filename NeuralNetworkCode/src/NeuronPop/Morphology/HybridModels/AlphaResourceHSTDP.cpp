@@ -268,6 +268,7 @@ void AlphaResourceHSTDP::RecordPostSpike() {
 }
 
 void AlphaResourceHSTDP::RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) {
+  std::lock_guard<std::mutex> _locked(_presynSpikeMutex);
   // This function is NOT DELAY COMPATIBLE (careful with the delays in synapse objects)
   // POINTER CASTING IS FREE PERFORMANCE WISE
   // Here only record, afterwards we do the checks

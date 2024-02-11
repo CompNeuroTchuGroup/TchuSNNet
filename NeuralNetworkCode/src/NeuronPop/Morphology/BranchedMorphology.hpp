@@ -55,7 +55,7 @@ public:
   virtual std::string GetType() const = 0;
 
   void RecordPostSpike() override;
-  void RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) override;
+  void RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) = 0;
   // virtual std::vector<double> GetOverallSynapticProfile() const;
   // void CalcMorphoPlasticityEvents() override;
 

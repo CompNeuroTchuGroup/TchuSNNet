@@ -84,9 +84,10 @@ void MonoDendriteSTDP::RecordPostSpike() {
 }
 
 void MonoDendriteSTDP::RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) {
+  std::lock_guard<std::mutex> _locked(_presynSpikeMutex);
   // This function is NOT DELAY COMPATIBLE (careful with the delays in synapse objects)
   // Here the optimization for non-branched is shit, but no one uses this classes anyways
-  Morphology::RecordExcitatoryPreSpike(spinePtr);
+  this->totalPreSpikes++;
   this->spikedSpines.at(spinePtr->idInMorpho) = true; // This does not seem to be correctly implemented
   this->spikedSpinesId.push_back(spinePtr->idInMorpho);
   this->spineDataCoop.at(spinePtr->idInMorpho)

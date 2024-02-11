@@ -15,9 +15,7 @@ struct BranchTargeting;
 
 // DEPRECATED
 class HeteroGraupnerBrunel : public BranchedMorphology {
-  // This class models a behaviour based on wi=beta*(alfai/(omega+sum(alfai))), where alfai represents the spine's resources as
-  // (Ks*expdt+Kbasal)/(Ns*expdt+Nbasal) with bumps on Ks and Ns It is mathematically provable that this model is equivlaent to the original in a
-  // single branch.
+  // THIS MODEL IS NOT COMPLETE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 protected:
   // Synapse variables
   double alphaBasal{1.0};            // LP and SP

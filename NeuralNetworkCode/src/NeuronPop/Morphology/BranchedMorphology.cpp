@@ -11,15 +11,6 @@ void BranchedMorphology::RecordPostSpike() {
   Morphology::RecordPostSpike();
 }
 
-void BranchedMorphology::RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) {
-  // NEVER CALLED
-  //  This function is NOT DELAY COMPATIBLE (careful with the delays in synapse objects)
-  Morphology::RecordExcitatoryPreSpike(spinePtr);
-  // this->branches.at(this->branchedSpineData.at(spikedSynapseId)->branchId)->spikedSyn.at(this->branchedSpineData.at(spikedSynapseId)->branchPositionId)=true;
-  this->branches.at(static_cast<BranchedSpinePtr>(spinePtr)->branchId)
-      ->spikedSpinesInTheBranch.push_back(static_cast<BranchedSpinePtr>(spinePtr)->branchPositionId);
-}
-
 void BranchedMorphology::Reset() {
   std::for_each(branches.begin(), branches.end(), [](BranchPtr branch) { branch->spikedSpinesInTheBranch.clear(); });
   this->postSpiked = false;

@@ -410,6 +410,7 @@ void HeteroGraupnerBrunel::RecordPostSpike() {
 }
 
 void HeteroGraupnerBrunel::RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) {
+  std::lock_guard<std::mutex> _locked(_presynSpikeMutex);
   // This function is NOT DELAY COMPATIBLE (careful with the delays in synapse objects)
   // Here only record, afterwards we do the checks
   // Not going down the virtual path because inefficient

@@ -52,14 +52,6 @@ void Morphology::RecordPostSpike() {
   this->postSpiked = true;
 }
 
-void Morphology::RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) {
-  // This function is NOT DELAY COMPATIBLE (careful with the delays in synapse objects)
-  // Is there supposed to be a different Inhibitory function?
-  this->totalPreSpikes++;
-  // STDP Analysis
-  // this->preSpikes.emplace_back(spikedSynapseId, this->baseSpineData.at(spikedSynapseId)->lastSpike);
-}
-
 std::vector<double> Morphology::GetIndividualSynapticProfile(signed long spineID) const {
   return baseSpineData.at(spineID)->GetIndividualSynapticProfile();
 }

@@ -40,6 +40,8 @@ protected:
 
   virtual void Reset() = 0;
 
+  std::mutex _presynSpikeMutex;
+
 public:
   explicit Morphology(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters);
   virtual ~Morphology() = default;
@@ -55,7 +57,7 @@ public:
 
   virtual void Advect() = 0;
   virtual void RecordPostSpike();
-  virtual void RecordExcitatoryPreSpike(BaseSpinePtr spinePtr);
+  virtual void RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) = 0;
   // Record functions
   std::vector<double> GetIndividualSynapticProfile(signed long synapseId) const;
   std::string         GetIndividualSynapticProfileHeaderInfo() const;

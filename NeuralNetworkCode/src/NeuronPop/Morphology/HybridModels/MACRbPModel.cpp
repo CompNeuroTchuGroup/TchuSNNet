@@ -405,6 +405,7 @@ void MACRbPModel::RecordPostSpike() {
 }
 
 void MACRbPModel::RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) {
+  std::lock_guard<std::mutex> _locked(_presynSpikeMutex);
   // CaResSynapseSpine& synapseSpine = *caResSpines.at(spikedSpineId);
   // CaDiffusionBranch&  branch       = caDiffBranches.at(synapseSpine.branchId);
   // int  branchSpinePosition{synapseSpine.branchPositionId};
@@ -469,5 +470,7 @@ std::vector<double> MACRbPModel::GetSteadyStateData() const {
 }
 
 std::vector<std::string> MACRbPModel::GetSteadyStateVarNames() const {
-  return std::vector<std::string>();
+  return std::vector<std::string>{
+      "",
+  };
 }
