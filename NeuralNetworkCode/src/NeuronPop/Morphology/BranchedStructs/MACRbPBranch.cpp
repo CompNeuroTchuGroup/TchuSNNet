@@ -29,6 +29,7 @@ MACRbPBranch::MACRbPBranch(double gap, double branchLength, int branchId, Consta
 
 void MACRbPBranch::PostConnectSetUp(std::vector<BranchedSpinePtr> spineData) {
   // If it is ever necessary to release the weight of unconnected synapses as free resources, uncomment the next lines of code.
+  // PROBLEM WITH THIS: Spines will not be in steady state anymore, they will start over-depressed
   // double extraResources{};
   // for (const MACRbPSynapseSpine &spine : MACRbPspines) {
   //   if (!spine.connected) {
