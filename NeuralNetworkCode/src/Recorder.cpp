@@ -123,6 +123,7 @@ void Recorder::WriteSteadyStates() const {
     if (pop->HasSteadyState()) {
       ssStream << "Steady state no. " << counter++ << '\n';
       ssStream << "Neuron pop. " << pop->GetId() << " with model " << pop->GetMorphologyType() << '\n';
+      std::vector<double> data{};
     }
   }
 
