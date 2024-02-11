@@ -12,7 +12,8 @@ void BranchedMorphology::RecordPostSpike() {
 }
 
 void BranchedMorphology::RecordExcitatoryPreSpike(BaseSpinePtr spinePtr) {
-  // This function is NOT DELAY COMPATIBLE (careful with the delays in synapse objects)
+  // NEVER CALLED
+  //  This function is NOT DELAY COMPATIBLE (careful with the delays in synapse objects)
   Morphology::RecordExcitatoryPreSpike(spinePtr);
   // this->branches.at(this->branchedSpineData.at(spikedSynapseId)->branchId)->spikedSyn.at(this->branchedSpineData.at(spikedSynapseId)->branchPositionId)=true;
   this->branches.at(static_cast<BranchedSpinePtr>(spinePtr)->branchId)
