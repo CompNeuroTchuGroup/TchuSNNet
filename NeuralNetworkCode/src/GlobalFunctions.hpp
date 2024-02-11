@@ -170,7 +170,7 @@ struct Constants { // currently 19 + the prespike/postspike calcium and the pres
   double reaction4Ctt; // From active CaM to CaM and Ca
 };
 namespace threadsafe {
-std::mutex _timeMutex;
+static std::mutex _timeMutex;
 // tm* localtime(const time_t* timer);
 void put_time(time_t timeObj, const char *formatString, std::stringstream &outputString);
 } // namespace threadsafe
