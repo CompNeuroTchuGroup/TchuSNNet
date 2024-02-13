@@ -171,6 +171,19 @@ struct Constants { // currently 19 + the prespike/postspike calcium and the pres
   double reaction3Ctt; // From CaM and Ca to active CaM
   double reaction4Ctt; // From active CaM to CaM and Ca
 };
+
+struct Instruction {
+  // This struct allows the reading organization of instruction
+  NeuronInt neuronId;      // The neuron specific to the instruction (-1 is equivalent to all?)
+  long      startTimeStep; // Will have to convert times to timesteps. Or make a short python programme to do it in a file by itself
+  long      endTimeStep;
+  double    frequency;
+  double    firingProbability;
+  long      fireEveryNSteps{}; // This variable describes the timesteps between every AP. If 3, it will fire every 3 timesteps, so 2 no and 1 yes.
+  bool      last{false};
+  bool      off{false};
+  Instruction(FileEntry inputEntry, double dtTimestep);
+};
 namespace threadsafe {
 static std::mutex _timeMutex;
 // tm* localtime(const time_t* timer);

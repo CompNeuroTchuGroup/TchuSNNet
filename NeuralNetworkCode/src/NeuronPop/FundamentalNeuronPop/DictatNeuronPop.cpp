@@ -111,12 +111,12 @@ void DictatNeuronPop::GenerateRegularSpikersFromInstructions() {
   // //loop option 1 (inefficient but less exception prone)
   // for (int neuronId = 0; neuronId<static_cast<int>(inputInstructions.size()); neuronId++){
   //     for (Instruction& instruction : inputInstructions.at(neuronId)){
-  //         if ((!instruction.completed) && (instruction.startTimeStep>infoGlobal->timeStep)){ //Here not >= to avoid a spike of frequency when
+  //         if ((!instruction.off) && (instruction.startTimeStep>infoGlobal->timeStep)){ //Here not >= to avoid a spike of frequency when
   //         changing instructions
   //             if (((infoGlobal->timeStep-instruction.startTimeStep)%instruction.fireEveryNSteps)==0){
   //                 spiker.push_back(neuronId);
   //                 if (instruction.endTimeStep>=infoGlobal->timeStep){
-  //                 instruction.completed=true;
+  //                 instruction.off=true;
   //             }
   //             break;
   //             }
@@ -130,13 +130,13 @@ void DictatNeuronPop::GenerateRegularSpikersFromInstructions() {
       if (!(instruction.last)) {
         activeInstructions.at(neuronId)++;
       }
-      instruction.completed = true;
+      instruction.off = true;
     }
     if (!instruction.off && ((infoGlobal->timeStep - instruction.startTimeStep) % instruction.fireEveryNSteps) == 0) {
       // Instruction.off condition is there to avoid doing a modulus with zero
-      if (instruction.completed) {
-        continue;
-      }
+      // if (instruction.off) {
+      //   continue;
+      // }
       if (instruction.startTimeStep < infoGlobal->timeStep) {
         spikerNeurons.push_back(neuronId);
       }
@@ -151,11 +151,11 @@ void DictatNeuronPop::GeneratePoissonSpikersFromInstructions() {
       if (!(instruction.last)) {
         activeInstructions.at(neuronId)++;
       }
-      instruction.completed = true;
+      instruction.off = true;
     }
     if (uniformDistribution(generator) <
         instruction.firingProbability) { // Here because there is no modulus, there is no need for checking the instruction.off condition
-      if (instruction.completed) {
+      if (instruction.off) {
         continue;
       }
       if (instruction.startTimeStep < infoGlobal->timeStep) {
