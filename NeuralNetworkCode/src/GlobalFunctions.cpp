@@ -250,6 +250,23 @@ T stringToFileEntry(std::string readStringLine)
 //     }
 //     commentedString = uncommentedString;
 // }
+Instruction::Instruction(FileEntry inputEntry, double dtTimestep)
+    : neuronId{std::stoi(inputEntry.parameterValues.at(0))}, startTimeStep{std::lround(std::stod(inputEntry.parameterValues.at(1)) / dtTimestep)},
+      endTimeStep{std::lround(std::stod(inputEntry.parameterValues.at(2)) / dtTimestep)}, frequency{std::stod(inputEntry.parameterValues.at(3))},
+      firingProbability{frequency * dtTimestep} {
+  // Constructor
+  if (frequency < std::numeric_limits<double>::epsilon()) { // Zero comparison to avoid division by zero
+    this->off = true;
+  } else {
+    fireEveryNSteps = std::lround((1 / frequency) / dtTimestep); // Conversion from frequency to timestep period.
+    if (fireEveryNSteps == 0) {                                  // If the frequency is close
+      std::cout << "\n"
+                << "EXCEPTION: YOU CHOSE A FREQUENCY THAT IS TOO HIGH FOR NEURON " << std::to_string(neuronId) << "\n\n\n"
+                << "**********************************";
+      throw "EXCEPTION: YOU CHOSE A FREQUENCY THAT IS TOO HIGH FOR CURRENT DT IN DICTAT INPUT FILE";
+    }
+  }
+}
 void threadsafe::put_time(time_t timeObj, const char *formatString, std::stringstream &outputString) {
   std::lock_guard<std::mutex> _lockGuard(_timeMutex);
   outputString << std::put_time(std::localtime(&timeObj), formatString);
