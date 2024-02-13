@@ -121,12 +121,18 @@ void Recorder::WriteSteadyStates() const {
   for (PopInt popIndex = 0; popIndex < neurons->GetTotalPopulations(); popIndex++) {
     cPopPtr pop{neurons->GetcPopPtr(popIndex)};
     if (pop->HasSteadyState()) {
-      ssStream << "Steady state no. " << counter++ << '\n';
-      ssStream << "Neuron pop. " << pop->GetId() << " with model " << pop->GetMorphologyType() << '\n';
-      std::vector<double> data{};
+      ssStream << "#Steady state no. " << std::to_string(counter++) << '\n';
+      ssStream << "#Neuron pop. " << pop->GetId() << " with model " << pop->GetMorphologyType() << '\n';
+      std::vector<double>      data{pop->GetSteadyStateData()};
+      std::vector<std::string> labels{pop->GetSteadyStateVarNames()};
+      if (data.size() != labels.size())
+        throw "There is a bug in delivery of steady state data.";
+      for (size_t index = 0; index < data.size(); index++) {
+        ssStream << labels.at(index) << "\t\t\t" << std::to_string(data.at(index)) << "\n";
+      }
     }
   }
-
+  ssStream.close();
   // Models in synapse classes
   // Models in stimulus classes
 }

@@ -466,11 +466,20 @@ std::string MACRbPModel::GetOverallSynapticProfileHeaderInfo() const {
 }
 
 std::vector<double> MACRbPModel::GetSteadyStateData() const {
-  return std::vector<double>();
+  return std::vector<double>{steady_state_spine.calciumFree,
+                             steady_state_spine.calmodulinNeurogranin,
+                             constants.neurograninTotal - steady_state_spine.calmodulinNeurogranin,
+                             steady_state_spine.calmodulinActive,
+                             constants.calcineurinTotal - steady_state_spine.calcineurinActive,
+                             steady_state_spine.calcineurinActive,
+                             constants.kinasesTotal - steady_state_spine.kinasesCaM - steady_state_spine.kinasesPhospho,
+                             steady_state_spine.kinasesCaM,
+                             steady_state_spine.kinasesPhospho,
+                             steady_state_spine.resourcesAvailable,
+                             steady_state_spine.weight};
 }
 
 std::vector<std::string> MACRbPModel::GetSteadyStateVarNames() const {
-  return std::vector<std::string>{
-      "",
-  };
+  return std::vector<std::string>{"Calcium ion", "Ng-CaM",        "Free Ng",  "Ca2CaM", "Free CaN",       "Ca2CaM-CaN",
+                                  "Free CaMKII", "Ca2CaM-CaMKII", "CaMKII-P", "AMPAR",  "Synaptic weight"};
 }
