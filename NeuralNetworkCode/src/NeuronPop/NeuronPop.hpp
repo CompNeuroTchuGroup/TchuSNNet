@@ -19,7 +19,7 @@ class NeuronPop {
 protected:
   GlobalSimInfo *infoGlobal;
 
-  PopInt    identifier;
+  PopInt    identifier{};
   NeuronInt noNeurons{};
   TStepInt  refractorySteps{};
   double    membraneVTau{};
