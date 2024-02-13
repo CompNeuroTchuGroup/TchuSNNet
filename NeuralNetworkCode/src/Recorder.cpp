@@ -117,7 +117,7 @@ void Recorder::WriteSteadyStates() const {
   int           counter{1};
 
   // Models in neuronPop classes
-  // Models in the Morphology framework
+  // Models inside NeuronPop of the Morphology framework
   for (PopInt popIndex = 0; popIndex < neurons->GetTotalPopulations(); popIndex++) {
     cPopPtr pop{neurons->GetcPopPtr(popIndex)};
     if (pop->HasSteadyState()) {
