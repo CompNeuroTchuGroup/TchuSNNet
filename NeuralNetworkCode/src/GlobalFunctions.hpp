@@ -98,7 +98,7 @@ struct IterableFileEntry : FileEntry {
 };
 
 struct RecorderOpenStreams {
-  std::vector<std::ofstream> heatmapStreamVector{};
+  std::vector<std::ofstream> heatmapStreamVector;
   std::ofstream              averagesFileStream;
   std::ofstream              rasterplotFileStream;
   std::ofstream              potentialFileStream;
@@ -113,7 +113,7 @@ struct RecorderOpenStreams {
   // std::vector<std::ofstream> neuronOuputFileStreams;
 };
 struct DendriticSubRegion { // Still under work
-  char             regionID;
+  char             regionID{};
   std::vector<int> branchesInRegion; // I will have to read this from the morphology LP, every DendriticSubRegion is a line, first input is ID, rest
                                      // is branchIDs. Then in Synapse you put the DendriticSubRegion where the synapse goes.
   DendriticSubRegion(char regionID, std::vector<int> branchesInRegion);
@@ -131,54 +131,55 @@ struct BranchTargeting { // This is esentially a wrapper for HCS different targe
 
 struct Constants { // currently 19 + the prespike/postspike calcium and the prespike calcium influx delay, so 21
 
-  double calciumExtrusionCtt; // Consider already exponentiated
-  double calciumInfluxBasal;
+  double calciumExtrusionCtt{}; // Consider already exponentiated
+  double calciumInfluxBasal{};
 
-  double kinasesTotal;     // Upper limit of Kinases (determines, with active, unactive species)
-  double calcineurinTotal; // Upper limit of phosphatases (determines, with active, unactive species)
-  double calmodulinTotal;  // We just multiply this by the logistic function to get the active ones
-  double neurograninTotal; // THIS IS STILL NOT DONE
+  double kinasesTotal{};     // Upper limit of Kinases (determines, with active, unactive species)
+  double calcineurinTotal{}; // Upper limit of phosphatases (determines, with active, unactive species)
+  double calmodulinTotal{};  // We just multiply this by the logistic function to get the active ones
+  double neurograninTotal{}; // THIS IS STILL NOT DONE
 
-  int32_t newtonIterations; // For the neurogranin equilibrium
+  int32_t newtonIterations{}; // For the neurogranin equilibrium
 
-  double reaction1234Ctt; // For the neurogranin equilibrium
-  double reaction5Ctt;    // From N inactive to N active, using CaM
-  double reaction6Ctt;    // From N active to N inactive, using CaM
-  double reaction7Ctt;    // From K bound to CaM to phosphorylated K
-  double reaction8Ctt;    // From phosphorylated K to K bound to CaM
-  double reaction9Ctt;    // From K inactive to K active, using CaM
-  double reaction10Ctt;   // From K active to K inactive, using CaM
-  double reaction11Ctt;   // From resources to weight
-  double reaction12Ctt;   // From weight to resources
+  double reaction1234Ctt{}; // For the neurogranin equilibrium
+  double reaction5Ctt{};    // From N inactive to N active, using CaM
+  double reaction6Ctt{};    // From N active to N inactive, using CaM
+  double reaction7Ctt{};    // From K bound to CaM to phosphorylated K
+  double reaction8Ctt{};    // From phosphorylated K to K bound to CaM
+  double reaction9Ctt{};    // From K inactive to K active, using CaM
+  double reaction10Ctt{};   // From K active to K inactive, using CaM
+  double reaction11Ctt{};   // From resources to weight
+  double reaction12Ctt{};   // From weight to resources
 
-  double caDiffusionFct;       // Consider delta x squared already here
-  double resourceDiffusionFct; // Consider delta x squared already here
-  double resourceConversionFct;
-  double initialResources, initialWeight;
+  double caDiffusionFct{};       // Consider delta x squared already here
+  double resourceDiffusionFct{}; // Consider delta x squared already here
+  double resourceConversionFct{};
+  double initialResources{};
+  double initialWeight{};
 
-  double preCalciumFluxFactor;
-  double preCalciumRiseRate;
-  double preCalciumDecayRate;
+  double preCalciumFluxFactor{};
+  double preCalciumRiseRate{};
+  double preCalciumDecayRate{};
 
-  double postCalciumFluxFactor;
-  double postCalciumRiseRate;
-  double postCalciumDecayRate;
+  double postCalciumFluxFactor{};
+  double postCalciumRiseRate{};
+  double postCalciumDecayRate{};
 
-  double nonlinearFactorNMDA;
+  double nonlinearFactorNMDA{};
 
-  double reaction1Ctt; // From CaM and Ng to CaMNg
-  double reaction2Ctt; // From CaMNg to CaM and Ng
-  double reaction3Ctt; // From CaM and Ca to active CaM
-  double reaction4Ctt; // From active CaM to CaM and Ca
+  double reaction1Ctt{}; // From CaM and Ng to CaMNg
+  double reaction2Ctt{}; // From CaMNg to CaM and Ng
+  double reaction3Ctt{}; // From CaM and Ca to active CaM
+  double reaction4Ctt{}; // From active CaM to CaM and Ca
 };
 
 struct Instruction {
   // This struct allows the reading organization of instruction
-  NeuronInt neuronId;      // The neuron specific to the instruction (-1 is equivalent to all?)
-  long      startTimeStep; // Will have to convert times to timesteps. Or make a short python programme to do it in a file by itself
-  long      endTimeStep;
-  double    frequency;
-  double    firingProbability;
+  NeuronInt neuronId{};      // The neuron specific to the instruction (-1 is equivalent to all?)
+  long      startTimeStep{}; // Will have to convert times to timesteps. Or make a short python programme to do it in a file by itself
+  long      endTimeStep{};
+  double    frequency{};
+  double    firingProbability{};
   long      fireEveryNSteps{}; // This variable describes the timesteps between every AP. If 3, it will fire every 3 timesteps, so 2 no and 1 yes.
   bool      last{false};
   bool      off{false};
