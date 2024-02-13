@@ -65,22 +65,6 @@ void DictatNeuronPop::SaveParameters(std::ofstream &wParameterStream) const {
   wParameterStream << "\t#Write true vs false to indicate if the firing reproduced from instructions is poisson-like or periodic. \n";
 }
 
-void DictatNeuronPop::Advect(const std::vector<double> &synaptic_dV) {
-  spikerNeuronsPrevdt = spikerNeurons;
-  spikerNeurons.clear();
-  if (spikerListFiringBool) {
-    ReadSpikersFromFile();
-  } else if (instructionFiringBool) {
-    if (poissonLikeFiringBool) {
-      GeneratePoissonSpikersFromInstructions();
-    } else {
-      GenerateRegularSpikersFromInstructions();
-    }
-  } else {
-    throw "Logical error in DictatNeuronPop";
-  }
-}
-
 void DictatNeuronPop::ReadInstructionsFromFile() {
   /*Instruction files for a population should be written in the following format:
   > neuronid starttime1 endtime1 fire_every_n_steps
@@ -190,21 +174,19 @@ void DictatNeuronPop::ReadSpikersFromFile() {
     }
   }
 }
-
-Instruction::Instruction(FileEntry inputEntry, double dtTimestep)
-    : neuronId{std::stoi(inputEntry.parameterValues.at(0))}, startTimeStep{std::lround(std::stod(inputEntry.parameterValues.at(1)) / dtTimestep)},
-      endTimeStep{std::lround(std::stod(inputEntry.parameterValues.at(2)) / dtTimestep)}, frequency{std::stod(inputEntry.parameterValues.at(3))},
-      firingProbability{frequency * dtTimestep} {
-  // Constructor
-  if (frequency < std::numeric_limits<double>::epsilon()) { // Zero comparison to avoid division by zero
-    this->off = true;
-  } else {
-    fireEveryNSteps = std::lround((1 / frequency) / dtTimestep); // Conversion from frequency to timestep period.
-    if (fireEveryNSteps == 0) {                                  // If the frequency is close
-      std::cout << "\n"
-                << "EXCEPTION: YOU CHOSE A FREQUENCY THAT IS TOO HIGH FOR NEURON " << std::to_string(neuronId) << "\n\n\n"
-                << "**********************************";
-      throw "EXCEPTION: YOU CHOSE A FREQUENCY THAT IS TOO HIGH FOR CURRENT DT IN DICTAT INPUT FILE";
+void DictatNeuronPop::Advect(const std::vector<double> &synaptic_dV) {
+  spikerNeuronsPrevdt = spikerNeurons;
+  spikerNeurons.clear();
+  if (spikerListFiringBool) {
+    ReadSpikersFromFile();
+  } else if (instructionFiringBool) {
+    if (poissonLikeFiringBool) {
+      GeneratePoissonSpikersFromInstructions();
+    } else {
+      GenerateRegularSpikersFromInstructions();
     }
+  } else {
+    throw "Logical error in DictatNeuronPop";
   }
+  this->AdvectPlasticityModel();
 }
