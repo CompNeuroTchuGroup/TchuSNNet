@@ -36,7 +36,7 @@ struct MACRbPBranch : public Branch {
   //  already and we just add. void PreSpikeCalciumInflux();//We do swaps of the matrix and fill with zeroes. Matrix contains the calcium
   //  concentration already and we just add.
   // Reaction methods
-  void Advect(); // All done in the scope of the branch!
+  void Advect();  // All done in the scope of the branch!
 
   // Data retrieval
   double GetTotalWeight() const;

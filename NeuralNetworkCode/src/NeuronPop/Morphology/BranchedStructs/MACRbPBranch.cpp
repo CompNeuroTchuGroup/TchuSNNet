@@ -53,7 +53,7 @@ void MACRbPBranch::Advect() {
   // Spatial locality is achieved in the spine vector (not pointers). Temporal locality is achieved by making a mess
   // of a function
   // All constants.reactions happen in a single loop because diffusion is separate
-  std::for_each(PAR, MACRbPspines.begin(), MACRbPspines.end(), [ctt](MACRbPSynapseSpine &spine) {
+  std::for_each(PAR_UNSEQ, MACRbPspines.begin(), MACRbPspines.end(), [ctt](MACRbPSynapseSpine &spine) {
     // const Constants ctt{ctt};
     if (spine.connected) {
       // Here we influx calcium with the nonlinear traces
@@ -132,18 +132,17 @@ void MACRbPBranch::Advect() {
   MACRbPspines.at(0).resourcesAvailable += ctt.resourceDiffusionFct * (-MACRbPspines.at(0).resourcesOldStep + MACRbPspines.at(1).resourcesOldStep);
 
   size_t lastIndex{MACRbPspines.size() - 1};
-  auto   range = std::ranges::common_view(std::views::iota(1ull) | std::views::take(lastIndex - 1));
-  std::for_each(PAR, range.begin(), range.end(), [this](size_t spineIndex) {
-    const Constants CONST{this->constants};
+  auto   range = std::ranges::common_view(std::views::iota(1ull) | std::views::take(lastIndex));
+  std::for_each(PAR_UNSEQ, range.begin(), range.end(), [ctt, this](size_t spineIndex) {
     // Diffusion of calcium
     MACRbPspines.at(spineIndex).calciumFree +=
-        CONST.caDiffusionFct * (-2 * MACRbPspines.at(spineIndex).calciumOldStep + MACRbPspines.at(spineIndex - 1).calciumOldStep +
-                                MACRbPspines.at(spineIndex + 1).calciumOldStep);
-    MACRbPspines.at(spineIndex).calciumFree += CONST.calciumInfluxBasal - MACRbPspines.at(spineIndex).calciumFree * CONST.calciumExtrusionCtt;
+        ctt.caDiffusionFct * (-2 * MACRbPspines.at(spineIndex).calciumOldStep + MACRbPspines.at(spineIndex - 1).calciumOldStep +
+                              MACRbPspines.at(spineIndex + 1).calciumOldStep);
+    MACRbPspines.at(spineIndex).calciumFree += ctt.calciumInfluxBasal - MACRbPspines.at(spineIndex).calciumFree * ctt.calciumExtrusionCtt;
     // Diffusion of resources
     MACRbPspines.at(spineIndex).resourcesAvailable +=
-        CONST.resourceDiffusionFct * (-2 * MACRbPspines.at(spineIndex).resourcesOldStep + MACRbPspines.at(spineIndex - 1).resourcesOldStep +
-                                      MACRbPspines.at(spineIndex + 1).resourcesOldStep);
+        ctt.resourceDiffusionFct * (-2 * MACRbPspines.at(spineIndex).resourcesOldStep + MACRbPspines.at(spineIndex - 1).resourcesOldStep +
+                                    MACRbPspines.at(spineIndex + 1).resourcesOldStep);
   });
   // Last boundary case
   //  Diffusion of calcium
