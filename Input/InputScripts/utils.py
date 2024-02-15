@@ -14,7 +14,7 @@ class InputGenerator:
         self.N_neurons = N_neurons
         self.max_frequencies = np.zeros(N_neurons)
         self.neuron_offsets = np.zeros(N_neurons)
-        self.neuron_ids = np.array(range(0, N_neurons))
+        # self.neuron_ids = np.array(range(0, N_neurons))
         self.instruction_start_times = np.zeros((N_neurons, total_time_intervals))
         self.instruction_end_times = np.zeros((N_neurons, total_time_intervals))
         self.frequencies = np.zeros((N_neurons, total_time_intervals))
