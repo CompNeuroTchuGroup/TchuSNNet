@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 import random as rd
 
 
@@ -91,7 +92,9 @@ class InputGenerator:
 
 class SimpleGenerator:
     def __init__(self, N_neurons,total_time, total_intervals, first_interval_true=False,testname="sim", pop_id1="0",max_offset_inpop=0) -> None:
-        self.interval_duration=total_time/total_intervals
+        # self.interval_duration=total_time/total_intervals
+        self.end_time=total_time
+        self.intervals=total_intervals
         self.first=first_interval_true
         self.max_offset_inpop=max_offset_inpop
         self.filename = testname + "_DictatNeuronPop_" + pop_id1 + "_spikers.txt"
@@ -102,12 +105,56 @@ class SimpleGenerator:
         self.instruction_start_times = np.zeros((N_neurons, total_intervals))
         self.instruction_end_times = np.zeros((N_neurons, total_intervals))
         self.frequencies = np.zeros((N_neurons, total_intervals))
+    def _set_times(self,startTimes, endTimes):
+        if self.intervals==len(startTimes) and len(endTimes)==len(startTimes):
+            for i in range (0,self.N_neurons):
+                self.instruction_start_times[i]=copy.copy(startTimes)
+                self.instruction_end_times[i]=copy.copy(endTimes)
+        else:
+            raise Exception
+    def _set_freqs_on_off(self,frequency):
+        mod=0
+        if not self.first:
+            mod=1
+        for i in range (0,self.N_neurons):
+            for j in range (0,self.intervals):
+              if (mod+j)%2==0:
+                self.frequencies[i][j]=frequency
+    def generate_instructions_from_arrays(self):
+        with open (self.filename, 'w') as text_file:
+            for i in range (0,self.N_neurons):
+                for j in range (0,self.total_time_intervals):
+                    text_file.write('> '+ str(i)+' '+str(self.instruction_start_times[i,j])+' '+str(self.instruction_end_times[i,j])+ ' ' + str(self.frequencies[i,j]))
+                    if i+1 == self.N_neurons and j+1 == self.total_time_intervals:
+                        pass
+                    else:
+                        text_file.write('\n')
+        text_file.close()
+    def SW_stim_protocol_one_burst(self,stimStart, noSpikes, frequency,offset=0):
+        if self.instruction_end_times[0]!=3:
+            raise Exception
+        stimEnd=noSpikes*(1/frequency)
+        startTimes=[0,stimStart+offset,stimEnd+offset]
+        endTimes=[stimStart+offset,stimEnd+offset,self.end_time]
+        self._set_times(startTimes,endTimes)
+        self._set_freqs_on_off(frequency)
+        self.generate_instructions_from_arrays()
+
+    
         
 class PairedPopsGenerator:
-    def __init__(self, testname="testCorr2", pop_id1="0", pop_id2="1",offset_outpop=0,max_offset_inpop=0,first_interval_true=False, N_Neurons_1=0,N_Neurons_2=0) -> None:
-        self.pop_offset=offset_outpop
+    def __init__(self, testname="testCorr2", pop_id1="0", pop_id2="1",max_offset_inpop=0,first_interval_true=False, N_Neurons_1=0,N_Neurons_2=0) -> None:
         self.gen1=SimpleGenerator(N_neurons=N_Neurons_1,testname=testname,pop_id1=pop_id1,first_interval_true=first_interval_true,max_offset_inpop=max_offset_inpop)
         self.gen2=SimpleGenerator(testname=testname,pop_id1=pop_id2,max_offset_inpop=max_offset_inpop)
+    def paired_stimm(self,stimStart,noSpikes, deltaT, frequency):
+        if deltaT>=0:
+          self.gen1.SW_stim_protocol_one_burst(stimStart,noSpikes,frequency)
+          self.gen2.SW_stim_protocol_one_burst(stimStart,noSpikes,frequency,offset=deltaT)
+        else:
+          deltaT=-deltaT
+          self.gen1.SW_stim_protocol_one_burst(stimStart,noSpikes,frequency,offset=deltaT)
+          self.gen2.SW_stim_protocol_one_burst(stimStart,noSpikes,frequency)
+            
 
 
 def allocate_pos_deltat(
