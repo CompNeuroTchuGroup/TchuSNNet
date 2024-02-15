@@ -110,7 +110,7 @@ void DictatNeuronPop::GenerateRegularSpikersFromInstructions() {
   // loop option 2 (efficient but probably worse in exception handling)
   for (NeuronInt neuronId : std::ranges::views::iota(0, noNeurons)) {
     Instruction &instruction = inputInstructions.at(neuronId).at(activeInstructions.at(neuronId));
-    if (instruction.endTimeStep <= infoGlobal->timeStep) {
+    if (instruction.endTimeStep < infoGlobal->timeStep) {
       if (!(instruction.last)) {
         activeInstructions.at(neuronId)++;
       }
@@ -131,7 +131,7 @@ void DictatNeuronPop::GenerateRegularSpikersFromInstructions() {
 void DictatNeuronPop::GeneratePoissonSpikersFromInstructions() {
   for (NeuronInt neuronId : std::ranges::views::iota(0, noNeurons)) {
     Instruction &instruction = inputInstructions.at(neuronId).at(activeInstructions.at(neuronId));
-    if (instruction.endTimeStep <= infoGlobal->timeStep) {
+    if (instruction.endTimeStep < infoGlobal->timeStep) {
       if (!(instruction.last)) {
         activeInstructions.at(neuronId)++;
       }
