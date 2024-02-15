@@ -1,6 +1,7 @@
 import numpy as np
 import copy
 import random as rd
+import os
 
 
 class InputGenerator:
@@ -97,7 +98,7 @@ class SimpleGenerator:
         self.intervals=total_intervals
         self.first=first_interval_true
         self.max_offset_inpop=max_offset_inpop
-        self.filename = testname + "_DictatNeuronPop_" + pop_id1 + "_spikers.txt"
+        self.filename  = f"{testname}/{testname}_DictatNeuronPop_{pop_id1}_spikers.txt"
         self.N_neurons = N_neurons
         self.max_frequencies = np.zeros(N_neurons)
         self.neuron_offsets = np.zeros(N_neurons)
@@ -121,9 +122,11 @@ class SimpleGenerator:
               if (mod+j)%2==0:
                 self.frequencies[i][j]=frequency
     def generate_instructions_from_arrays(self):
+        if not os.path.exists(os.path.dirname(self.filename)):
+            os.makedirs(os.path.dirname(self.filename))
         with open (self.filename, 'w') as text_file:
             for i in range (0,self.N_neurons):
-                for j in range (0,self.total_time_intervals):
+                for j in range (0,self.intervals):
                     text_file.write('> '+ str(i)+' '+str(self.instruction_start_times[i,j])+' '+str(self.instruction_end_times[i,j])+ ' ' + str(self.frequencies[i,j]))
                     if i+1 == self.N_neurons and j+1 == self.total_time_intervals:
                         pass
@@ -131,7 +134,7 @@ class SimpleGenerator:
                         text_file.write('\n')
         text_file.close()
     def SW_stim_protocol_one_burst(self,stimStart, noSpikes, frequency,offset=0):
-        if self.instruction_end_times[0]!=3:
+        if self.intervals!=3:
             raise Exception
         stimEnd=noSpikes*(1/frequency)
         startTimes=[0,stimStart+offset,stimEnd+offset]
@@ -143,17 +146,17 @@ class SimpleGenerator:
     
         
 class PairedPopsGenerator:
-    def __init__(self, testname="testCorr2", pop_id1="0", pop_id2="1",max_offset_inpop=0,first_interval_true=False, N_Neurons_1=0,N_Neurons_2=0) -> None:
-        self.gen1=SimpleGenerator(N_neurons=N_Neurons_1,testname=testname,pop_id1=pop_id1,first_interval_true=first_interval_true,max_offset_inpop=max_offset_inpop)
-        self.gen2=SimpleGenerator(testname=testname,pop_id1=pop_id2,max_offset_inpop=max_offset_inpop)
+    def __init__(self, testname="testCorr2", pop_id1="0", pop_id2="1",max_offset_inpop=0,first_interval_true=False, N_Neurons_1=0,N_Neurons_2=0,total_time=0,time_intervals=0) -> None:
+        self.gen1=SimpleGenerator(N_neurons=N_Neurons_1,testname=testname,pop_id1=pop_id1,first_interval_true=first_interval_true,max_offset_inpop=max_offset_inpop,total_time=total_time,total_intervals=time_intervals)
+        self.gen2=SimpleGenerator(testname=testname,pop_id1=pop_id2,first_interval_true=first_interval_true,max_offset_inpop=max_offset_inpop,total_time=total_time,total_intervals=time_intervals,N_neurons=N_Neurons_2)
     def paired_stimm(self,stimStart,noSpikes, deltaT, frequency):
         if deltaT>=0:
-          self.gen1.SW_stim_protocol_one_burst(stimStart,noSpikes,frequency)
-          self.gen2.SW_stim_protocol_one_burst(stimStart,noSpikes,frequency,offset=deltaT)
-        else:
-          deltaT=-deltaT
           self.gen1.SW_stim_protocol_one_burst(stimStart,noSpikes,frequency,offset=deltaT)
           self.gen2.SW_stim_protocol_one_burst(stimStart,noSpikes,frequency)
+        else:
+          deltaT=-deltaT
+          self.gen1.SW_stim_protocol_one_burst(stimStart,noSpikes,frequency)
+          self.gen2.SW_stim_protocol_one_burst(stimStart,noSpikes,frequency,offset=deltaT)
             
 
 #This functions are useless, they give spiketimes
