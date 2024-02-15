@@ -287,11 +287,7 @@ std::vector<double> NeuronPop::GetOverallSynapticProfile(NeuronInt neuronId) con
   return this->morphology.at(neuronId)->GetOverallSynapticProfile();
 }
 
-std::vector<std::string> NeuronPop::GetSteadyStateVarNames() const {
-  return morphology.at(0)->GetSteadyStateVarNames();
-}
-
-std::vector<double> NeuronPop::GetSteadyStateData() const {
+std::vector<std::pair<std::string, double>> NeuronPop::GetSteadyStateData() const {
   return morphology.at(0)->GetSteadyStateData();
 }
 

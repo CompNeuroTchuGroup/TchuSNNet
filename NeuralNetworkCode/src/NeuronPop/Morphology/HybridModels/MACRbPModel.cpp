@@ -465,21 +465,17 @@ std::string MACRbPModel::GetOverallSynapticProfileHeaderInfo() const {
   return std::string("{<average weight>, <total post spikes> ,<total pre spikes>, <total number of spines>}");
 }
 
-std::vector<double> MACRbPModel::GetSteadyStateData() const {
-  return std::vector<double>{steady_state_spine.calciumFree,
-                             steady_state_spine.calmodulinNeurogranin,
-                             constants.neurograninTotal - steady_state_spine.calmodulinNeurogranin,
-                             steady_state_spine.calmodulinActive,
-                             constants.calcineurinTotal - steady_state_spine.calcineurinActive,
-                             steady_state_spine.calcineurinActive,
-                             constants.kinasesTotal - steady_state_spine.kinasesCaM - steady_state_spine.kinasesPhospho,
-                             steady_state_spine.kinasesCaM,
-                             steady_state_spine.kinasesPhospho,
-                             steady_state_spine.resourcesAvailable,
-                             steady_state_spine.weight};
-}
-
-std::vector<std::string> MACRbPModel::GetSteadyStateVarNames() const {
-  return std::vector<std::string>{"Calcium ion", "Ng-CaM",        "Free Ng",  "Ca2CaM", "Free CaN",       "Ca2CaM-CaN",
-                                  "Free CaMKII", "Ca2CaM-CaMKII", "CaMKII-P", "AMPAR",  "Synaptic weight"};
+std::vector<std::pair<std::string, double>> MACRbPModel::GetSteadyStateData() const {
+  return std::vector<std::pair<std::string, double>>{
+      {"Calcium ion", steady_state_spine.calciumFree},
+      {"Ng-CaM", steady_state_spine.calmodulinNeurogranin},
+      {"Free Ng", constants.neurograninTotal - steady_state_spine.calmodulinNeurogranin},
+      {"Ca2CaM", steady_state_spine.calmodulinActive},
+      {"Free CaN", constants.calcineurinTotal - steady_state_spine.calcineurinActive},
+      {"Ca2CaM-CaN", constants.calcineurinTotal - steady_state_spine.calcineurinActive},
+      {"Free CaMKII", constants.kinasesTotal - steady_state_spine.kinasesCaM - steady_state_spine.kinasesPhospho},
+      {"Ca2CaM-CaMKII", steady_state_spine.kinasesCaM},
+      {"CaMKII-P", steady_state_spine.kinasesPhospho},
+      {"AMPAR", steady_state_spine.resourcesAvailable},
+      {"Synaptic weight", steady_state_spine.weight}};
 }

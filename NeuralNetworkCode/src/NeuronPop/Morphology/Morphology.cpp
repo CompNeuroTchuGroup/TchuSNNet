@@ -79,13 +79,9 @@ std::string Morphology::GetOverallSynapticProfileHeaderInfo() const {
   return std::string("{<average weight>, <total post spikes>, <total pre spikes>}");
 }
 
-std::vector<double> Morphology::GetSteadyStateData() const {
-  return std::vector<double>(1);
-}
-
-std::vector<std::string> Morphology::GetSteadyStateVarNames() const {
-  return std::vector<std::string>(
-      1, "There was an error, the GetSteadyStateData() was called from a class that has\nno overriding version of the function.");
+std::vector<std::pair<std::string, double>> Morphology::GetSteadyStateData() const {
+  return std::vector<std::pair<std::string, double>>{
+      {"There was an error, the GetSteadyStateData() was called from a class that has\nno overriding version of the function.", 0}};
 }
 
 std::string Morphology::GetIndividualSynapticProfileHeaderInfo() const {

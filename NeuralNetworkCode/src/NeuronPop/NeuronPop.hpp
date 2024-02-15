@@ -117,8 +117,7 @@ public:
   std::vector<double> GetIndividualSynapticProfile(NeuronInt neuronId, NeuronInt spineID) const;
   std::vector<double> GetOverallSynapticProfile(NeuronInt neuronId) const;
 
-  std::vector<std::string> GetSteadyStateVarNames() const;
-  std::vector<double>      GetSteadyStateData() const;
+  std::vector<std::pair<std::string, double>> GetSteadyStateData() const;
 
   void PostConnectSetUp(); // This function cannot be called without throwing first};
 };

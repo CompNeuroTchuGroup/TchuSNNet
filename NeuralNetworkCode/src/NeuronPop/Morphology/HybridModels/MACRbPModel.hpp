@@ -67,8 +67,7 @@ public:
   std::vector<double> GetOverallSynapticProfile() const override;
   std::string         GetOverallSynapticProfileHeaderInfo() const override;
 
-  std::vector<double>      GetSteadyStateData() const override;
-  std::vector<std::string> GetSteadyStateVarNames() const override;
+  std::vector<std::pair<std::string, double>> GetSteadyStateData() const override;
   // void CalcMorphoPlasticityEvents() override;
   // For debugging purposes
   bool IgnoreJDParameters() const override { return true; }
