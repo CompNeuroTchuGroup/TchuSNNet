@@ -236,6 +236,7 @@ const std::string IDstringWhitenoiseRescaled{"WhiteNoiseRescaled"};
 const std::string IDstringWhiteNoiseLinear{"WhiteNoiseLinear"};
 const std::string IDstringSpatialGaussianStimulus{"SpatialGaussianStimulus"};
 const std::string IDstringSpatialPoissonStimulus{"SpatialPoissonStimulus"};
+const std::string IDstringNoStimulus{"NoStimulus"};
 
 const std::string IDstringMonoDendriteSTDPTazerart{"MonoDendriteSTDPTazerart"};
 const std::string IDstringMonoDendriteSTDPTazerartRelative{"MonoDendriteSTDPTazerartRelative"};

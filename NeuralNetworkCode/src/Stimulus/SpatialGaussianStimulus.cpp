@@ -311,7 +311,8 @@ void SpatialGaussianStimulus::SetSignalMatrix() {
         // for (int x_rep = -1;x_rep <= 1;x_rep++) {
         //	for (int y_rep = -1;y_rep <= 1;y_rep++) {
         //		d = pow(neurons->GetX_Pos(neuronPop, i) - infoGlobal->xAxisLength *(GPos_X[Gauss_index] + x_rep), 2) +
-        //pow(neurons->GetY_Pos(neuronPop, i) - infoGlobal->yAxisLength *(GPos_Y[Gauss_index] + y_rep), 2); 		if (infoGlobal->Dimensions == 2 || y_rep
+        // pow(neurons->GetY_Pos(neuronPop, i) - infoGlobal->yAxisLength *(GPos_Y[Gauss_index] + y_rep), 2); 		if (infoGlobal->Dimensions == 2 ||
+        // y_rep
         //== 0) 			mu = mu + mu_max * dtTimestep*pow(s, infoGlobal->networkScaling_synStrength)*exp(-d / (2 * pow(sigmax, 2)));
         //	}
         // }

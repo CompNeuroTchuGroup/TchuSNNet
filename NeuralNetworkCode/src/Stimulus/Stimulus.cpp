@@ -4,8 +4,7 @@
 Stimulus::Stimulus(std::shared_ptr<NeuronPopSample> neuronSample, GlobalSimInfo *infoGlobal) : infoGlobal{infoGlobal}, neurons{neuronSample} {
   // int N         = neurons->GetTotalNeurons();
   // signal_array = new double*[totalNeuronPops]//Or sth like this
-  PopInt totalNeuronPops = neurons->GetTotalPopulations();
-  for (PopInt neuronPop : std::ranges::views::iota(0, totalNeuronPops)) {
+  for (PopInt neuronPop : std::ranges::views::iota(0, neurons->GetTotalPopulations())) {
     signalMatrix.push_back(std::vector<double>(neurons->GetNeuronsPop(neuronPop), 0.0));
   }
 
