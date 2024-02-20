@@ -4,9 +4,9 @@
 MACRbPSynapseSpine::MACRbPSynapseSpine() : connected{false} {
 }
 
-//MACRbPSynapseSpine::MACRbPSynapseSpine(double weight, double resources, double calcium)
-//    : BranchedSynapseSpine(weight), connected{false}, calciumFree{calcium}, resourcesAvailable{resources} {
-//}
+// MACRbPSynapseSpine::MACRbPSynapseSpine(double weight, double resources, double calcium)
+//     : BranchedSynapseSpine(weight), connected{false}, calciumFree{calcium}, resourcesAvailable{resources} {
+// }
 
 void MACRbPSynapseSpine::PreDiffusion() {
   // This has to run before reations, and before diffusion. Makes no sense to do both, and makes no sense to actually store the inactive forms in the
@@ -38,7 +38,7 @@ void MACRbPSynapseSpine::CheckNegativeValues(const Constants &c) {
 std::vector<double> MACRbPSynapseSpine::GetIndividualSynapticProfile() const {
   std::vector<double> dataArray(5);
   dataArray.at(0) = this->branchId;
-  dataArray.at(1) = this->weight;
+  dataArray.at(1) = this->GetWeight();
   dataArray.at(2) = this->calciumFree;
   dataArray.at(3) = this->branchPositionId;
   dataArray.at(4) = this->prePopId;

@@ -85,7 +85,7 @@ void MACRbPModel::PreCalculateParameters() {
       this->constants.reaction1Ctt * this->constants.reaction4Ctt / (this->constants.reaction2Ctt * this->constants.reaction3Ctt);
   this->constants.calciumInfluxBasal = calciumBasal * constants.calciumExtrusionCtt;
   this->constants.initialResources   = this->constants.initialWeight / constants.resourceConversionFct / availResourcesRatio; // REVIEW
-  this->constants.reaction11Ctt *= constants.resourceConversionFct;                                                           // REVIEW
+  // this->constants.reaction11Ctt *= constants.resourceConversionFct;                                                           // REVIEW
   this->constants.preCalciumRiseRate   = 1 / preCalciumRiseTau;
   this->constants.preCalciumDecayRate  = 1 / preCalciumDecayTau;
   this->constants.postCalciumRiseRate  = 1 / postCalciumRiseTau;
@@ -141,7 +141,7 @@ void MACRbPModel::CheckParameters(const std::vector<FileEntry> &parameters) {
                this->constants.reaction10Ctt != std::stod(parameterValues.at(0)) * infoGlobal->dtTimestep) {
       throw "kTen was not consistent in plasticity model parameters.";
     } else if (parameterName.find("kEleven") != std::string::npos &&
-               this->constants.reaction11Ctt / constants.resourceConversionFct != std::stod(parameterValues.at(0)) * infoGlobal->dtTimestep) {
+               this->constants.reaction11Ctt != std::stod(parameterValues.at(0)) * infoGlobal->dtTimestep) {
       throw "kEleven was not consistent in plasticity model parameters.";
     } else if (parameterName.find("kTwelve") != std::string::npos &&
                this->constants.reaction12Ctt != std::stod(parameterValues.at(0)) * infoGlobal->dtTimestep) {
@@ -241,8 +241,7 @@ void MACRbPModel::SaveParameters(std::ofstream &wParameterFile, std::string neur
   wParameterFile << neuronIdentificator << "kTen\t\t" << (this->constants.reaction10Ctt / infoGlobal->dtTimestep) << " #u M^{-1} s^{-1}";
   wParameterFile << "\t"
                  << "#From K active to K inactive, using CaM\n";
-  wParameterFile << neuronIdentificator << "kEleven\t\t" << (this->constants.reaction11Ctt / constants.resourceConversionFct / infoGlobal->dtTimestep)
-                 << " #u M^{-1} s^{-1}";
+  wParameterFile << neuronIdentificator << "kEleven\t\t" << ((this->constants.reaction11Ctt) / infoGlobal->dtTimestep) << " #u M^{-1} s^{-1}";
   wParameterFile << "\t"
                  << "#From resources to weight\n";
   wParameterFile << neuronIdentificator << "kTwelve\t\t" << (this->constants.reaction12Ctt / infoGlobal->dtTimestep) << " #u M^{-1} s^{-1}";
@@ -305,7 +304,8 @@ MACRbPSynapseSpine MACRbPModel::ComputeSteadyState(MACRbPSynapseSpine &spine) {
   // Set values
   spine.calciumFree        = calciumBasal;
   spine.resourcesAvailable = constants.initialResources;
-  spine.weight             = constants.initialWeight;
+  spine.weight             = constants.initialWeight / constants.resourceConversionFct; // Weight will be treated as uMs
+  spine.couplingStrength /= constants.resourceConversionFct;
   // Time stamp
   auto steady_state_begin = std::chrono::high_resolution_clock::now();
 
@@ -347,10 +347,11 @@ MACRbPSynapseSpine MACRbPModel::ComputeSteadyState(MACRbPSynapseSpine &spine) {
     // 8th Change in synapse spine size/weight
     wDot = constants.reaction11Ctt * spine.resourcesAvailable * (spine.kinasesCaM + spine.kinasesPhospho) -
            constants.reaction12Ctt * spine.weight * spine.calcineurinActive;
+    // Now wDot is in uM units
     spine.weight += wDot;
     // 9th Consumption of resources by weight change
-    spine.resourcesAvailable -=
-        (wDot) / constants.resourceConversionFct; // This should be the case for converting the dmV/spike to concentration of resources
+    spine.resourcesAvailable -= (wDot);
+    // / constants.resourceConversionFct; // This should be the case for converting the dmV/spike to concentration of resources
     // Store equilibrium in a file? Together with time spent in the calculation? Output only to terminal the time?
   }
 
@@ -428,8 +429,8 @@ BaseSpinePtr MACRbPModel::AllocateNewSynapse(BranchTargeting &branchTarget) {
 
   // this->weightsSum += newSynapse->GetWeight();
   newSpine->idInMorpho = (this->baseSpineData.size()); // this->spineIdGenerator++
-  newSpine->weight     = constants.initialWeight;
-  // Branch
+  // newSpine->weight     = constants.initialWeight / constants.resourceConversionFct;//Not necessary, weight is set in the SS computation.
+  // This would be an active bug Branch
   newSpine->branchPositionId = (position);
   newSpine->branchId         = (branch);
 
@@ -477,5 +478,5 @@ std::vector<std::pair<std::string, double>> MACRbPModel::GetSteadyStateData() co
       {"Ca2CaM-CaMKII", steady_state_spine.kinasesCaM},
       {"CaMKII-P", steady_state_spine.kinasesPhospho},
       {"AMPAR", steady_state_spine.resourcesAvailable},
-      {"Synaptic weight", steady_state_spine.weight}};
+      {"Synaptic weight", steady_state_spine.GetWeight()}};
 }

@@ -13,17 +13,17 @@ MACRbPBranch::MACRbPBranch(std::vector<int> anteriorBranches, double gap, double
 }
 
 MACRbPBranch::MACRbPBranch(double gap, double branchLength, int branchId, Constants constants, MACRbPSynapseSpine spine)
-    : Branch(gap, branchLength, branchId), constants{constants} {
+    : Branch(gap, branchLength, branchId), constants{constants}, MACRbPspines(branchLength / gap, spine) {
 
-  MACRbPspines.resize(branchLength / gap, spine);
-  for (MACRbPSynapseSpine &spine : MACRbPspines) {
-    spine.resourcesAvailable = constants.initialResources;
-    spine.weight             = constants.initialWeight;
-    spine.PreDiffusion();
-  }
-  if (branchSlots < 1) {
-    throw "A branch with one synapse slot cannot do diffusion";
-  }
+  // MACRbPspines.resize(branchLength / gap, spine);
+  // for (MACRbPSynapseSpine &spine : MACRbPspines) {
+  //   spine.resourcesAvailable = constants.initialResources;
+  //   spine.weight             = constants.initialWeight;
+  //   spine.PreDiffusion();
+  // }
+  // if (branchSlots < 1) {
+  //   throw "A branch with one synapse slot cannot do diffusion";
+  // }
   // waitingMatrix.resize(prespikeDelaySteps, std::vector<double>(branchLength / gap, 0));
 }
 
@@ -116,8 +116,8 @@ void MACRbPBranch::Advect() {
              ctt.reaction12Ctt * spine.weight * spine.calcineurinActive;
       spine.weight += wDot;
       // 9th Consumption of resources by weight change
-      spine.resourcesAvailable -=
-          (wDot) / ctt.resourceConversionFct; // This should be the case for converting the dmV/spike to concentration of resources
+      spine.resourcesAvailable -= (wDot);
+      // / ctt.resourceConversionFct; // This should be the case for converting the dmV/spike to concentration of resources
       // For the next timestep
     }
     spine.PreDiffusion();
@@ -215,8 +215,8 @@ void MACRbPBranch::AdvectUnrolled() {
            ctt.reaction12Ctt * MACRbPspines.at(0).weight * MACRbPspines.at(0).calcineurinActive;
     MACRbPspines.at(0).weight += wDot;
     // 9th Consumption of resources by weight change
-    MACRbPspines.at(0).resourcesAvailable -=
-        (wDot) / ctt.resourceConversionFct; // This should be the case for converting the dmV/spike to concentration of resources
+    MACRbPspines.at(0).resourcesAvailable -= (wDot);
+    // / ctt.resourceConversionFct; // This should be the case for converting the dmV/spike to concentration of resources
     // For the next timestep
   }
 #ifndef NDEBUG
@@ -292,8 +292,8 @@ void MACRbPBranch::AdvectUnrolled() {
              ctt.reaction12Ctt * MACRbPspines.at(spineIndex).weight * MACRbPspines.at(spineIndex).calcineurinActive;
       MACRbPspines.at(spineIndex).weight += wDot;
       // 9th Consumption of resources by weight change
-      MACRbPspines.at(spineIndex).resourcesAvailable -=
-          (wDot) / ctt.resourceConversionFct; // This should be the case for converting the dmV/spike to concentration of resources
+      MACRbPspines.at(spineIndex).resourcesAvailable -= (wDot);
+      // / ctt.resourceConversionFct; // This should be the case for converting the dmV/spike to concentration of resources
       // For the next timestep
     }
 #ifndef NDEBUG
@@ -365,8 +365,8 @@ void MACRbPBranch::AdvectUnrolled() {
            ctt.reaction12Ctt * MACRbPspines.at(lastIndex).weight * MACRbPspines.at(lastIndex).calcineurinActive;
     MACRbPspines.at(lastIndex).weight += wDot;
     // 9th Consumption of resources by weight change
-    MACRbPspines.at(lastIndex).resourcesAvailable -=
-        (wDot) / ctt.resourceConversionFct; // This should be the case for converting the dmV/spike to concentration of resources
+    MACRbPspines.at(lastIndex).resourcesAvailable -= (wDot);
+    // / ctt.resourceConversionFct; // This should be the case for converting the dmV/spike to concentration of resources
     // For the next timestep
   }
 #ifndef NDEBUG
@@ -377,7 +377,7 @@ void MACRbPBranch::AdvectUnrolled() {
 double MACRbPBranch::GetTotalWeight() const {
   return std::reduce(MACRbPspines.begin(), MACRbPspines.end(), 0.0, [](double accumulator, const MACRbPSynapseSpine &spine) {
     if (spine.connected)
-      return accumulator + spine.weight;
+      return accumulator + spine.GetWeight();
     else
       return accumulator;
   });
