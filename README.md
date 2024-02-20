@@ -37,7 +37,8 @@ All the parameters of a simulation are contained in a parameter file. The parame
 
 ## Tests
 
-We provide eight tests to reproduce published results with the code. Please see [here](README_Tests.md) for more details.
+We provide twelve tests to reproduce published results with the code and test that the code functions as intended. Please see [here](README_Tests.md) for more details.
+All tagged versions are fully tested, although it is recommended to use the latest version due to earlier bugs.
 
 ## Parameter Files
 
