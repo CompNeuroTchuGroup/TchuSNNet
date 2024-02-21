@@ -79,6 +79,26 @@ struct GlobalSimInfo {
   bool      isMock{false};
 };
 
+struct binData {
+  std::vector<double> potential;   // used to compute average potential of neurons [per population]
+  std::vector<double> spikerRatio; // number of spiked neurons [per population]
+
+  std::vector<double>              externalCurrent;  // average external input current [to population totalNeuronPopulation] //to vector
+  std::vector<std::vector<double>> synapticCurrents; // average current [to population P1][from population P2] //to vector
+  // std::valarray<double>  totalCurrent_mean;             // mean of the total input current     [to population totalNeuronPopulation]
+
+  std::vector<std::vector<double>> neuronTotalCurrentMean;   // mean of the total input current     [to neuron N]
+  std::vector<double>              totalCurrentSquared_mean; // mean of the squared total input current to each neuron [averaged over population Ps]
+  // std::valarray<int>               spiker_pop; //Member is currently not in use
+
+  /** synaptic statistics per time step for every postsynaptic and every
+   * presynaptic population and every synapse specific data column.
+   */
+  std::vector<std::vector<std::vector<double>>> synapticState; // synaptic data of synapses [to population P1][from population P2][data entry j] //sum
+                                                               // of vectors, valarray is valid (in last level)
+  std::vector<std::vector<double>>      heatmap;               // firing rate [of population i][in each pixel]
+  std::vector<std::vector<signed long>> noRecordedSynapses;
+};
 struct FileEntry {
   std::string              parameterName;
   std::vector<std::string> parameterValues;
