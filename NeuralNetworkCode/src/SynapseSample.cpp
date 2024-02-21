@@ -3,13 +3,13 @@
 SynapseSample::SynapseSample(std::shared_ptr<NeuronPopSample> neurons, std::vector<FileEntry> &synapseParameters, GlobalSimInfo *infoGlobal)
     : infoGlobal{infoGlobal}, neurons{neurons}, totalNeuronPops{neurons->GetTotalPopulations()} {
 
-  synapses      = std::vector<std::vector<SynapsePtr>>(totalNeuronPops);
+  synapses      = std::vector<std::vector<SynapsePtr>>(totalNeuronPops);//This not allowed
   synapseStates = std::vector<std::vector<bool>>(totalNeuronPops, std::vector<bool>(totalNeuronPops, false));
   for (std::vector<SynapsePtr> &targetVector : synapses) {
-    targetVector.resize(totalNeuronPops);
-    for (PopInt neuronPop : std::ranges::views::iota(0, totalNeuronPops)) {
-      targetVector.at(neuronPop) = nullptr;
-    }
+    targetVector.resize(totalNeuronPops);//Already default initialized to nullptr
+    // for (PopInt neuronPop : std::ranges::views::iota(0, totalNeuronPops)) {
+    //   targetVector.at(neuronPop) = nullptr;
+    // }
   }
   // for (std::vector<synapsePtr>& targetVector : synapses){
   //     for (synapsePtr synapse : targetVector){
