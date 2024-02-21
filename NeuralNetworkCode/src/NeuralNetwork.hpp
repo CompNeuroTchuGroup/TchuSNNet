@@ -31,11 +31,11 @@ private:
   std::shared_ptr<Recorder>        recorder;
   std::shared_ptr<Stimulus>        stimulus;
 
-  void SaveParameters();
+  void SaveParameters() const;
   void LoadParameters(std::string baseDirectory, std::vector<FileEntry> &parameterEntries);
   bool WellDefined() const;
 
-  void SaveParameterOptions();
+  void SaveParameterOptions() const;
 
 public:
   NeuralNetwork(std::string baseDirectory, std::vector<FileEntry> parameterEntries);

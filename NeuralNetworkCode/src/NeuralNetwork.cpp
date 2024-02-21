@@ -11,7 +11,7 @@ NeuralNetwork::NeuralNetwork(std::string baseDirectory, std::vector<FileEntry> p
   SaveParameterOptions();
 }
 
-void NeuralNetwork::SaveParameters() {
+void NeuralNetwork::SaveParameters() const {
 
   // if this test file does not appear in the target directory: stop the
   // simulation and check the directoryPath.
@@ -58,7 +58,7 @@ void NeuralNetwork::SaveParameters() {
   wParameterStream.close();
 }
 
-void NeuralNetwork::SaveParameterOptions() { // This function should have stuff moved to the heap (and deleted at the end of the function)
+void NeuralNetwork::SaveParameterOptions() const { // This function should have stuff moved to the heap (and deleted at the end of the function)
   // return;//SaveParameteroptions is disabled
   std::cout << recorder->GetParameterOptionsFilename() << std::endl;
   std::ofstream streamPOptions(recorder->GetParameterOptionsFilename());
