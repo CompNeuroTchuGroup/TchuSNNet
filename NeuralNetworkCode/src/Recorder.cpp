@@ -276,7 +276,7 @@ void Recorder::WriteHeader(std::ofstream &fileStream) const {
   fileStream << "#*****************************************************************\n";
 }
 
-void Recorder::MakeInputCopies(const std::string &inputFileAddress) {
+void Recorder::MakeInputCopies(const std::string &inputFileAddress) const {
   // Parameters file
   std::ifstream sourceFile(inputFileAddress, std::ios::binary);
   std::ofstream copiedFile(this->GetDirectoryPath() + "_inputParametersCopy.txt", std::ios::binary);

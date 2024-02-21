@@ -499,6 +499,6 @@ void NeuralNetwork::Simulate() {
   //*****************************************************
 }
 
-void NeuralNetwork::MakeInputCopies(const std::string &inputFileAddress) {
+void NeuralNetwork::MakeInputCopies(const std::string &inputFileAddress) const {
   this->recorder->MakeInputCopies(inputFileAddress);
 }

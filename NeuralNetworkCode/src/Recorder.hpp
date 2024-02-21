@@ -167,7 +167,7 @@ public:
   void WriteDistributionJ() const;
   void WriteSteadyStates() const;
 
-  void MakeInputCopies(const std::string &filename);
+  void MakeInputCopies(const std::string &filename) const;
 };
 
 #endif /* Recorder_HPP */
