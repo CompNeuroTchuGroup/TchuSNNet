@@ -244,7 +244,7 @@ const std::string IDstringMonoDendriteSTDPBiWindow{"MonoDendriteSTDPBiWindow"};
 const std::string IDstringMonoDendriteSTDPBiExponential{"MonoDendriteSTDPBiExponential"};
 
 const std::string IDstringTraceResourceHSTDP{"AlphaResourceHSTDP"};
-const std::string IDstringMACRbPModel{"ResourceCalciumDiffusion"};
+const std::string IDstringMACRbPModel{"MACRbPModel"};
 const std::string IDstringHeteroGraupnerBrunel{"HeteroGraupnerBrunel"};
 
 // void MultiplyVector (std::vector<signed long> &vector, signed long value);

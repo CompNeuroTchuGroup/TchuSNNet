@@ -86,7 +86,7 @@ synapses_1_0_seed						183427039
 synapses_1_0_targetBranch					0			#You can target branches in an 'ordered' manner (0,1,2...), 'random', or set (if you input a number). Put none if the HS does not used branched morphology
 synapses_1_0_relative_coupling					1.000000	#Relative coupling strength (only non-J plasticity models)
 #########From here on is all Heterosynaptic plasticity###########
-synapses_1_0_pmodel_type			ResourceCalciumDiffusion
+synapses_1_0_pmodel_type			MACRbPModel
 synapses_1_0_pmodel_branchLength		100.000000 #μm	#Length of each branch.
 synapses_1_0_pmodel_synapticGap			1.000000 #μm	#Distance between synapse spines.
 synapses_1_0_pmodel_distributeWeights		false #μm	#Distance between synapse spines.
