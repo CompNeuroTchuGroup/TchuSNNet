@@ -59,13 +59,11 @@ void MACRbPBranch::Advect() {
       // Here we influx calcium with the nonlinear traces
       spine.preTransientIncrease -= spine.preTransientIncrease * ctt.preCalciumDecayRate; // This is B in Graupner and Brunel appendix
       spine.preTransient +=
-          ctt.preCalciumFluxFactor * (spine.preTransientIncrease - spine.preTransient * ctt.preCalciumRiseRate); // This is A in appendix
+          ctt.preCalciumFluxFactor * spine.preTransientIncrease - spine.preTransient * ctt.calciumExtrusionCtt; // This is A in appendix
 
       spine.postTransientIncrease -= spine.postTransientIncrease * ctt.postCalciumDecayRate; // This is F in Graupner and Brunel appendix
-      spine.postTransient +=
-          ctt.postCalciumFluxFactor * (spine.postTransientIncrease - spine.postTransient * ctt.postCalciumRiseRate); // This is E in appendix
       // Here we add the traces plus the basal flux to the calcium
-      spine.calciumFree += spine.preTransient + spine.postTransient;
+      spine.calciumFree += spine.preTransientIncrease + spine.postTransientIncrease;
       // Until here, now first reactions
 
       double freeNg{ctt.neurograninTotal - spine.calmodulinNeurogranin}, epsilon{};
@@ -165,18 +163,13 @@ void MACRbPBranch::AdvectUnrolled() {
   // Reactions
   if (MACRbPspines.at(0).enabled) {
     // Here we influx calcium with the nonlinear traces
-    MACRbPspines.at(0).preTransientIncrease -=
-        MACRbPspines.at(0).preTransientIncrease * ctt.preCalciumDecayRate; // This is B in Graupner and Brunel appendix
-    MACRbPspines.at(0).preTransient += ctt.preCalciumFluxFactor * (MACRbPspines.at(0).preTransientIncrease -
-                                                                   MACRbPspines.at(0).preTransient * ctt.preCalciumRiseRate); // This is A in appendix
+      MACRbPspines.at(0).preTransientIncrease -= MACRbPspines.at(0).preTransientIncrease * ctt.preCalciumDecayRate; // This is B in Graupner and Brunel appendix
+      MACRbPspines.at(0).preTransient +=
+          ctt.preCalciumFluxFactor * MACRbPspines.at(0).preTransientIncrease - MACRbPspines.at(0).preTransient * ctt.calciumExtrusionCtt; // This is A in appendix
 
-    MACRbPspines.at(0).postTransientIncrease -=
-        MACRbPspines.at(0).postTransientIncrease * ctt.postCalciumDecayRate; // This is F in Graupner and Brunel appendix
-    MACRbPspines.at(0).postTransient +=
-        ctt.postCalciumFluxFactor *
-        (MACRbPspines.at(0).postTransientIncrease - MACRbPspines.at(0).postTransient * ctt.postCalciumRiseRate); // This is E in appendix
-    // Here we add the traces plus the basal flux to the calcium
-    MACRbPspines.at(0).calciumFree += MACRbPspines.at(0).preTransient + MACRbPspines.at(0).postTransient;
+      MACRbPspines.at(0).postTransientIncrease -= MACRbPspines.at(0).postTransientIncrease * ctt.postCalciumDecayRate; // This is F in Graupner and Brunel appendix
+      // Here we add the traces plus the basal flux to the calcium
+      MACRbPspines.at(0).calciumFree += MACRbPspines.at(0).preTransientIncrease + MACRbPspines.at(0).postTransientIncrease;
     // Until here, now first reactions
 
     double freeNg{ctt.neurograninTotal - MACRbPspines.at(0).calmodulinNeurogranin}, epsilon{};
@@ -240,16 +233,13 @@ void MACRbPBranch::AdvectUnrolled() {
       MACRbPspines.at(spineIndex).preTransientIncrease -=
           MACRbPspines.at(spineIndex).preTransientIncrease * ctt.preCalciumDecayRate; // This is B in Graupner and Brunel appendix
       MACRbPspines.at(spineIndex).preTransient +=
-          ctt.preCalciumFluxFactor * (MACRbPspines.at(spineIndex).preTransientIncrease -
-                                      MACRbPspines.at(spineIndex).preTransient * ctt.preCalciumRiseRate); // This is A in appendix
+          ctt.preCalciumFluxFactor * MACRbPspines.at(spineIndex).preTransientIncrease -
+                                      MACRbPspines.at(spineIndex).preTransient * ctt.calciumExtrusionCtt; // This is A in appendix
 
       MACRbPspines.at(spineIndex).postTransientIncrease -=
           MACRbPspines.at(spineIndex).postTransientIncrease * ctt.postCalciumDecayRate; // This is F in Graupner and Brunel appendix
-      MACRbPspines.at(spineIndex).postTransient +=
-          ctt.postCalciumFluxFactor * (MACRbPspines.at(spineIndex).postTransientIncrease -
-                                       MACRbPspines.at(spineIndex).postTransient * ctt.postCalciumRiseRate); // This is E in appendix
       // Here we add the traces plus the basal flux to the calcium
-      MACRbPspines.at(spineIndex).calciumFree += MACRbPspines.at(spineIndex).preTransient + MACRbPspines.at(spineIndex).postTransient;
+      MACRbPspines.at(spineIndex).calciumFree += MACRbPspines.at(spineIndex).preTransientIncrease + MACRbPspines.at(spineIndex).postTransientIncrease;
       // Until here, now first reactions
 
       double freeNg{ctt.neurograninTotal - MACRbPspines.at(spineIndex).calmodulinNeurogranin}, epsilon{};
@@ -314,16 +304,13 @@ void MACRbPBranch::AdvectUnrolled() {
     MACRbPspines.at(lastIndex).preTransientIncrease -=
         MACRbPspines.at(lastIndex).preTransientIncrease * ctt.preCalciumDecayRate; // This is B in Graupner and Brunel appendix
     MACRbPspines.at(lastIndex).preTransient +=
-        ctt.preCalciumFluxFactor *
-        (MACRbPspines.at(lastIndex).preTransientIncrease - MACRbPspines.at(lastIndex).preTransient * ctt.preCalciumRiseRate); // This is A in appendix
+        ctt.preCalciumFluxFactor * MACRbPspines.at(lastIndex).preTransientIncrease - MACRbPspines.at(lastIndex).preTransient * ctt.calciumExtrusionCtt; // This is A in appendix
 
     MACRbPspines.at(lastIndex).postTransientIncrease -=
         MACRbPspines.at(lastIndex).postTransientIncrease * ctt.postCalciumDecayRate; // This is F in Graupner and Brunel appendix
-    MACRbPspines.at(lastIndex).postTransient +=
-        ctt.postCalciumFluxFactor * (MACRbPspines.at(lastIndex).postTransientIncrease -
-                                     MACRbPspines.at(lastIndex).postTransient * ctt.postCalciumRiseRate); // This is E in appendix
+
     // Here we add the traces plus the basal flux to the calcium
-    MACRbPspines.at(lastIndex).calciumFree += MACRbPspines.at(lastIndex).preTransient + MACRbPspines.at(lastIndex).postTransient;
+    MACRbPspines.at(lastIndex).calciumFree += MACRbPspines.at(lastIndex).preTransientIncrease + MACRbPspines.at(lastIndex).postTransientIncrease;
     // Until here, now first reactions
 
     double freeNg{ctt.neurograninTotal - MACRbPspines.at(lastIndex).calmodulinNeurogranin}, epsilon{};

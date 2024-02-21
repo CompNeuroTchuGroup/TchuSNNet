@@ -19,7 +19,7 @@ public:
   double preTransient{};         // Calcium trace (interacts with postspike)
 
   double postTransientIncrease{}; // Abstract trace
-  double postTransient{};         // Calcium trace (interacts with postspike)
+  // double postTransient{};         // Calcium trace (interacts with postspike) Not in use anymore
 
   double calciumOldStep{};
   double calciumFree{};
