@@ -33,7 +33,7 @@ private:
 
   void SaveParameters();
   void LoadParameters(std::string baseDirectory, std::vector<FileEntry> &parameterEntries);
-  bool WellDefined();
+  bool WellDefined() const;
 
   void SaveParameterOptions();
 

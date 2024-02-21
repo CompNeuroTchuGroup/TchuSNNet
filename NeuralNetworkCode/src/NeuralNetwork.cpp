@@ -394,7 +394,7 @@ void NeuralNetwork::LoadParameters(std::string baseDirectory, std::vector<FileEn
       std::make_shared<Recorder>(neurons, synapses, stimulus, baseDirectory, recorderParameters, simulationTitle, nonIterateTitle, &infoGlobal);
 }
 
-bool NeuralNetwork::WellDefined() {
+bool NeuralNetwork::WellDefined() const {
   return !((neurons == nullptr) || (synapses == nullptr) || (recorder == nullptr) || (stimulus == nullptr));
 }
 
