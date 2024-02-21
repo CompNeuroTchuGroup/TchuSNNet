@@ -24,10 +24,10 @@ protected:
   // Constants
   double prespikeCalcium{}, postspikeCalcium{};
 
-  double preCalciumRiseTau{};
+  // double preCalciumRiseTau{};
   double preCalciumDecayTau{};
 
-  double postCalciumRiseTau{};
+  // double postCalciumRiseTau{};
   double postCalciumDecayTau{};
 
   double availResourcesRatio{};

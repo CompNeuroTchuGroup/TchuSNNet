@@ -158,11 +158,11 @@ struct Constants { // currently 19 + the prespike/postspike calcium and the pres
   double initialWeight{};
 
   double preCalciumFluxFactor{};
-  double preCalciumRiseRate{};
+  // double preCalciumRiseRate{};
   double preCalciumDecayRate{};
 
   double postCalciumFluxFactor{};
-  double postCalciumRiseRate{};
+  // double postCalciumRiseRate{};
   double postCalciumDecayRate{};
 
   double nonlinearFactorNMDA{};

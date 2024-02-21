@@ -59,12 +59,12 @@ void MACRbPModel::LoadParameters(const std::vector<FileEntry> &morphologyParamet
       this->prespikeCalcium = std::stod(parameterValues.at(0));
     } else if (parameterName.find("postspikeCalcium") != std::string::npos) {
       this->postspikeCalcium = std::stod(parameterValues.at(0));
-    } else if (parameterName.find("preCalciumRiseTau") != std::string::npos) {
-      this->preCalciumRiseTau = (std::stod(parameterValues.at(0)) / infoGlobal->dtTimestep);
+    // } else if (parameterName.find("preCalciumRiseTau") != std::string::npos) {
+    //   this->preCalciumRiseTau = (std::stod(parameterValues.at(0)) / infoGlobal->dtTimestep);
     } else if (parameterName.find("preCalciumDecayTau") != std::string::npos) {
       this->preCalciumDecayTau = (std::stod(parameterValues.at(0)) / infoGlobal->dtTimestep);
-    } else if (parameterName.find("postCalciumRiseTau") != std::string::npos) {
-      this->postCalciumRiseTau = (std::stod(parameterValues.at(0)) / infoGlobal->dtTimestep);
+    // } else if (parameterName.find("postCalciumRiseTau") != std::string::npos) {
+    //   this->postCalciumRiseTau = (std::stod(parameterValues.at(0)) / infoGlobal->dtTimestep);
     } else if (parameterName.find("postCalciumDecayTau") != std::string::npos) {
       this->postCalciumDecayTau = (std::stod(parameterValues.at(0)) / infoGlobal->dtTimestep);
     } else if (parameterName.find("nonlinearNMDAFactor") != std::string::npos) {
@@ -86,9 +86,9 @@ void MACRbPModel::PreCalculateParameters() {
   this->constants.calciumInfluxBasal = calciumBasal * constants.calciumExtrusionCtt;
   this->constants.initialResources   = this->constants.initialWeight / constants.resourceConversionFct / availResourcesRatio; // REVIEW
   // this->constants.reaction11Ctt *= constants.resourceConversionFct;                                                           // REVIEW
-  this->constants.preCalciumRiseRate   = 1 / preCalciumRiseTau;
+  // this->constants.preCalciumRiseRate   = 1 / preCalciumRiseTau;
   this->constants.preCalciumDecayRate  = 1 / preCalciumDecayTau;
-  this->constants.postCalciumRiseRate  = 1 / postCalciumRiseTau;
+  // this->constants.postCalciumRiseRate  = 1 / postCalciumRiseTau;
   this->constants.postCalciumDecayRate = 1 / postCalciumDecayTau;
 
   auto amplitudeNormalization = [](double amplitude, double calcium_tau, double decay_tau) { // The taus need to be in the proper time unit
@@ -163,15 +163,15 @@ void MACRbPModel::CheckParameters(const std::vector<FileEntry> &parameters) {
       throw "prespikeCalcium was not consistent in plasticity model parameters.";
     } else if (parameterName.find("postspikeCalcium") != std::string::npos && this->postspikeCalcium != std::stod(parameterValues.at(0))) {
       throw "postspikeCalcium was not consistent in plasticity model parameters.";
-    } else if (parameterName.find("preCalciumRiseTau") != std::string::npos &&
-               this->preCalciumRiseTau != (std::stod(parameterValues.at(0)) / infoGlobal->dtTimestep)) {
-      throw "preCalciumDelay was not consistent in plasticity model parameters.";
+    // } else if (parameterName.find("preCalciumRiseTau") != std::string::npos &&
+    //            this->preCalciumRiseTau != (std::stod(parameterValues.at(0)) / infoGlobal->dtTimestep)) {
+    //   throw "preCalciumDelay was not consistent in plasticity model parameters.";
     } else if (parameterName.find("preCalciumDecayTau") != std::string::npos &&
                this->preCalciumDecayTau != (std::stod(parameterValues.at(0)) / infoGlobal->dtTimestep)) {
       throw "preCalciumDelay was not consistent in plasticity model parameters.";
-    } else if (parameterName.find("postCalciumRiseTau") != std::string::npos &&
-               this->postCalciumRiseTau != (std::stod(parameterValues.at(0)) / infoGlobal->dtTimestep)) {
-      throw "preCalciumDelay was not consistent in plasticity model parameters.";
+    // } else if (parameterName.find("postCalciumRiseTau") != std::string::npos &&
+    //            this->postCalciumRiseTau != (std::stod(parameterValues.at(0)) / infoGlobal->dtTimestep)) {
+    //   throw "preCalciumDelay was not consistent in plasticity model parameters.";
     } else if (parameterName.find("postCalciumDecayTau") != std::string::npos &&
                this->postCalciumDecayTau != (std::stod(parameterValues.at(0)) / infoGlobal->dtTimestep)) {
       throw "preCalciumDelay was not consistent in plasticity model parameters.";
@@ -269,18 +269,18 @@ void MACRbPModel::SaveParameters(std::ofstream &wParameterFile, std::string neur
   wParameterFile << neuronIdentificator << "postspikeCalcium\t\t" << (this->postspikeCalcium) << " #nM/spike";
   wParameterFile << "\t"
                  << "#Total influx of calcium with a postspike\n";
-  wParameterFile << neuronIdentificator << "preCalciumRiseTau\t\t" << (static_cast<double>(this->preCalciumRiseTau) * infoGlobal->dtTimestep)
-                 << " #secs.";
-  wParameterFile << "\t"
-                 << "#Delay of the prespike calcium influx\n";
+  // wParameterFile << neuronIdentificator << "preCalciumRiseTau\t\t" << (static_cast<double>(this->preCalciumRiseTau) * infoGlobal->dtTimestep)
+  //                << " #secs.";
+  // wParameterFile << "\t"
+  //                << "#Delay of the prespike calcium influx\n";
   wParameterFile << neuronIdentificator << "preCalciumDecayTau\t\t" << (static_cast<double>(this->preCalciumDecayTau) * infoGlobal->dtTimestep)
                  << " #secs.";
   wParameterFile << "\t"
                  << "#Delay of the prespike calcium influx\n";
-  wParameterFile << neuronIdentificator << "postCalciumRiseTau\t\t" << (static_cast<double>(this->postCalciumRiseTau) * infoGlobal->dtTimestep)
-                 << " #secs.";
-  wParameterFile << "\t"
-                 << "#Delay of the prespike calcium influx\n";
+  // wParameterFile << neuronIdentificator << "postCalciumRiseTau\t\t" << (static_cast<double>(this->postCalciumRiseTau) * infoGlobal->dtTimestep)
+  //                << " #secs.";
+  // wParameterFile << "\t"
+  //                << "#Delay of the prespike calcium influx\n";
   wParameterFile << neuronIdentificator << "postCalciumDecayTau\t\t" << (static_cast<double>(this->postCalciumDecayTau) * infoGlobal->dtTimestep)
                  << " #secs.";
   wParameterFile << "\t"
