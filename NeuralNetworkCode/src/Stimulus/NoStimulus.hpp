@@ -4,7 +4,7 @@
 #include "../GlobalFunctions.hpp"
 #include "Stimulus.hpp"
 
-class NoStimulus : Stimulus {
+class NoStimulus : public Stimulus {
   virtual void SetSignalMatrix();
   virtual void PostLoadParameters();
 

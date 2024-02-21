@@ -9,6 +9,7 @@
 #include "Stimulus/UncorrelatedPoissonLikeStimulus.hpp"
 #include "Stimulus/WhiteNoiseLinear.hpp"
 #include "Stimulus/WhiteNoiseStimulus.hpp"
+#include "Stimulus/NoStimulus.hpp"
 #include "SynapseSample.hpp"
 #include <chrono>
 #include <cstring>

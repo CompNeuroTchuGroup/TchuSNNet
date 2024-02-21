@@ -384,8 +384,10 @@ void NeuralNetwork::LoadParameters(std::string baseDirectory, std::vector<FileEn
     this->stimulus = std::make_shared<SpatialGaussianStimulus>(neurons, stimulusParameters, &infoGlobal); //
   } else if (stimulusType == IDstringSpatialPoissonStimulus) {
     this->stimulus = std::make_shared<SpatialPoissonStimulus>(neurons, stimulusParameters, &infoGlobal); //
+  } else if (stimulusType== "" || stimulusType==IDstringNoStimulus) {
+    this->stimulus = std::make_shared<NoStimulus>(neurons, &infoGlobal);
   } else {
-    throw "Stimulus not defined";
+    throw "Stimulus type was not properly defined.";
   }
 
   this->recorder =
