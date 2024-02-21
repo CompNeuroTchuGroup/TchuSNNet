@@ -13,7 +13,7 @@
 struct MACRbPSynapseSpine : public BranchedSynapseSpine {
 
 public:
-  bool connected{false};
+  bool enabled{false};
 
   double preTransientIncrease{}; // Abstract trace
   double preTransient{};         // Calcium trace (interacts with postspike)

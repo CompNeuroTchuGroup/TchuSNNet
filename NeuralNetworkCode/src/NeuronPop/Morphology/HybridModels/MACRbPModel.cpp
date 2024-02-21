@@ -434,7 +434,7 @@ BaseSpinePtr MACRbPModel::AllocateNewSynapse(BranchTargeting &branchTarget) {
   newSpine->branchPositionId = (position);
   newSpine->branchId         = (branch);
 
-  newSpine->connected = true;
+  newSpine->enabled = true;
 
   branches.at(branch)->synapseSlotClosedIndex.push_back(position); // Do we really need this?
 

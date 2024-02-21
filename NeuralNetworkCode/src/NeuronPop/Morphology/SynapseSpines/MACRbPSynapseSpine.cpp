@@ -1,7 +1,7 @@
 #include "./MACRbpSynapseSpine.hpp"
 #include "MACRbPSynapseSpine.hpp"
 
-MACRbPSynapseSpine::MACRbPSynapseSpine() : connected{false} {
+MACRbPSynapseSpine::MACRbPSynapseSpine() : enabled{false} {
 }
 
 // MACRbPSynapseSpine::MACRbPSynapseSpine(double weight, double resources, double calcium)

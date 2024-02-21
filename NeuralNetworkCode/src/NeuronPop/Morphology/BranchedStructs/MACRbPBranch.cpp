@@ -55,7 +55,7 @@ void MACRbPBranch::Advect() {
   // All constants.reactions happen in a single loop because diffusion is separate
   std::for_each(PAR_UNSEQ, MACRbPspines.begin(), MACRbPspines.end(), [ctt](MACRbPSynapseSpine &spine) {
     // const Constants ctt{ctt};
-    if (spine.connected) {
+    if (spine.enabled) {
       // Here we influx calcium with the nonlinear traces
       spine.preTransientIncrease -= spine.preTransientIncrease * ctt.preCalciumDecayRate; // This is B in Graupner and Brunel appendix
       spine.preTransient +=
@@ -163,7 +163,7 @@ void MACRbPBranch::AdvectUnrolled() {
   // Diffusion of resources
   MACRbPspines.at(0).resourcesAvailable += ctt.resourceDiffusionFct * (-MACRbPspines.at(0).resourcesOldStep + MACRbPspines.at(1).resourcesOldStep);
   // Reactions
-  if (MACRbPspines.at(0).connected) {
+  if (MACRbPspines.at(0).enabled) {
     // Here we influx calcium with the nonlinear traces
     MACRbPspines.at(0).preTransientIncrease -=
         MACRbPspines.at(0).preTransientIncrease * ctt.preCalciumDecayRate; // This is B in Graupner and Brunel appendix
@@ -235,7 +235,7 @@ void MACRbPBranch::AdvectUnrolled() {
     MACRbPspines.at(spineIndex).resourcesAvailable +=
         ctt.resourceDiffusionFct * (-2 * MACRbPspines.at(spineIndex).resourcesOldStep + MACRbPspines.at(spineIndex - 1).resourcesOldStep +
                                     MACRbPspines.at(spineIndex + 1).resourcesOldStep);
-    if (MACRbPspines.at(spineIndex).connected) {
+    if (MACRbPspines.at(spineIndex).enabled) {
       // Here we influx calcium with the nonlinear traces
       MACRbPspines.at(spineIndex).preTransientIncrease -=
           MACRbPspines.at(spineIndex).preTransientIncrease * ctt.preCalciumDecayRate; // This is B in Graupner and Brunel appendix
@@ -309,7 +309,7 @@ void MACRbPBranch::AdvectUnrolled() {
   MACRbPspines.at(lastIndex).resourcesAvailable +=
       ctt.resourceDiffusionFct * (-MACRbPspines.at(lastIndex).resourcesOldStep + MACRbPspines.at(lastIndex - 1).resourcesOldStep);
   // Reactions
-  if (MACRbPspines.at(lastIndex).connected) {
+  if (MACRbPspines.at(lastIndex).enabled) {
     // Here we influx calcium with the nonlinear traces
     MACRbPspines.at(lastIndex).preTransientIncrease -=
         MACRbPspines.at(lastIndex).preTransientIncrease * ctt.preCalciumDecayRate; // This is B in Graupner and Brunel appendix
@@ -376,7 +376,7 @@ void MACRbPBranch::AdvectUnrolled() {
 
 double MACRbPBranch::GetTotalWeight() const {
   return std::reduce(MACRbPspines.begin(), MACRbPspines.end(), 0.0, [](double accumulator, const MACRbPSynapseSpine &spine) {
-    if (spine.connected)
+    if (spine.enabled)
       return accumulator + spine.GetWeight();
     else
       return accumulator;
