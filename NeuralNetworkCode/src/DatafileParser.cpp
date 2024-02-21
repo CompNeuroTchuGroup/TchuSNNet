@@ -23,7 +23,7 @@ DatafileParser::DatafileParser(Recorder &recorder) { // revised
     fileNamesToParse.push_back(recorder.GetRasterplotFilename());
     fileTypes.push_back(RasterPlot);
   }
-  for (std::string fileName : fileNamesToParse) {
+  for (std::string& fileName : fileNamesToParse) {//You want a full copy? string_view would not be useful I suppose, and string& could be problematic, potentially
     filesToParse.push_back(std::ifstream(fileName, std::ifstream::in));
   }
   // Here we have to access the recorder to obtain the filepaths/filenames and paths in general (and the metadata)
