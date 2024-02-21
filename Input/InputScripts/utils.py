@@ -128,7 +128,7 @@ class SimpleGenerator:
             for i in range (0,self.N_neurons):
                 for j in range (0,self.intervals):
                     text_file.write('> '+ str(i)+' '+str(self.instruction_start_times[i,j])+' '+str(self.instruction_end_times[i,j])+ ' ' + str(self.frequencies[i,j]))
-                    if i+1 == self.N_neurons and j+1 == self.total_time_intervals:
+                    if i+1 == self.N_neurons and j+1 == self.intervals:
                         pass
                     else:
                         text_file.write('\n')
