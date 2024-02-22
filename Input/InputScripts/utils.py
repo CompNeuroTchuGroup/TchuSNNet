@@ -151,12 +151,12 @@ class PairedPopsGenerator:
         self.gen2=SimpleGenerator(testname=testname,pop_id1=pop_id2,first_interval_true=first_interval_true,max_offset_inpop=max_offset_inpop,total_time=total_time,total_intervals=time_intervals,N_neurons=N_Neurons_2)
     def paired_stimm(self,stimStart,noSpikes, deltaT, frequency):
         if deltaT>=0:
-          self.gen1.SW_stim_protocol_one_burst(stimStart,noSpikes,frequency,offset=deltaT)
-          self.gen2.SW_stim_protocol_one_burst(stimStart,noSpikes,frequency)
+          self.gen2.SW_stim_protocol_one_burst(stimStart,noSpikes,frequency,offset=deltaT)
+          self.gen1.SW_stim_protocol_one_burst(stimStart,noSpikes,frequency)
         else:
           deltaT=-deltaT
-          self.gen1.SW_stim_protocol_one_burst(stimStart,noSpikes,frequency)
-          self.gen2.SW_stim_protocol_one_burst(stimStart,noSpikes,frequency,offset=deltaT)
+          self.gen2.SW_stim_protocol_one_burst(stimStart,noSpikes,frequency)
+          self.gen1.SW_stim_protocol_one_burst(stimStart,noSpikes,frequency,offset=deltaT)
             
 
 #This functions are useless, they give spiketimes
