@@ -12,8 +12,7 @@ DictatNeuronPop::DictatNeuronPop(GlobalSimInfo *infoGlobal, NeuronInt neuronID) 
 }
 
 void DictatNeuronPop::LoadParameters(const std::vector<FileEntry> &neuronParameters) {
-  NeuronPop::LoadParameters(
-      neuronParameters); // For now this is commented out to avoid confusion, and prevent from recording output in DictatNeuronPop
+  NeuronPop::LoadParameters(neuronParameters); // For now this is commented out to avoid confusion, and prevent from recording output in DictatNeuronPop
 
   for (auto &[parameterName, parameterValues] : neuronParameters) {
 

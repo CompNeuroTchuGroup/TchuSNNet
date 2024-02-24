@@ -70,6 +70,7 @@ void PModelSynapse::SaveParameters(std::ofstream &wParameterStream, std::string 
 
 void PModelSynapse::LoadParameters(const std::vector<FileEntry> &hybridParameters) {
   // branchTarget.setOfPositions.clear();//Unnecessary, push_back initializes the vector.
+  targetPop->LoadPlasticityModel(FilterStringEntries(hybridParameters, "pmodel"));
   for (auto &[parameterName, parameterValues] : hybridParameters) {
     if (parameterName.find("targetBranch") != std::string::npos) {
       if (parameterValues.at(0).find("random") != std::string::npos) {
@@ -106,7 +107,7 @@ void PModelSynapse::LoadParameters(const std::vector<FileEntry> &hybridParameter
       }
     }
   }
-  targetPop->LoadPlasticityModel(FilterStringEntries(hybridParameters, "pmodel"));
+  
   this->ignoreJDParameters = targetPop->ignoreJDParameters();
   Synapse::LoadParameters(hybridParameters);
   Dmax = targetPop->GetMaxGapDelay(delayPerMicrometer);
