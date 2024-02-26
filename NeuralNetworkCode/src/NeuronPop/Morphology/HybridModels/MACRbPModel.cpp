@@ -6,12 +6,8 @@ MACRbPModel::MACRbPModel(GlobalSimInfo *infoGlobal, const std::vector<FileEntry>
   if (spine.calmodulinActive == 0) {
     ComputeSteadyState(spine);
   }
-  steady_state_spine         = spine;
-  constants.newtonIterations = 2;
-  if (1) {
-    std::cout << "asd";
-  } else {
-  }
+  steady_state_spine = spine;
+  // constants.newtonIterations = 2;
 }
 
 void MACRbPModel::LoadParameters(const std::vector<FileEntry> &morphologyParameters) {
