@@ -23,8 +23,7 @@ struct MACRbPBranch : public Branch {
 
     // Methods
     // Setup
-    MACRbPBranch(std::vector<int> anteriorBranches, double gap, double branchLength, int branchId,
-                 MACRbPSynapseSpine spine);
+    MACRbPBranch(std::vector<int> anteriorBranches, double gap, double branchLength, int branchId, MACRbPSynapseSpine spine);
     MACRbPBranch(double gap, double branchLength, int branchId, MACRbPSynapseSpine spine);
     void PostConnectSetUp(std::vector<BranchedSpinePtr> spineData) override;
     void PostSpikeCalciumFlux(double nonlinearFactor);
@@ -34,7 +33,7 @@ struct MACRbPBranch : public Branch {
     //  matrix and fill with zeroes. Matrix contains the calcium concentration already and we just add.
     // Reaction methods
     void Advect(const RuntimeConstants& constants);          // All done in the scope of the branch!
-    void AdvectUnrolled(const RuntimeConstants& constants);  // All done in the scope of the branch!
+    void AdvectUnrolled(const RuntimeConstants& constants);  // This one maximizes L1 cache hits to infinity
 
     // Data retrieval
     double GetTotalWeight() const;
