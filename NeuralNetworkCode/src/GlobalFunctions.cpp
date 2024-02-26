@@ -7,20 +7,6 @@
 //
 #include "GlobalFunctions.hpp"
 
-DendriticSubRegion::DendriticSubRegion(char regionID, std::vector<int> branchesInRegion) : regionID{regionID}, branchesInRegion{branchesInRegion} {
-  // This is still under work
-}
-void FileEntry::RemoveCommentsInValues(char commentCharacter) {
-  std::vector<std::string> uncommentedValues;
-  for (std::string &storedValue : parameterValues) {
-    if (storedValue.find(commentCharacter) != std::string::npos) {
-      break;
-    } else {
-      uncommentedValues.push_back(storedValue);
-    }
-  }
-  this->parameterValues = uncommentedValues;
-}
 // void MultiplyVector (std::vector<signed long> &vector, signed long value)
 // {
 //     for(std::vector<signed long>::iterator iterator = vector.begin(); iterator != vector.end(); ++iterator)
@@ -51,10 +37,12 @@ void FileEntry::RemoveCommentsInValues(char commentCharacter) {
 //     testStream.close();
 // }
 
-// void FilterStringVector(std::vector<std::string>& fullString,std::string token,std::vector<std::string>& filteredString)
+// void FilterStringVector(std::vector<std::string>& fullString,std::string token,std::vector<std::string>&
+// filteredString)
 // {
 //     filteredString.clear();
-//     for(std::vector<std::string>::iterator iterator = (fullString).begin(); iterator != (fullString).end(); ++iterator) {
+//     for(std::vector<std::string>::iterator iterator = (fullString).begin(); iterator != (fullString).end();
+//     ++iterator) {
 //         if(iterator->find(token) != std::string::npos){
 //             filteredString.push_back(*iterator);
 //         }
@@ -69,24 +57,25 @@ std::vector<FileEntry> FilterStringEntries(const std::vector<FileEntry> &fullEnt
 }
 
 std::string getPathToInputFile(std::string &inputFileAddress, bool Windows) {
-
   std::istringstream stringStream(inputFileAddress);
   std::string        token;
   std::string        pathTo_inpuFile = "";
   char               tokenizerChar   = ' ';
-  if (Windows)
+  if (Windows) {
     tokenizerChar = '\\';
-  else
+  } else {
     tokenizerChar = '/';
+  }
 
   while (std::getline(stringStream, token, tokenizerChar)) {
     if (!stringStream.eof()) {
       if (token.length() != 0) {
         pathTo_inpuFile += token;
-        if (Windows)
+        if (Windows) {
           pathTo_inpuFile += "\\";
-        else
+        } else {
           pathTo_inpuFile += "/";
+        }
       }
     }
   }
@@ -113,8 +102,8 @@ std::string getPathToInputFile(std::string &inputFileAddress, bool Windows) {
 std::vector<std::string> SplitStringToValues(std::string fullString) {
   // Converts from string to values (without name involved)
   std::vector<std::string> parameterValues;
-  std::replace(fullString.begin(), fullString.end(), '\t', ' '); // Replace tabs by spaces, then search for tabs
-  std::replace(fullString.begin(), fullString.end(), '\r', ' '); // Replace additional end-of-line \r-symbol
+  std::replace(fullString.begin(), fullString.end(), '\t', ' ');  // Replace tabs by spaces, then search for tabs
+  std::replace(fullString.begin(), fullString.end(), '\r', ' ');  // Replace additional end-of-line \r-symbol
 
   std::istringstream stringStream(fullString);
   std::string        token;
@@ -131,19 +120,19 @@ FileEntry SplitStringToEntry(std::string fullString) {
   // Converts from string to values
   std::string              parameterName;
   std::vector<std::string> parameterValues;
-  std::replace(fullString.begin(), fullString.end(), '\t', ' '); // Replace tabs by spaces, then search for tabs
-  std::replace(fullString.begin(), fullString.end(), '\r', ' '); // Replace additional end-of-line \r-symbol
+  std::replace(fullString.begin(), fullString.end(), '\t', ' ');  // Replace tabs by spaces, then search for tabs
+  std::replace(fullString.begin(), fullString.end(), '\r', ' ');  // Replace additional end-of-line \r-symbol
 
   std::istringstream stringStream(fullString);
   std::string        token;
 
-  std::getline(stringStream, parameterName, ' '); // put name in name ref
+  std::getline(stringStream, parameterName, ' ');  // put name in name ref
   while (std::getline(stringStream, token, ' ')) {
     if (token.length() != 0) {
       parameterValues.push_back(token);
     }
   }
-  return FileEntry{parameterName, parameterValues};
+  return FileEntry { parameterName, parameterValues };
 }
 
 IterableFileEntry SplitStringToIterableEntry(std::string fullString) {
@@ -151,42 +140,44 @@ IterableFileEntry SplitStringToIterableEntry(std::string fullString) {
   std::string              parameterName;
   std::vector<std::string> parameterValues;
   // Converts from string to values with iterate in the paramline
-  std::replace(fullString.begin(), fullString.end(), '\t', ' '); // Replace tabs by spaces, then search for tabs
-  std::replace(fullString.begin(), fullString.end(), '\r', ' '); // Replace additional end-of-line \r-symbol
+  std::replace(fullString.begin(), fullString.end(), '\t', ' ');  // Replace tabs by spaces, then search for tabs
+  std::replace(fullString.begin(), fullString.end(), '\r', ' ');  // Replace additional end-of-line \r-symbol
 
   std::istringstream stringStream(fullString);
   std::string        token;
 
-  std::getline(stringStream, iterateID, ' '); // put first two entries in their refs
+  std::getline(stringStream, iterateID, ' ');  // put first two entries in their refs
   std::getline(stringStream, parameterName, ' ');
   while (std::getline(stringStream, token, ' ')) {
     if (token.length() != 0) {
       parameterValues.push_back(token);
     }
   }
-  return IterableFileEntry{iterateID, parameterName, parameterValues};
+  return IterableFileEntry { iterateID, parameterName, parameterValues };
 }
 
 void SaveDoubleFile(std::ofstream &file, double value, int precision) {
-  std::stringstream tempStream; // I think the idea of using a stream is to avoid individual writing on the file to slow down the code. As far as I am
-                                // aware this is already dealt with implicitly in the file stream objects.
+  std::stringstream
+    tempStream;  // I think the idea of using a stream is to avoid individual writing on the file to slow down the code.
+                 // As far as I am aware this is already dealt with implicitly in the file stream objects.
 
   tempStream << std::fixed << std::setprecision(precision) << value;
   file << tempStream.str() << "\t";
 }
 
 // void SaveTupleOfDoublesFile(std::ofstream& file, std::valarray<double> tuple, int precision)  {
-//     std::stringstream tempStream; //I think the idea of using a stream is to avoid individual writing on the file to slow down the code. As far as
-//     I am aware this is already dealt with implicitly in the file stream objects. size_t dataEntry; tempStream << "{"; for (dataEntry = 0; dataEntry
-//     < tuple.size()-1; ++dataEntry) {
+//     std::stringstream tempStream; //I think the idea of using a stream is to avoid individual writing on the file to
+//     slow down the code. As far as I am aware this is already dealt with implicitly in the file stream objects. size_t
+//     dataEntry; tempStream << "{"; for (dataEntry = 0; dataEntry < tuple.size()-1; ++dataEntry) {
 //         tempStream << std::fixed << std::setprecision(precision) << tuple[dataEntry] << ",";
 //     }
 //     tempStream << std::fixed << std::setprecision(precision) << tuple[dataEntry] << "}";
 //     file  << tempStream.str() << "\t";
 // }
 void SaveTupleOfDoublesFile(std::ofstream &file, std::vector<double> vector, int precision) {
-  std::stringstream tempStream; // I think the idea of using a stream is to avoid individual writing on the file to slow down the code. As far as I am
-                                // aware this is already dealt with implicitly in the file stream objects.
+  std::stringstream
+    tempStream;  // I think the idea of using a stream is to avoid individual writing on the file to slow down the code.
+                 // As far as I am aware this is already dealt with implicitly in the file stream objects.
   size_t dataEntry;
   tempStream << "{" << std::fixed << std::setprecision(precision);
   for (dataEntry = 0; dataEntry < vector.size() - 1; ++dataEntry) {
@@ -212,10 +203,12 @@ size_t IsIterateParamConsistent(FileEntry entry, IterableFileEntry iterateEntry)
 }
 
 signed int MinIterateParameterSize(std::vector<IterableFileEntry> iterateEntries) {
-  return static_cast<signed int>(
-      std::min_element(iterateEntries.begin(), iterateEntries.end(), [](const IterableFileEntry &entry1, const IterableFileEntry &entry2) {
-        return entry1.parameterValues.size() < entry2.parameterValues.size();
-      })->parameterValues.size());
+  return static_cast<signed int>(std::min_element(iterateEntries.begin(), iterateEntries.end(),
+                                                  [](const IterableFileEntry &entry1, const IterableFileEntry &entry2) {
+                                                    return entry1.parameterValues.size() <
+                                                           entry2.parameterValues.size();
+                                                  })
+                                   ->parameterValues.size());
 }
 
 /*template <typename T>
@@ -228,7 +221,8 @@ T stringToFileEntry(std::string readStringLine)
 }*/
 
 // void CheckConsistencyOfIterationParameters(const std::vector<IterableFileEntry>& entries) {
-//     bool consistent = std::all_of( entries.begin(), entries.end(), [entries] (const IterableFileEntry& iterableFileEntry) {
+//     bool consistent = std::all_of( entries.begin(), entries.end(), [entries] (const IterableFileEntry&
+//     iterableFileEntry) {
 //         return (iterableFileEntry.parameterValues.size() == entries.front().parameterValues.size());
 //     });
 //     if (entries.front().parameterValues.size() < 1) {
@@ -250,23 +244,6 @@ T stringToFileEntry(std::string readStringLine)
 //     }
 //     commentedString = uncommentedString;
 // }
-Instruction::Instruction(FileEntry inputEntry, double dtTimestep)
-    : neuronId{std::stoi(inputEntry.parameterValues.at(0))}, startTimeStep{std::lround(std::stod(inputEntry.parameterValues.at(1)) / dtTimestep)},
-      endTimeStep{std::lround(std::stod(inputEntry.parameterValues.at(2)) / dtTimestep)}, frequency{std::stod(inputEntry.parameterValues.at(3))},
-      firingProbability{frequency * dtTimestep} {
-  // Constructor
-  if (frequency < std::numeric_limits<double>::epsilon()) { // Zero comparison to avoid division by zero
-    this->off = true;
-  } else {
-    fireEveryNSteps = std::lround((1 / frequency) / dtTimestep); // Conversion from frequency to timestep period.
-    if (fireEveryNSteps == 0) {                                  // If the frequency is close
-      std::cout << "\n"
-                << "EXCEPTION: YOU CHOSE A FREQUENCY THAT IS TOO HIGH FOR NEURON " << std::to_string(neuronId) << "\n\n\n"
-                << "**********************************";
-      throw "EXCEPTION: YOU CHOSE A FREQUENCY THAT IS TOO HIGH FOR CURRENT DT IN DICTAT INPUT FILE";
-    }
-  }
-}
 void threadsafe::put_time(time_t timeObj, const char *formatString, std::stringstream &outputString) {
   std::lock_guard<std::mutex> _lockGuard(_timeMutex);
   outputString << std::put_time(std::localtime(&timeObj), formatString);
