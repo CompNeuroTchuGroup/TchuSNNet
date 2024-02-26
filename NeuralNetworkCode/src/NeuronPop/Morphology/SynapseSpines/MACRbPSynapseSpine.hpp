@@ -6,48 +6,49 @@
 
 #include "../../../GlobalFunctions.hpp"
 #include "BranchedSynapseSpine.hpp"
+
 #include <string>
 #include <vector>
+
 // using double = double; //If we go to long for precision concerns
 
 struct MACRbPSynapseSpine : public BranchedSynapseSpine {
+  public:
+    bool enabled { false };
 
-public:
-  bool enabled{false};
+    double preTransientIncrease {};  // Abstract trace
+    double preTransient {};          // Calcium trace (interacts with postspike)
 
-  double preTransientIncrease{}; // Abstract trace
-  double preTransient{};         // Calcium trace (interacts with postspike)
+    double postTransientIncrease {};  // Abstract trace
+    // double postTransient{};         // Calcium trace (interacts with postspike) Not in use anymore
 
-  double postTransientIncrease{}; // Abstract trace
-  // double postTransient{};         // Calcium trace (interacts with postspike) Not in use anymore
+    double calciumOldStep {};
+    double calciumFree {};
 
-  double calciumOldStep{};
-  double calciumFree{};
+    double calmodulinActive {};
+    double calmodulinNeurogranin {};
 
-  double calmodulinActive{};
-  double calmodulinNeurogranin{};
+    double kinasesCaM {};
+    double kinasesPhospho {};
+    // double kinasesInactive{};
 
-  double kinasesCaM{};
-  double kinasesPhospho{};
-  // double kinasesInactive{};
+    double calcineurinActive {};
+    // double phosphatasesInactive{};
 
-  double calcineurinActive{};
-  // double phosphatasesInactive{};
+    double resourcesOldStep {};
+    double resourcesAvailable {};
 
-  double resourcesOldStep{};
-  double resourcesAvailable{};
-
-  MACRbPSynapseSpine();
-  // MACRbPSynapseSpine(double weight, double resources, double calcium);
-  ~MACRbPSynapseSpine() override = default;
-  // End of step
-  void PreDiffusion(); // This function MUST run right before diffusion
+    MACRbPSynapseSpine();
+    // MACRbPSynapseSpine(double weight, double resources, double calcium);
+    ~MACRbPSynapseSpine() override = default;
+    // End of step
+    void PreDiffusion();  // This function MUST run right before diffusion
 #ifndef NDEBUG
-  void CheckNegativeValues(const Constants &constants);
+    void CheckNegativeValues(const RuntimeConstants &constants);
 #endif
-  // Profile methods
-  std::vector<double> GetIndividualSynapticProfile() const override;
-  std::string         GetIndividualSynapticProfileHeaderInfo() const override;
+    // Profile methods
+    std::vector<double> GetIndividualSynapticProfile() const override;
+    std::string         GetIndividualSynapticProfileHeaderInfo() const override;
 };
 
 #endif

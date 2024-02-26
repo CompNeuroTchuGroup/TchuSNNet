@@ -1,16 +1,15 @@
 #include "./MACRbpSynapseSpine.hpp"
 #include "MACRbPSynapseSpine.hpp"
 
-MACRbPSynapseSpine::MACRbPSynapseSpine() : enabled{false} {
-}
+MACRbPSynapseSpine::MACRbPSynapseSpine(): enabled { false } { }
 
 // MACRbPSynapseSpine::MACRbPSynapseSpine(double weight, double resources, double calcium)
 //     : BranchedSynapseSpine(weight), connected{false}, calciumFree{calcium}, resourcesAvailable{resources} {
 // }
 
 void MACRbPSynapseSpine::PreDiffusion() {
-  // This has to run before reations, and before diffusion. Makes no sense to do both, and makes no sense to actually store the inactive forms in the
-  // spine, if we are going to calculate it to the timestep anyway
+  // This has to run before reations, and before diffusion. Makes no sense to do both, and makes no sense to actually
+  // store the inactive forms in the spine, if we are going to calculate it to the timestep anyway
   //  kinasesInactive=kinasesTotal-(kinasesCaM+kinasesPhospho);
   //  phosphatasesInactive=calcineurinTotal-phosphatasesInactive;
 #ifndef NDEBUG
@@ -26,9 +25,10 @@ void MACRbPSynapseSpine::PreDiffusion() {
   resourcesOldStep = resourcesAvailable;
 }
 #ifndef NDEBUG
-void MACRbPSynapseSpine::CheckNegativeValues(const Constants &c) {
-  if (calmodulinActive < 0 || calmodulinNeurogranin < 0 || kinasesCaM < 0 || kinasesPhospho < 0 || calcineurinActive < 0 ||
-      calmodulinNeurogranin > c.neurograninTotal || kinasesCaM + kinasesPhospho > c.kinasesTotal ||
+void MACRbPSynapseSpine::CheckNegativeValues(const RuntimeConstants &c) {
+  if (calmodulinActive < 0 || calmodulinNeurogranin < 0 || kinasesCaM < 0 || kinasesPhospho < 0 ||
+      calcineurinActive < 0 || calmodulinNeurogranin > c.neurograninTotal ||
+      kinasesCaM + kinasesPhospho > c.kinasesTotal ||
       calmodulinActive + calmodulinNeurogranin + kinasesCaM + kinasesPhospho + calcineurinActive > c.calmodulinTotal ||
       calcineurinActive > c.calcineurinTotal) {
     throw "Negative value exception";
