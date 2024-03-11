@@ -3,20 +3,18 @@
 //
 #include "Morphology.hpp"
 
-Morphology::Morphology(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters)
-    : infoGlobal(infoGlobal), totalPostSpikes(0), totalPreSpikes(0) {
+Morphology::Morphology(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters):
+    infoGlobal(infoGlobal), totalPostSpikes(0), totalPreSpikes(0) {
   std::uniform_int_distribution<int> distribution(0, INT32_MAX);
   this->seed      = distribution(infoGlobal->globalGenerator);
   this->generator = std::mt19937(this->seed);
-  //this->LoadParameters(morphologyParameters);
+  // this->LoadParameters(morphologyParameters);
 }
 
 void Morphology::LoadParameters(const std::vector<FileEntry> &morphologyParameters) {
-
   // checks for correct initialization
 
   for (auto &[parameterName, parameterValues] : morphologyParameters) {
-
     if (parameterName.find("seed") != std::string::npos && infoGlobal->globalSeed != -1) {
       this->seed      = std::stoi(parameterValues.at(0));
       this->generator = std::mt19937(this->seed);
@@ -28,7 +26,6 @@ void Morphology::LoadParameters(const std::vector<FileEntry> &morphologyParamete
 
 void Morphology::CheckParameters(const std::vector<FileEntry> &parameters) {
   for (auto &[parameterName, parameterValues] : parameters) {
-
     if (parameterName.find("seed") != std::string::npos && infoGlobal->globalSeed != -1) {
       if (!(seed == std::stoi(parameterValues.at(0)))) {
         throw "Seed was not identical between Synaptic parameters for the plasticity model";
@@ -65,11 +62,12 @@ std::vector<double> Morphology::GetOverallSynapticProfile() const {
    * item 4: average plasticity events
    * */
   std::vector<double> dataArray(3);
-  size_t              sizeOfSpineData{this->baseSpineData.size()};
+  size_t              sizeOfSpineData { this->baseSpineData.size() };
 
-  dataArray.at(0) = std::accumulate(this->baseSpineData.begin(), this->baseSpineData.end(), 0.0,
-                                    [](double accumulator, const BaseSpinePtr spine) { return accumulator + spine->GetWeightUncoupled(); }) /
-                    sizeOfSpineData;
+  dataArray.at(0) =
+    std::accumulate(this->baseSpineData.begin(), this->baseSpineData.end(), 0.0,
+                    [](double accumulator, const BaseSpinePtr spine) { return accumulator + spine->GetWeightUncoupled(); }) /
+    sizeOfSpineData;
   dataArray.at(1) = this->totalPostSpikes;
   dataArray.at(2) = this->totalPreSpikes;
   return dataArray;
@@ -80,8 +78,9 @@ std::string Morphology::GetOverallSynapticProfileHeaderInfo() const {
 }
 
 std::vector<std::pair<std::string, double>> Morphology::GetSteadyStateData() const {
-  return std::vector<std::pair<std::string, double>>{
-      {"There was an error, the GetSteadyStateData() was called from a class that has\nno overriding version of the function.", 0}};
+  return std::vector<std::pair<std::string, double>> {
+    { "There was an error, the GetSteadyStateData() was called from a class that has\nno overriding version of the function.", 0 }
+  };
 }
 
 std::string Morphology::GetIndividualSynapticProfileHeaderInfo() const {
@@ -89,12 +88,12 @@ std::string Morphology::GetIndividualSynapticProfileHeaderInfo() const {
 }
 
 double Morphology::GenerateSynapticWeight() {
-  double                                 weight{};
+  double                                 weight {};
   std::uniform_real_distribution<double> distribution(this->minWeight, this->maxWeight);
   if (this->distributeWeights) {
     weight = distribution(generator);
   } else {
-    weight = this->initialWeights; // assuming a range of weight between 0 and 2, weight is initialized to midpoint: 1
+    weight = this->initialWeights;  // assuming a range of weight between 0 and 2, weight is initialized to midpoint: 1
   }
   // this->weightsSum += weight;
   return weight;
