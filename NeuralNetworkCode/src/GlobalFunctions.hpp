@@ -36,7 +36,6 @@
 #include <string>
 #include <vector>
 
-
 // Type alias list
 
 using PopInt    = signed int;
@@ -56,8 +55,6 @@ struct AlphaSynapseSpine;
 using AlphaSpinePtr = AlphaSynapseSpine *;
 struct CoopSynapseSpine;
 using CoopSpinePtr = std::unique_ptr<CoopSynapseSpine>;
-struct MACRbPSynapseSpine;
-using MACRbpSpinePtr = MACRbPSynapseSpine *;
 struct Branch;
 using BranchPtr = Branch *;
 struct AlphaBranch;
@@ -122,7 +119,6 @@ const std::string IDstringMonoDendriteSTDPBiWindow { "MonoDendriteSTDPBiWindow" 
 const std::string IDstringMonoDendriteSTDPBiExponential { "MonoDendriteSTDPBiExponential" };
 
 const std::string IDstringTraceResourceHSTDP { "AlphaResourceHSTDP" };
-const std::string IDstringMACRbPModel { "MACRbPModel" };
 const std::string IDstringHeteroGraupnerBrunel { "HeteroGraupnerBrunel" };
 
 // void MultiplyVector (std::vector<signed long> &vector, signed long value);

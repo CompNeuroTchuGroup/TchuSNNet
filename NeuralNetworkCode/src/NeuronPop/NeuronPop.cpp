@@ -182,16 +182,7 @@ void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry> &morphologyPara
             this->isBranched    = true;
             this->morphology.back()->LoadParameters(morphologyParameters);
           }
-        } else if (parameterValues.at(0) == IDstringMACRbPModel) {
-          morphologyType = IDstringMACRbPModel;
-          MACRbPSynapseSpine spine;  // This will be moved to steady state inside the first constructor
-          for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
-            (void)neuron;  // Does nothing, removes warning on unused vars
-            this->morphology.push_back(std::make_unique<MACRbPModel>(this->infoGlobal, morphologyParameters, spine));
-            this->hasPlasticity = true;
-            this->isBranched    = true;
-            this->morphology.back()->LoadParameters(morphologyParameters);
-          }
+
         } else if (parameterValues.at(0) == IDstringHeteroGraupnerBrunel) {
           morphologyType = IDstringHeteroGraupnerBrunel;
           for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
