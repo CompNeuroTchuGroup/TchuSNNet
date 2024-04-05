@@ -67,7 +67,7 @@ struct binData {
      */
     std::vector<std::vector<std::vector<double>>> synapticState;  // synaptic data of synapses [to population P1][from population P2][data
                                                                   // entry j] //sum of vectors, valarray is valid (in last level)
-    std::vector<std::vector<double>>      heatmap;  // firing rate [of population i][in each pixel]
+    std::vector<std::vector<double>>      heatmap;                // firing rate [of population i][in each pixel]
     std::vector<std::vector<signed long>> noRecordedSynapses;
 };
 struct FileEntry {
@@ -189,6 +189,24 @@ struct Instruction {
     bool last { false };
     bool off { false };
     Instruction(FileEntry inputEntry, double dtTimestep);
+};
+
+struct ExponentialFit {
+    // Include here the simulation of the gaussian too, just giving a single constant
+    void   fitExponential(std::vector<double> &x_data, std::vector<double> &y_data);
+    double getExponentialRate() { return exp_rate; }
+
+  private:
+    int    max_iterations = 1000;  // Constants to be parametrized
+    double tolerance      = 1e-7;
+
+    double dfda {};
+    double dfdb {};
+    double init_val {};  // Initial guesses!
+    double exp_rate {};
+
+    double exponential_func(double x) { return init_val * std::exp(exp_rate * x); }
+    void   jacobian_exponential(double x);
 };
 
 #endif

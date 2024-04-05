@@ -144,6 +144,7 @@ bool isDouble(const std::string &readString);
 
 size_t     IsIterateParamConsistent(FileEntry entry, IterableFileEntry iterateEntry);
 signed int MinIterateParameterSize(std::vector<IterableFileEntry> iterateEntries);
+
 // void CheckConsistencyOfIterationParameters(const std::vector<IterableFileEntry>& iterableEntryVector);
 
 // struct noAllocatableSynapseException : std::exception {
