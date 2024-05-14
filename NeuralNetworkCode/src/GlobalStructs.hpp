@@ -191,22 +191,22 @@ struct Instruction {
     Instruction(FileEntry inputEntry, double dtTimestep);
 };
 
-struct ExponentialFit {
-    // Include here the simulation of the gaussian too, just giving a single constant
-    void   fitExponential(std::vector<double> &x_data, std::vector<double> &y_data);
-    double getExponentialRate() { return exp_rate; }
+// struct ExponentialFit {
+//     // Include here the simulation of the gaussian too, just giving a single constant
+//     void   fitExponential(std::vector<double> &x_data, std::vector<double> &y_data);
+//     double getExponentialRate() { return exp_rate; }
 
-  private:
-    int    max_iterations = 1000;  // Constants to be parametrized
-    double tolerance      = 1e-7;
+//   private:
+//     int    max_iterations = 1000;  // Constants to be parametrized
+//     double tolerance      = 1e-7;
 
-    double dfda {};
-    double dfdb {};
-    double init_val {};  // Initial guesses!
-    double exp_rate {};
+//     double dfda {};
+//     double dfdb {};
+//     double init_val {};  // Initial guesses!
+//     double exp_rate {};
 
-    double exponential_func(double x) { return init_val * std::exp(exp_rate * x); }
-    void   jacobian_exponential(double x);
-};
+//     double exponential_func(double x) { return init_val * std::exp(exp_rate * x); }
+//     void   jacobian_exponential(double x);
+// };
 
 #endif

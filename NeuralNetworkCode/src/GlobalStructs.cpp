@@ -36,48 +36,48 @@ Instruction::Instruction(FileEntry inputEntry, double dtTimestep):
   }
 }
 
-void ExponentialFit::fitExponential(std::vector<double>& x_data, std::vector<double>& y_data) {
-  int    n = x_data.size();
-  double delta_a, delta_b;
-  double error, error_new;
+// void ExponentialFit::fitExponential(std::vector<double>& x_data, std::vector<double>& y_data) {
+//   int    n = x_data.size();
+//   double delta_a, delta_b;
+//   double error, error_new;
 
-  for (int iter = 0; iter < max_iterations; ++iter) {
-    double sum1 = 0.0, sum2 = 0.0, sum3 = 0.0, sum4 = 0.0;
+//   for (int iter = 0; iter < max_iterations; ++iter) {
+//     double sum1 = 0.0, sum2 = 0.0, sum3 = 0.0, sum4 = 0.0;
 
-    for (int i = 0; i < n; ++i) {
-      double y_fit    = exponential_func(x_data[i]);
-      double residual = y_data[i] - y_fit;
+//     for (int i = 0; i < n; ++i) {
+//       double y_fit    = exponential_func(x_data[i]);
+//       double residual = y_data[i] - y_fit;
 
-      jacobian_exponential(x_data[i]);
+//       jacobian_exponential(x_data[i]);
 
-      sum1 += residual * dfda * dfda;
-      sum2 += residual * dfda * dfdb;
-      sum3 += residual * dfdb * dfda;
-      sum4 += residual * dfdb * dfdb;
-    }
+//       sum1 += residual * dfda * dfda;
+//       sum2 += residual * dfda * dfdb;
+//       sum3 += residual * dfdb * dfda;
+//       sum4 += residual * dfdb * dfdb;
+//     }
 
-    delta_a = (sum4 * sum1 - sum2 * sum3) / (n * sum1 - sum2 * sum3);
-    delta_b = (n * sum2 - sum1 * sum3) / (n * sum1 - sum2 * sum3);
+//     delta_a = (sum4 * sum1 - sum2 * sum3) / (n * sum1 - sum2 * sum3);
+//     delta_b = (n * sum2 - sum1 * sum3) / (n * sum1 - sum2 * sum3);
 
-    init_val += delta_a;
-    exp_rate += delta_b;
+//     init_val += delta_a;
+//     exp_rate += delta_b;
 
-    // Check convergence
-    error_new = 0.0;
-    for (int i = 0; i < n; ++i) {
-      double y_fit = exponential_func(x_data[i]);
-      error_new += (y_data[i] - y_fit) * (y_data[i] - y_fit);
-    }
+//     // Check convergence
+//     error_new = 0.0;
+//     for (int i = 0; i < n; ++i) {
+//       double y_fit = exponential_func(x_data[i]);
+//       error_new += (y_data[i] - y_fit) * (y_data[i] - y_fit);
+//     }
 
-    if (std::fabs(error_new - error) < tolerance) {
-      break;
-    }
+//     if (std::fabs(error_new - error) < tolerance) {
+//       break;
+//     }
 
-    error = error_new;
-  }
-}
+//     error = error_new;
+//   }
+// }
 
-void ExponentialFit::jacobian_exponential(double x) {
-  dfda = std::exp(exp_rate * x);
-  dfdb = init_val * x * std::exp(exp_rate * x);
-}
+// void ExponentialFit::jacobian_exponential(double x) {
+//   dfda = std::exp(exp_rate * x);
+//   dfdb = init_val * x * std::exp(exp_rate * x);
+// }
