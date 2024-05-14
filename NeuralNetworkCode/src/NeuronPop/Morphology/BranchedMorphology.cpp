@@ -3,9 +3,8 @@
 //
 #include "./BranchedMorphology.hpp"
 #include "BranchedMorphology.hpp"
-BranchedMorphology::BranchedMorphology(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters)
-    : Morphology(infoGlobal, morphologyParameters) {
-}
+BranchedMorphology::BranchedMorphology(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters):
+    Morphology(infoGlobal, morphologyParameters) { }
 
 void BranchedMorphology::RecordPostSpike() {
   Morphology::RecordPostSpike();
@@ -135,11 +134,12 @@ void BranchedMorphology::CheckParameters(const std::vector<FileEntry> &parameter
 void BranchedMorphology::SetUpBranchedMorphology() {
   // If a different starting point for binary branch splits is desired, add more branches here and remember to add
   // them in the recursive function call.
-  int remainingBranchings{static_cast<int>(std::floor(std::log2(noBranches))) - 1};
-  int remainingBranches{noBranches--};
-  CreateBranch(std::vector<int>());
+  int remainingBranchings { static_cast<int>(
+    std::floor(std::log2(noBranches))) };  //-1 removed so that we do the appropiate number of branchings
+  int remainingBranches { noBranches - 1 };
+  int firstID { CreateBranch(std::vector<int>()) };
   if (branchingTreePattern) {
-    SetUpBranchingTree(remainingBranches, remainingBranchings);
+    SetUpBranchingTree(remainingBranches, remainingBranchings, { firstID });
   } else {
     SetUpRadialBranching(remainingBranches);
   }
@@ -167,7 +167,8 @@ void BranchedMorphology::SaveParameters(std::ofstream &wParameterFile, std::stri
   wParameterFile << "\t"
                  << "#Distance between synapse spines.\n";
 
-  wParameterFile << neuronIdentificator << "distributeWeights\t\t" << std::boolalpha << this->distributeWeights << std::noboolalpha << " #μm";
+  wParameterFile << neuronIdentificator << "distributeWeights\t\t" << std::boolalpha << this->distributeWeights << std::noboolalpha
+                 << " #μm";
   wParameterFile << "\t"
                  << "#Distance between synapse spines.\n";
 
@@ -245,7 +246,7 @@ void BranchedMorphology::SaveParameters(std::ofstream &wParameterFile, std::stri
 
 int BranchedMorphology::AllocateBranch(const BranchTargeting branchTarget) {
   if (branchTarget.setTargetBranch &&
-      !(branchTarget.targetBranch >= static_cast<int>(this->branches.size()))) { // SHould this condition be equal or less than?
+      !(branchTarget.targetBranch >= static_cast<int>(this->branches.size()))) {  // SHould this condition be equal or less than?
     return branchTarget.targetBranch;
   } else if (branchTarget.randomTargetBranch) {
     return RandomBranchAllocation();
@@ -259,7 +260,7 @@ int BranchedMorphology::AllocateBranch(const BranchTargeting branchTarget) {
 int BranchedMorphology::RandomBranchAllocation() {
   // For now, the distribution will be uniform
   std::uniform_int_distribution<int> branchDistribution(0, static_cast<int>(branches.size() - 1));
-  int                                branchID{branchDistribution(this->generator)};
+  int                                branchID { branchDistribution(this->generator) };
   if (this->branches.at(branchID)->openSpineSlots.empty()) {
     branchID = RandomBranchAllocation();
   }
@@ -267,7 +268,7 @@ int BranchedMorphology::RandomBranchAllocation() {
 }
 
 int BranchedMorphology::OrderedBranchAllocation() {
-  int branchId{};
+  int branchId {};
   for (BranchPtr branch : branches) {
     if (!branch->openSpineSlots.empty()) {
       branchId = branch->branchId;
@@ -299,7 +300,7 @@ int BranchedMorphology::PopSynapseSlotFromBranch(BranchTargeting &branchTargetin
   if (branches.at(branchTargeting.targetBranch)->openSpineSlots.empty()) {
     throw "No allocatable exception";
   }
-  int position{};
+  int position {};
   // Position
   // If there are no set positions from the params file
   if (branchTargeting.setOfPositions.empty()) {
@@ -314,9 +315,9 @@ int BranchedMorphology::PopSynapseSlotFromBranch(BranchTargeting &branchTargetin
     }
   } else {
     // If set positions in params file find coincidence in open slots
-    std::deque<int>::iterator foundPosition{std::find(branches.at(branchTargeting.targetBranch)->openSpineSlots.begin(),
-                                                      branches.at(branchTargeting.targetBranch)->openSpineSlots.end(),
-                                                      branchTargeting.setOfPositions.back())};
+    std::deque<int>::iterator foundPosition { std::find(branches.at(branchTargeting.targetBranch)->openSpineSlots.begin(),
+                                                        branches.at(branchTargeting.targetBranch)->openSpineSlots.end(),
+                                                        branchTargeting.setOfPositions.back()) };
     if (foundPosition == branches.at(branchTargeting.targetBranch)->openSpineSlots.end()) {
       throw "There was no free slot coinciding with set position";
     } else {
@@ -330,10 +331,18 @@ int BranchedMorphology::PopSynapseSlotFromBranch(BranchTargeting &branchTargetin
   return position;
 }
 
-double BranchedMorphology::GetSynapticDistanceToSoma(int synapseID) {
-  return branches.at(branchedSpineData.at(synapseID)->branchId)->anteriorBranches.size() * branchLength +
-         branchedSpineData.at(synapseID)->branchPositionId * synapticGap;
-}
+// int BranchedMorphology::GetMaxGapDelay(int delayPerMicroMeter) {
+//   if (branchingTreePattern) {
+//     return static_cast<int>(std::floor(std::log2(noBranches))) - 1;
+//   } else {
+//     return delayPerMicroMeter * branchLength;
+//   }
+// }
+
+// double BranchedMorphology::GetSynapticDistanceToSoma(int synapseID) {
+//   return branches.at(branchedSpineData.at(synapseID)->branchId)->anteriorBranches.size() * branchLength +
+//          branchedSpineData.at(synapseID)->branchPositionId * synapticGap;
+// }
 /*void BranchedMorphology::SetUpBranchingTree(int remainingBranchingEvents, std::vector<int> anteriorBranches) {
     //This is binary tree
     // This is a recursive function that sets up the branched dendritic tree and is generalized for 0 branchings (1
@@ -361,17 +370,19 @@ void BranchedMorphology::SetUpBranchingTree(int &remainingBranches, int remainin
   // If the variable remainingBranchings is changed to a reference, the tree will be a brush.
   remainingBranchings--;
   // First call is done with an empty int vector
-  for (int iteration = 0; iteration < 2; iteration++) {
+  int branches { (remainingBranches > 1) ? 2 : remainingBranches };
+  remainingBranches -= branches;
+  for (int iteration = 0; iteration < branches; iteration++) {
     (void)iteration;
-    remainingBranches--;
-    if (remainingBranches > 0) {
-      int branchId{CreateBranch(anteriorBranches)};
-      if (remainingBranchings > 0) {
-        std::vector<int> anteriorBranchesCopy(anteriorBranches);
-        anteriorBranchesCopy.push_back(branchId);
-        this->SetUpBranchingTree(remainingBranches, remainingBranchings, anteriorBranchesCopy);
-      }
+    // remainingBranches--;
+    // if (remainingBranches-- > 0) {
+    int branchId { CreateBranch(anteriorBranches) };
+    if (remainingBranchings > 0) {
+      std::vector<int> anteriorBranchesCopy(anteriorBranches);
+      anteriorBranchesCopy.push_back(branchId);
+      this->SetUpBranchingTree(remainingBranches, remainingBranchings, anteriorBranchesCopy);
     }
+    // }
   }
   // Here we can create the node pointers:
 }
@@ -386,7 +397,7 @@ void BranchedMorphology::SetUpBranchingBrush(int &remainingBranches, int &remain
     (void)iteration;
     remainingBranches--;
     if (remainingBranches > 0) {
-      int branchId{CreateBranch(anteriorBranches)};
+      int branchId { CreateBranch(anteriorBranches) };
       if (remainingBranchings > 0) {
         std::vector<int> anteriorBranchesCopy(anteriorBranches);
         anteriorBranchesCopy.push_back(branchId);
