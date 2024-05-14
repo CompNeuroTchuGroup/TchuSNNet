@@ -1,11 +1,11 @@
 #include "PModelSynapse.hpp"
 
-PModelSynapse::PModelSynapse(PopPtr targetPop, PopPtr sourcePop, GlobalSimInfo *infoGlobal) : Synapse(targetPop, sourcePop, infoGlobal) {
+PModelSynapse::PModelSynapse(PopPtr targetPop, PopPtr sourcePop, GlobalSimInfo *infoGlobal): Synapse(targetPop, sourcePop, infoGlobal) {
   hasPlasticityModel = true;
 }
 std::vector<double> PModelSynapse::AdvectSpikers(NeuronInt spiker) {
   // This is basically the CurrentSynapse AdvectSpikers, but for synapse spine pointers not nullptr
-  NeuronInt           noTargets{GetNoTargetedSynapses(spiker)};
+  NeuronInt           noTargets { GetNoTargetedSynapses(spiker) };
   std::vector<double> currents(noTargets, 0.0);
   for (NeuronInt targetNeuronIndex : std::ranges::views::iota(0, noTargets)) {
     // for(NeuronInt targetNeuronIndex{0};targetNeuronIndex<noTargets;targetNeuronIndex++){
@@ -32,14 +32,14 @@ void PModelSynapse::SaveParameters(std::ofstream &wParameterStream, std::string 
   if (this->targetPop->IsBranchedBool()) {
     wParameterStream << idString << "targetBranch\t\t\t\t\t";
     if (this->branchTarget.randomTargetBranch) {
-      wParameterStream << "random"; // Missing comments on what this is supposed to do
+      wParameterStream << "random";  // Missing comments on what this is supposed to do
     } else if (this->branchTarget.setTargetBranch) {
-      wParameterStream << std::to_string(this->branchTarget.targetBranch); // Missing comments on what
-                                                                           // this is supposed to do
+      wParameterStream << std::to_string(this->branchTarget.targetBranch);  // Missing comments on what
+                                                                            // this is supposed to do
     } else if (this->branchTarget.orderedTargetBranch) {
       wParameterStream << "ordered";
     } else {
-      wParameterStream << "none"; // Missing comments on what this is supposed to do
+      wParameterStream << "none";  // Missing comments on what this is supposed to do
     }
     wParameterStream << "\t\t\t#You can target branches in an 'ordered' "
                         "manner (0,1,2...), "
@@ -59,7 +59,7 @@ void PModelSynapse::SaveParameters(std::ofstream &wParameterStream, std::string 
                         "the "
                         "opposite. This only makes sense in ordered allocation\n";
   }
-  targetPop->SavePlasticityModel(wParameterStream, idString + "pmodel_"); //!!!!
+  targetPop->SavePlasticityModel(wParameterStream, idString + "pmodel_");  //!!!!
 
   targetPop->ModelSaved();
   // if (geometry != nullptr){
@@ -84,9 +84,9 @@ void PModelSynapse::LoadParameters(const std::vector<FileEntry> &hybridParameter
         this->branchTarget.orderedTargetBranch = true;
       } else {
         this->branchTarget.targetBranch = std::stoi(parameterValues.at(0));
-        if (!targetPop->IsBranchedBool())
+        if (!targetPop->IsBranchedBool()) {
           throw "Cannot target branches if there is no branched model.";
-        else if (this->branchTarget.targetBranch >= targetPop->GetNoBranches()) {
+        } else if (this->branchTarget.targetBranch >= targetPop->GetNoBranches()) {
           throw "Targeted branch does not exist";
         }
         this->branchTarget.setTargetBranch = true;
@@ -94,7 +94,7 @@ void PModelSynapse::LoadParameters(const std::vector<FileEntry> &hybridParameter
         // integer.
       }
     } else if (parameterName.find("subregion") != std::string::npos) {
-      this->branchTarget.DendriticSubRegion = parameterValues.at(0).at(0); // Re-think this char array wacky stuff
+      this->branchTarget.DendriticSubRegion = parameterValues.at(0).at(0);  // Re-think this char array wacky stuff
     } else if (parameterName.find("positionsSet") != std::string::npos && !parameterValues.empty()) {
       for (std::string param : parameterValues) {
         branchTarget.setOfPositions.push_back(std::stoi(param));
@@ -107,10 +107,10 @@ void PModelSynapse::LoadParameters(const std::vector<FileEntry> &hybridParameter
       }
     }
   }
-  
-  this->ignoreJDParameters = targetPop->ignoreJDParameters();
+
+  this->ignoreJcoupling = targetPop->ignoreJcoupling();
   Synapse::LoadParameters(hybridParameters);
-  Dmax = targetPop->GetMaxGapDelay(delayPerMicrometer);
+  // Dmax = targetPop->GetMaxGapDelay(delayPerMicrometer);//For waiting matrix indexing and size
 }
 void PModelSynapse::AllocateSynapse(NeuronInt targetNeuron, NeuronInt sourceNeuron) {
   AllocateSynapseWithPlasticity(targetNeuron, sourceNeuron);
