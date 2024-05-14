@@ -4,34 +4,33 @@
 //
 // Refactored by Antoni Bertolin on 14.06.23
 //
-#ifndef NEURALNETWORK_MONODENDRITESYMMETRICSTDP_H
-#define NEURALNETWORK_MONODENDRITESYMMETRICSTDP_H
+#ifndef _MONODENDRITE_SYMMETRIC_STDP_HPP
+#define _MONODENDRITE_SYMMETRIC_STDP_HPP
 
 #include "MonoDendriteSTDP.hpp"
+#include <string>
 
-class MonoDendriteSTDPBiWindow: public MonoDendriteSTDP {
+class MonoDendriteSTDPBiWindow : public MonoDendriteSTDP {
 
 protected:
-    void UpdateLTP(signed long synId) override;
-    void UpdateLTD(signed long synId) override;
+  void UpdateLTP(signed long synId) override;
+  void UpdateLTD(signed long synId) override;
 
-    double gLTP(double deltaT) const override;
-    double gLTD(double deltaT) const override;
+  double gLTP(double deltaT) const override;
+  double gLTD(double deltaT) const override;
 
+  double tauLTP{};
 
-    double tauLTP{};
-
-    double tauLTD{};
+  double tauLTD{};
 
 public:
-    explicit MonoDendriteSTDPBiWindow(GlobalSimInfo* infoGlobal);
-    ~MonoDendriteSTDPBiWindow() override = default;
-    virtual std::string GetType() const override {return IDstringMonoDendriteSTDPBiWindow;}
+  explicit MonoDendriteSTDPBiWindow(GlobalSimInfo *infoGlobal, const std::vector<FileEntry> &morphologyParameters);
+  ~MonoDendriteSTDPBiWindow() override = default;
+  virtual std::string GetType() const override { return IDstringMonoDendriteSTDPBiWindow; }
 
-    void SaveParameters(std::ofstream& wParameterStream, std::string neuronIdentificator) const override;
-    void LoadParameters(const std::vector<FileEntry>& parameters) override;
-    void CheckParameters(const std::vector<FileEntry>& parameters) override;
+  void SaveParameters(std::ofstream &wParameterStream, std::string neuronIdentificator) const override;
+  void LoadParameters(const std::vector<FileEntry> &parameters) override;
+  void CheckParameters(const std::vector<FileEntry> &parameters) override;
 };
 
-
-#endif //NEURALNETWORK_MONODENDRITESYMMETRICSTDP_H
+#endif // NEURALNETWORK_MONODENDRITESYMMETRICSTDP_H

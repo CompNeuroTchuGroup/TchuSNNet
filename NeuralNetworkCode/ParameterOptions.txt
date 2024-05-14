@@ -296,11 +296,11 @@ neurons_0_sigmaLtd				0.000000	#used in gLTD, spread of the effect distribution.
 neurons_0_betaLtd				0.000000	#used in aLTD.
 #*************  Branched dendrites **************************************************************
 #########From here on is all Heterosynaptic plasticity###########
-neurons_0model_type			TraceRBranchedHSTDP
+neurons_0model_type			AlphaResourceHSTDP
 neurons_0model_seed			0
 neurons_0model_branchLength		0.000000 #μm	#Length of each branch.
 neurons_0model_synapticGap			0.000000 #μm	#Distance between synapse spines.
-neurons_0model_dendriteBranchings		1	#This specifies the number of branchings in the dendritic tree FOR EVERY EXISTING BRANCH. Total isolated branches are 2^n. More than 28 will cause integer overflow
+neurons_0model_noBranches		1	#This specifies the number of branchings in the dendritic tree FOR EVERY EXISTING BRANCH. Total isolated branches are 2^n. More than 28 will cause integer overflow
 neurons_0model_synapseAllocation			#'ordered' synapse allocation will allocate synapses from the branch node to the end of the branch. 'random' will allocate random positions in each branch
 neurons_0model_basalAlpha		1.000000	#Alpha at rest, where alpha decays towards
 neurons_0model_alphaTau		1.000000 #seconds	#Decay constant of Alpha_stimmulus

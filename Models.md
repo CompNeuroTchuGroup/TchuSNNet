@@ -12,10 +12,10 @@ Ulzii
 (Now it can contain multiple synapses)
 ## PoissonConnectivity
 This connectivity class is theoretically equivalent to RandomConnectivity, but instead of getting a set of synapses from the probability of connection and the source neurons which is fixed, you sample a poisson distribution with the class' parameter `connectivity_connectionLambda` as the distribution's lambda. This allows for multiple synapses between two neurons with a random process.
-## TraceRBranchedHSTDP
+## AlphaResourceHSTDP
 *(Trace based heterosynaptic plasticity model with multiple resource-limited dendritic branches, by Antoni Bertolin Monferrer)*
 
-This model is a discrete implementation of the conjunction of the heterosynaptic expansion of trace-based STDP with a resource limitation per branch. The model can be used on any type of neuron with the parameter `synapses_N_N_pmodel_type TraceRBranchedHSTDP`, and the basic morphological parameters are `synapses_N_N_pmodel_branchLength`, `synapses_N_N_pmodel_synapticGap`, `synapses_N_N_pmodel_dendriteBranchings`, and `synapses_N_N_pmodel_synapseAllocation`. The synaptic gap and branch length define the number of available synaptic slots and the distance between them. This two are in units of micrometres, and all spatial constants in the models are expressed in the same unit. The branchings parameter does not define the total branching points in the dendritic tree, but the number of branching points that each path in the dendritic tree goes through. The total amount of branching points in the tree is given by $2^{branchings}$ . The synapse allocation refers to the order in which synapses are allocated to the synaptic branch. Once the branch has been allocated (this pertains to the Synapse object), the synapses can be allocated in that branch in an ordered manner (from position 0 to last position) or randomly (a random unoccupied position is chosen).
+This model is a discrete implementation of the conjunction of the heterosynaptic expansion of trace-based STDP with a resource limitation per branch. The model can be used on any type of neuron with the parameter `synapses_N_N_pmodel_type AlphaResourceHSTDP`, and the basic morphological parameters are `synapses_N_N_pmodel_branchLength`, `synapses_N_N_pmodel_synapticGap`, `synapses_N_N_pmodel_noBranches`, and `synapses_N_N_pmodel_synapseAllocation`. The synaptic gap and branch length define the number of available synaptic slots and the distance between them. This two are in units of micrometres, and all spatial constants in the models are expressed in the same unit. The branchings parameter does not define the total branching points in the dendritic tree, but the number of branching points that each path in the dendritic tree goes through. The total amount of branching points in the tree is given by $2^{branchings}$ . The synapse allocation refers to the order in which synapses are allocated to the synaptic branch. Once the branch has been allocated (this pertains to the Synapse object), the synapses can be allocated in that branch in an ordered manner (from position 0 to last position) or randomly (a random unoccupied position is chosen).
 
 The model's behaviour can be separated into two parts: the traces and the definition of synaptic weight through resource limitation.
 
@@ -40,20 +40,27 @@ Each spine's alpha (or resource) trace is defined as:
 
 $$ \frac{d\alpha_{i}}{dt}=-\frac{\alpha_{i}-\alpha_{basal}}{\tau_{\alpha}}+F_i(t)$$
 
+$$F_i(t) =
 
+     \begin{cases}
 
-$$F_i(t)= \begin{cases} \alpha_{st}T_{i}(1+C_i) &\quad S_p(t)=1 \newline -\alpha_{st}T_{i}(1-C_i) &\quad S_p(t)=0 \wedge S_i(t)=1 \newline 0 &\quad S_p(t)=0 \wedge S_i(t)=0 \end{cases}$$
+       \alpha_{st}*T_{i}*(1+C_i) &\quad S_p(t)=1
 
+       \\-\alpha_{st}*T_{i}*(b-C_i)&\quad S_p(t)=0 \wedge S_i(t)=1 \\
 
-where $\alpha_{basal}$ is the basal value, defined by `synapses_N_N_pmodel_basalAlpha`. $\alpha_{st}$ is the constant amount by which the trace increases or decreases per event, defined by `synapses_N_N_pmodel_baseAlphaIncrease`. the decay constant $\tau_{\alpha}$ is the trace decay to the basal value, defined by `synapses_N_N_pmodel_alphaTau`.
+        0 &\quad S_p(t)=0 \wedge S_i(t)=0
+
+     \end{cases}
+
+$$
+
+where $\alpha_{basal}$ is the basal value, defined by `synapses_N_N_pmodel_basalAlpha`. $\alpha_{st}$ is the constant amount by which the trace increases or decreases per event, defined by `synapses_N_N_pmodel_baseAlphaIncrease`. the decay constant $\tau_{\alpha}$ is the trace decay to the basal value, defined by `synapses_N_N_pmodel_alphaTau`. $b$ is the LTD bias, making STDP symmetric if it is equal to 1, and defined by `synapses_N_N_pmodel_biasLTD`.
 These traces represent the spine's access to resources in the neuron, and they will be used in the resource normalization of weights. Changes in these traces are not capped upwards but are not allowed to become negative, as the excitatory-inhibitory inversion is undesirable in this model
 
 ### Resource normalization of weights
 Weights in each dendritic branch are normalized in this model according to the total amount of trace in the branch plus a constant. The definition of weight is:
-
-$$w_{i}(t)=\beta\frac{\alpha_{trace, i}(t)}{\omega + \sum_i (\alpha_{trace, i}(t))}$$
-
-where $\beta$ is the total amount of weight in the branch (in dmV/spike) to be distributed according to the fraction and is defined by `synapses_N_N_pmodel_betaResourcePool`, $\omega$ represents the amount of resources that are constantly contained in the branch outside the spines (adimensional) and is defined by `synapses_N_N_pmodel_omegaOffset`. $w_{i}(t)$ is the weight of the i-th spine at time $t$$t$, and the sum of the N $\alpha_{trace}(t)$ is the total amount of traces at time $t$. 
+$$w_{i}(t)=\beta*\frac{\alpha_{trace, i}(t)}{\omega+\sum_{i=0}^{N}(\alpha_{trace, i}(t))}$$
+where $\beta$ is the total amount of weight in the branch (in dmV/spike) to be distributed according to the fraction and is defined by `synapses_N_N_pmodel_betaResourcePool`<font size="4"> <span style="color:red"> Caution: </font></span> $\beta$ is divided by the number of branches to avoid synaptic efficacy from depending on the number of branches. If the strength is to be increased it can only be increased through the $beta$ or the `synapses_n_n_relativeCoupling` which is a synapse-specific multiplicator of the beta, $\omega$ represents the amount of resources that are constantly contained in the branch outside the spines (adimensional) and is defined by `synapses_N_N_pmodel_omegaOffset`. $w_{i}(t)$ is the weight of the i-th spine at time $t$$t$, and the sum of the N $\alpha_{trace}(t)$ is the total amount of traces at time $t$.
 This resource limiting normalization aims to reproduce another heterosynaptic effect, that is the effect of allocating available resources unequally along the branch. This normalization also fulfills the need for capping the synaptic weights in a more organic way, as the total weight of a dendritic branch will never go beyond $\beta$.
 
 ## MonoDendriteSTDP models
