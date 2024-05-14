@@ -249,15 +249,15 @@ bool NeuronPop::HasSteadyState() const {
   }
 }
 
-bool NeuronPop::ignoreJDParameters() const {
+bool NeuronPop::ignoreJcoupling() const {
 #ifndef NDEBUG
   if (morphology.empty()) {
     throw "Logical error jdis";
   } else {
-    return morphology.at(0)->IgnoreJDParameters();
+    return morphology.at(0)->IgnoreJcoupling();
   }
 #else
-  return morphology.at(0)->IgnoreJDParameters();
+  return morphology.at(0)->IgnoreJcoupling();
 #endif
 }
 

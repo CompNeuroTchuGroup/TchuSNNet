@@ -82,10 +82,10 @@ class NeuronPop {
 
     SynInt GetNoSynapses() const;  // This is purely for virtualization reasons
     int    GetNoBranches() const { return static_cast<BranchedMorphology *>(morphology.at(0).get())->GetNoBranches(); }
-    int    GetMaxGapDelay(int delayPerGap) const { return (morphology.at(0).get())->GetMaxGapDelay(delayPerGap); }
-    double GetSynapticDistanceToSoma(int neuronId, int synapseId) const {
-      return morphology.at(neuronId)->GetSynapticDistanceToSoma(synapseId);
-    }
+    // int    GetMaxGapDelay(int delayPerGap) const { return (morphology.at(0).get())->GetMaxGapDelay(delayPerGap); }
+    // double GetSynapticDistanceToSoma(int neuronId, int synapseId) const {
+    //   return morphology.at(neuronId)->GetSynapticDistanceToSoma(synapseId);
+    // }
     //*******************
     // Set-Functions
     //*******************
@@ -106,7 +106,7 @@ class NeuronPop {
     // Dyn_casting optimization methods
     bool HasPlasticityModel() const { return hasPlasticity; }
     bool IsBranchedBool() const { return isBranched; }
-    bool ignoreJDParameters() const;
+    bool ignoreJcoupling() const;
     bool HasSteadyState() const;
 
     // All of the following functions throw to ease the virtualization, but it is a bad coding practice
