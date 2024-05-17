@@ -4,9 +4,21 @@ CXX ?= g++
 SRC_PATH = src
 BUILD_PATH = build
 BIN_PATH = $(BUILD_PATH)/bin
-
+#FIND_PATH ?= /C/msys64/usr/bin/find.exe
 # executable #
 BIN_NAME = main
+
+# Default value for FIND
+FIND ?= find
+
+# Conditionally override FIND based on the operating system
+ifeq ($(OS),Windows_NT)
+    #If you are using windows, replace this path with the path of your installed GNU find    
+    FIND := /C/msys64/usr/bin/find.exe
+else
+    # If the OS environment variable is set, assume it's not a Windows system and use the default value for FIND
+    FIND := find
+endif
 
 # extensions #
 SRC_EXT = cpp
@@ -14,12 +26,13 @@ SRC_EXT = cpp
 # code lists #
 # Find all source files in the source directory, sorted by
 # most recently modified
-SOURCES = $(shell find $(SRC_PATH) -name '*.$(SRC_EXT)' | sort -k 1nr | cut -f2-)
+SOURCES = $(shell $(FIND) $(SRC_PATH) -name '*.$(SRC_EXT)')
 # Set the object file names, with the source directory stripped
 # from the path, and the build path prepended in its place
 OBJECTS = $(SOURCES:$(SRC_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o)
 # Set the dependency files that will be used to add header dependencies
 DEPS = $(OBJECTS:.o=.d)
+
 
 OPTIMIZE    = -O3 -ffast-math -msse4.2 -mavx -mavx2 -march=native
 # flags -fomit-frame-pointer -funroll-loops
@@ -32,7 +45,7 @@ OPTIMIZE    = -O3 -ffast-math -msse4.2 -mavx -mavx2 -march=native
 #The interaction between the two previous groups of flags is unclear, as per StackOverflow consultation: https://stackoverflow.com/questions/943755/gcc-optimization-flags-for-xeon/25095818
 #All other flags could be redundant when -O3 is present
 
-COMPILE_FLAGS = -std=c++2a -Wall $(OPTIMIZE)
+COMPILE_FLAGS = -std=c++2b -Wall $(OPTIMIZE)
 
 .PHONY: default_target
 default_target: release
