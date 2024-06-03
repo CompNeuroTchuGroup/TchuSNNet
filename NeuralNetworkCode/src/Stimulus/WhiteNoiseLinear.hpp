@@ -9,47 +9,47 @@
 #ifndef WhiteNoiseLinear_hpp
 #define WhiteNoiseLinear_hpp
 
-#include "Stimulus.hpp"
 #include <stdio.h>
-#include <limits.h>
+#include <climits>
 #include <iostream>
-#include <vector>
 #include <random>
+#include <vector>
+#include "Stimulus.hpp"
 
 class WhiteNoiseLinear : public Stimulus {
-protected:
-	// signed seed{};
+  protected:
+    // signed seed{};
 
-	std::vector<StepStruct> meanCurrent;     
-	std::vector<StepStruct> sigmaCurrent;
+    std::vector<StepStruct> meanCurrent;
+    std::vector<StepStruct> sigmaCurrent;
 
-	StepStruct* meanCurrentPtr;
-	StepStruct* sigmaCurrentPtr;
+    StepStruct* meanCurrentPtr;
+    StepStruct* sigmaCurrentPtr;
 
-	std::vector<double> cachedScalingConstants;
-	std::vector<double> meanScalingCache;
-	std::vector<double> sigmaScalingCache;
+    std::vector<double> cachedScalingConstants;
+    std::vector<double> meanScalingCache;
+    std::vector<double> sigmaScalingCache;
 
-	std::normal_distribution<double> standardDistribution{0.0,1.0};
+    std::normal_distribution<double> standardDistribution { 0.0, 1.0 };
 
-	// std::mt19937 generator;
+    // std::mt19937 generator;
 
-	void PostLoadParameters() override;
+    void PostLoadParameters() override;
     void SetSignalMatrix() override;
-	void RecalculateMeanScalingCache(StepStruct* meanStep);
-	void RecalculateSigmaScalingCache(StepStruct* sigmaStep);
-public:
+    void RecalculateMeanScalingCache(StepStruct* meanStep);
+    void RecalculateSigmaScalingCache(StepStruct* sigmaStep);
 
-	WhiteNoiseLinear(std::shared_ptr<NeuronPopSample>  neurons, std::vector<FileEntry>& stimulusParameters, GlobalSimInfo*  infoGlobal);
-	~WhiteNoiseLinear() override = default;
+  public:
+    WhiteNoiseLinear(std::shared_ptr<NeuronPopSample> neurons, std::vector<FileEntry>& stimulusParameters, GlobalSimInfo* infoGlobal);
+    ~WhiteNoiseLinear() override = default;
 
-	std::string GetType() const override { return IDstringWhiteNoiseLinear; }
-	void        Update(std::vector<std::vector<double>>& synaptic_dV) override;
+    std::string GetType() const override { return IDstringWhiteNoiseLinear; }
+    void        Update(std::vector<std::vector<double>>& synaptic_dV) override;
 
-	double GetScaling(PopInt neuronPop) const override;
+    double GetScaling(PopInt neuronPop) const override;
 
-	void    SaveParameters(std::ofstream& wParameterStream) const override;
-	void    LoadParameters(const std::vector<FileEntry>& stimulusParameters) override;
+    void SaveParameters(std::ofstream& wParameterStream) const override;
+    void LoadParameters(const std::vector<FileEntry>& stimulusParameters) override;
 };
 
 #endif /* WhiteNoiseLinear_hpp */
