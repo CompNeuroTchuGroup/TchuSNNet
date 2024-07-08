@@ -64,8 +64,9 @@ void DictatNeuronPop::SaveParameters(std::ofstream& wParameterStream) const {
 }
 
 void DictatNeuronPop::Advect(const std::vector<double>& synaptic_dV) {
-  spikerNeuronsPrevdt = spikerNeurons;
-  spikerNeurons.clear();
+  // spikerNeuronsPrevdt = spikerNeurons;
+  // spikerNeurons.clear();
+  ClearSpikerVector();
   if (spikerListFiringBool) {
     ReadSpikersFromFile();
   } else if (instructionFiringBool) {
