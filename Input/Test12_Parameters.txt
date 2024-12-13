@@ -126,13 +126,13 @@ synapses_1_0_D_min						0.005000 #secs
 synapses_1_0_D_max						0.020000 #secs
 synapses_1_0_seed						183427039
 synapses_1_0_targetBranch					0			#You can target branches in an 'ordered' manner (0,1,2...), 'random', or set (if you input a number). Put none if the HS does not used branched morphology
-synapses_1_0_relativeCoupling					1.000000	#Relative coupling strength (only non-J plasticity models)
+synapses_1_0_relative_coupling					1.000000	#Relative coupling strength (only non-J plasticity models)
 #########From here on is all Heterosynaptic plasticity###########
-synapses_1_0_pmodel_type			TraceRBranchedHSTDP
+synapses_1_0_pmodel_type			AlphaResourceHSTDP
 synapses_1_0_pmodel_branchLength		4.000000 #μm	#Length of each branch.
 synapses_1_0_pmodel_synapticGap			1.000000 #μm	#Distance between synapse spines.
 synapses_1_0_pmodel_distributeWeights		false #μm	#Distance between synapse spines.
-synapses_1_0_pmodel_dendriteBranchings		1		#This specifies the number of branchings in the dendritic tree FOR EVERY EXISTING BRANCH. Total isolated branches are 2^n. More than 28 will cause integer overflow
+synapses_1_0_pmodel_noBranches		1		#This specifies the number of branchings in the dendritic tree FOR EVERY EXISTING BRANCH. Total isolated branches are 2^n. More than 28 will cause integer overflow
 synapses_1_0_pmodel_synapseAllocation		ordered		#'ordered' synapse allocation will allocate synapses from the branch node to the end of the branch. 'random' will allocate random positions in each branch
 synapses_1_0_pmodel_basalAlpha			20.100000	#Alpha at rest, where alpha decays towards
 synapses_1_0_pmodel_alphaTau			2.000000 #secs	#Decay constant of Alpha_stimulus
@@ -142,7 +142,7 @@ synapses_1_0_pmodel_betaResourcePool		200.000000	#Multiplication factor of the d
 synapses_1_0_pmodel_coopTau			0.002000 #secs	#Time decay constant for the alpha stimulus increase in the pairing kernel
 synapses_1_0_pmodel_coopProfile			7.000000 #μm	#Exponential decay that characterizes the spatial profile of cooperativity
 synapses_1_0_pmodel_tauSTDP			0.010000 #secs	#Exponential decay constant for the STDP kernel. Affects both pre and post synaptic traces
-synapses_1_0_pmodel_potdepRatio			2.000000	#Factor that multiplies potentiation
+synapses_1_0_pmodel_biasLTD			0.500000	#Factor that multiplies potentiation
 ##### The weight of this model is defined as wI=beta*alphaI/(omega+branch-sum(alpha)), where alphaI= alphaBasal + alphaStimulus*exp(-dt/alphaStimTau) 
 ########### Connectivity ################
 synapses_1_0_connectivity_type					RandomConnectivity
@@ -155,7 +155,7 @@ synapses_1_1_D_min						0.000000 #secs
 synapses_1_1_D_max						0.000000 #secs
 synapses_1_1_seed						921206234
 synapses_1_1_targetBranch					none			#You can target branches in an 'ordered' manner (0,1,2...), 'random', or set (if you input a number). Put none if the HS does not used branched morphology
-synapses_1_1_relativeCoupling					1.000000	#Relative coupling strength (only non-J plasticity models)
+synapses_1_1_relative_coupling					1.000000	#Relative coupling strength (only non-J plasticity models)
 ########### Connectivity ################
 synapses_1_1_connectivity_type					RandomConnectivity
 synapses_1_1_connectivity_ConnectionProba			1.000000
@@ -167,7 +167,7 @@ synapses_1_2_D_min						0.005000 #secs
 synapses_1_2_D_max						0.020000 #secs
 synapses_1_2_seed						183427039
 synapses_1_2_targetBranch					1			#You can target branches in an 'ordered' manner (0,1,2...), 'random', or set (if you input a number). Put none if the HS does not used branched morphology
-synapses_1_2_relativeCoupling					1.000000	#Relative coupling strength (only non-J plasticity models)
+synapses_1_2_relative_coupling					1.000000	#Relative coupling strength (only non-J plasticity models)
 ########### Connectivity ################
 synapses_1_2_connectivity_type					RandomConnectivity
 synapses_1_2_connectivity_ConnectionProba			1.000000

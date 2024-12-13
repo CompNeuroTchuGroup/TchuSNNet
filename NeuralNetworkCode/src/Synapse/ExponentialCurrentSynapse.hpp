@@ -1,15 +1,13 @@
 #ifndef EXPONENTIALCURRENTSYNAPSE
 #define EXPONENTIALCURRENTSYNAPSE
 
-#include "Synapse.hpp"
-#include "../NeuronPop/NeuronPop.hpp"
 #include "../GlobalFunctions.hpp"
+#include "../NeuronPop/NeuronPop.hpp"
+#include "Synapse.hpp"
 
 #include <iostream>
-#include <vector>
 #include <random>
-#include <typeinfo>
-
+#include <vector>
 
 //*****************************************************************************
 // Incoming synaptic current to neuron i:
@@ -21,30 +19,29 @@
 
 class ExponentialCurrentSynapse : public Synapse {
 protected:
-    double tauConstant{};
-    double expDecayConstant{};
-	std::vector<double> AdvectSpikers (NeuronInt spiker) override; // here, only expAddon is advected
-	//void advect_finalize(std::vector<std::vector<double>> * waiting_matrix) override {}
-    void ResetWaitingMatrixEntry() override;  // synaptic_dV is updated here!
-	void ResetcumulatedDV() override;
+  double              tauConstant{};
+  double              expDecayConstant{};
+  std::vector<double> AdvectSpikers(NeuronInt spiker) override; // here, only expAddon is advected
+                                                                // void advect_finalize(std::vector<std::vector<double>> * waiting_matrix) override {}
+  void ResetWaitingMatrixEntry() override;                      // synaptic_dV is updated here!
+  void ResetcumulatedDV() override;
 
 public:
-    ExponentialCurrentSynapse(PopPtr targetPop,PopPtr sourcePop,GlobalSimInfo* infoGlobal);
+  ExponentialCurrentSynapse(PopPtr targetPop, PopPtr sourcePop, GlobalSimInfo *infoGlobal);
 
-    //*****************************
-    //******* Get Functions *******
-    //*****************************
-    int GetNoDataColumns() const override { return 1;}
-    std::string GetDataHeader(int dataColumn) override;
-	std::string GetUnhashedDataHeader() const override;
-    std::vector<double> GetSynapticState(NeuronInt sourceNeuron) const override;
-    std::string GetTypeStr() const override { return IDstringExponentialCurrentSynapse; };
+  //*****************************
+  //******* Get Functions *******
+  //*****************************
+  int                 GetNoDataColumns() const override { return 1; }
+  std::string         GetDataHeader(int dataColumn) override;
+  std::string         GetUnhashedDataHeader() const override;
+  std::vector<double> GetSynapticState(NeuronInt sourceNeuron) const override;
+  std::string         GetTypeStr() const override { return IDstringExponentialCurrentSynapse; };
 
-    void SaveParameters(std::ofstream& wParameterStream,std::string idString) const override;
-    void LoadParameters(const std::vector<FileEntry>& parameters) override;
+  void SaveParameters(std::ofstream &wParameterStream, std::string idString) const override;
+  void LoadParameters(const std::vector<FileEntry> &parameters) override;
 
-    //~ExponentialCurrentSynapse(){ delete expAddon;}
+  //~ExponentialCurrentSynapse(){ delete expAddon;}
 };
-
 
 #endif // EXPONENTIALCURRENTSYNAPSE

@@ -1,13 +1,20 @@
 
 #include "NeuronPop.hpp"
 
-NeuronPop::NeuronPop(GlobalSimInfo* globalInfo, PopInt inputID): infoGlobal { globalInfo }, identifier { inputID } {
+NeuronPop::NeuronPop(GlobalSimInfo *globalInfo, PopInt inputID): infoGlobal { globalInfo }, identifier { inputID } {
+
   std::uniform_int_distribution<int> distribution(0, INT_MAX);
   seed = distribution(infoGlobal->globalGenerator);
   // seedInitialPreviousSpike  = distribution(infoGlobal->globalGenerator);
   // seedInitialPotentials = distribution(infoGlobal->globalGenerator);
   generator = std::mt19937(seed);
 }
+
+SynInt NeuronPop::GetNoSynapses() const {
+  return std::reduce(morphology.begin(), morphology.end(), static_cast<SynInt>(0),
+                     [](SynInt accumulator, const std::unique_ptr<Morphology> &morpho) { return accumulator + morpho->GetNoSynapses(); });
+}
+
 
 void NeuronPop::SetNeurons() {
   // std::mt19937 generatorPreviousSpikes(seedInitialPreviousSpike);
@@ -78,16 +85,18 @@ void NeuronPop::ClearSpikerVector() {
   // v2. This is done to preserve capacity of spiker vector. It would be faster to just have pointers and swap those, but that would add
   // dereferences everywhere (tested and faster in MVSC)
   std::swap(spikerNeurons, spikerNeuronsPrevdt);
-  spikerNeurons.clear();  // Clear is not necessary
-  std::transform(std::execution::unseq, previousSpikeDistance.begin(), previousSpikeDistance.end(), previousSpikeDistance.begin(),
+  spikerNeurons.clear();
+  std::transform(PAR_UNSEQ, previousSpikeDistance.begin(), previousSpikeDistance.end(), previousSpikeDistance.begin(),
+
                  std::bind(std::plus<TStepInt>(), std::placeholders::_1, 1));
 }
 
 void NeuronPop::AdvectPlasticityModel() {
   if (this->hasPlasticity) {
-    std::for_each(std::execution::unseq, spikerNeurons.begin(), spikerNeurons.end(), [this](NeuronInt spiker) { RecordPostSpike(spiker); });
-    std::for_each(PAR, morphology.begin(), morphology.end(),
-                  [](std::unique_ptr<Morphology>& singleMorphology) { singleMorphology->Advect(); });
+    std::for_each(PAR_UNSEQ, spikerNeurons.begin(), spikerNeurons.end(), [this](NeuronInt spiker) { RecordPostSpike(spiker); });
+    std::for_each(PAR_UNSEQ, morphology.begin(), morphology.end(),
+                  [](std::unique_ptr<Morphology> &singleMorphology) { singleMorphology->Advect(); });
+
   }
 }
 
@@ -96,8 +105,9 @@ void NeuronPop::AdvectPlasticityModel() {
 //     LoadParameters(neuronParameters);
 // }
 
-void NeuronPop::LoadParameters(const std::vector<FileEntry>& neuronParameters) {
-  for (auto& [parameterName, parameterValues] : neuronParameters) {
+void NeuronPop::LoadParameters(const std::vector<FileEntry> &neuronParameters) {
+  for (auto &[parameterName, parameterValues] : neuronParameters) {
+
     // This is what is called a "structured binding", it assigns the first value to the first variable, etc for the whole container.
     /*if(parameterName.find("Ni") != std::string::npos){
         totalPopulations = (int)parameterValues.size();
@@ -139,38 +149,54 @@ void NeuronPop::LoadParameters(const std::vector<FileEntry>& neuronParameters) {
   SetNeurons();
 }
 
-void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry>& morphologyParameters) {
+void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry> &morphologyParameters) {
   if (!hasPlasticity) {
-    for (auto& [parameterName, parameterValues] : morphologyParameters) {
+    for (auto &[parameterName, parameterValues] : morphologyParameters) {
       if (parameterName.find("pmodel_type") != std::string::npos) {
         if (parameterValues.at(0) == IDstringMonoDendriteSTDPTazerart) {
+          morphologyType = IDstringMonoDendriteSTDPTazerart;
           for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
             (void)neuron;  // Does nothing, removes warning on unused vars
-            this->morphology.push_back(std::make_unique<MonoDendriteSTDPTazerart>(this->infoGlobal));
-            this->morphology.back()->LoadParameters(morphologyParameters);
+            this->morphology.push_back(std::make_unique<MonoDendriteSTDPTazerart>(
+              this->infoGlobal,
+              morphologyParameters));  // this conversion works but I do not remember why. Implicit downcasting through the move operation?
             this->hasPlasticity = true;
           }
         } else if (parameterValues.at(0) == IDstringMonoDendriteSTDPBiWindow) {
+          morphologyType = IDstringMonoDendriteSTDPBiWindow;
           for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
             (void)neuron;  // Does nothing, removes warning on unused vars
-            this->morphology.push_back(std::make_unique<MonoDendriteSTDPBiWindow>(this->infoGlobal));
-            this->morphology.back()->LoadParameters(morphologyParameters);
+            this->morphology.push_back(std::make_unique<MonoDendriteSTDPBiWindow>(this->infoGlobal, morphologyParameters));
             this->hasPlasticity = true;
+            this->morphology.back()->LoadParameters(morphologyParameters);
           }
         } else if (parameterValues.at(0) == IDstringMonoDendriteSTDPTazerartRelative) {
+          morphologyType = IDstringMonoDendriteSTDPTazerartRelative;
           for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
             (void)neuron;  // Does nothing, removes warning on unused vars
-            this->morphology.push_back(std::make_unique<MonoDendriteSTDPTazerartRelative>(this->infoGlobal));
-            this->morphology.back()->LoadParameters(morphologyParameters);
+            this->morphology.push_back(std::make_unique<MonoDendriteSTDPTazerartRelative>(this->infoGlobal, morphologyParameters));
             this->hasPlasticity = true;
+            this->morphology.back()->LoadParameters(morphologyParameters);
           }
         } else if (parameterValues.at(0) == IDstringTraceResourceHSTDP) {
+          morphologyType = IDstringTraceResourceHSTDP;
           for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
             (void)neuron;  // Does nothing, removes warning on unused vars
-            this->morphology.push_back(std::make_unique<TraceRBranchedHSTDP>(this->infoGlobal));  // Remove, will not  be used
-            this->morphology.back()->LoadParameters(morphologyParameters);
+            this->morphology.push_back(std::make_unique<AlphaResourceHSTDP>(this->infoGlobal, morphologyParameters));
             this->hasPlasticity = true;
             this->isBranched    = true;
+            this->morphology.back()->LoadParameters(morphologyParameters);
+          }
+
+        } else if (parameterValues.at(0) == IDstringHeteroGraupnerBrunel) {
+          morphologyType = IDstringHeteroGraupnerBrunel;
+          for (NeuronInt neuron : std::ranges::views::iota(0, noNeurons)) {
+            (void)neuron;  // Does nothing, removes warning on unused vars
+            this->morphology.push_back(std::make_unique<HeteroGraupnerBrunel>(this->infoGlobal, morphologyParameters));
+            this->hasPlasticity = true;
+            this->isBranched    = true;
+            this->morphology.back()->LoadParameters(morphologyParameters);
+
           }
         } else {
           throw "Unespecified morphology type";
@@ -180,12 +206,13 @@ void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry>& morphologyPara
   } else {
     morphology.back()->CheckParameters(morphologyParameters);
   }
-  if (!hasPlasticity) {
+  if (!hasPlasticity) {  // This should never happen logically
+
     throw "Error, cannot use PModelSynapse without a plasticity model";
   }
 }
 
-void NeuronPop::SaveParameters(std::ofstream& wParameterStream) const {
+void NeuronPop::SaveParameters(std::ofstream &wParameterStream) const {
   std::string neuronID = "neurons_" + std::to_string(GetId());
 
   wParameterStream << "#***********************************************\n";
@@ -210,7 +237,7 @@ void NeuronPop::SaveParameters(std::ofstream& wParameterStream) const {
   wParameterStream << "#\t\tNote: Resting potential is 0 by definition.\n";
 }
 
-void NeuronPop::SavePlasticityModel(std::ofstream& wParameterStream, std::string idString) const {
+void NeuronPop::SavePlasticityModel(std::ofstream &wParameterStream, std::string idString) const {
   if (this->hasPlasticity && (!this->savedModel)) {
     morphology.at(0)->SaveParameters(wParameterStream, idString);  //"neurons_" + std::to_string(GetId())
     return;
@@ -221,10 +248,32 @@ void NeuronPop::SavePlasticityModel(std::ofstream& wParameterStream, std::string
   }
 }
 
+bool NeuronPop::HasSteadyState() const {
+  if (morphology.empty()) {
+    return false;
+  } else {
+    return morphology.at(0)->HasSteadyState();
+  }
+}
+
+bool NeuronPop::ignoreJcoupling() const {
+#ifndef NDEBUG
+  if (morphology.empty()) {
+    throw "Logical error jdis";
+  } else {
+    return morphology.at(0)->IgnoreJcoupling();
+  }
+#else
+  return morphology.at(0)->IgnoreJcoupling();
+#endif
+
+}
+
 // From here on
 
-BaseSpinePtr NeuronPop::AllocateNewSynapse(NeuronInt neuronId, BranchTargeting& branchTarget) {
-  std::lock_guard<std::mutex> _guardedMutexLock(_morphologyMutex);
+BaseSpinePtr NeuronPop::AllocateNewSynapse(NeuronInt neuronId, BranchTargeting &branchTarget) {
+  std::lock_guard<std::mutex> _guardedMutexLock(_connectMutex);
+
   return morphology.at(neuronId)->AllocateNewSynapse(branchTarget);
 }
 
@@ -236,10 +285,23 @@ std::string NeuronPop::GetOverallSynapticProfileHeaderInfo() const {
   return morphology.at(0)->GetOverallSynapticProfileHeaderInfo();
 }
 
+std::vector<double> NeuronPop::GetIndividualSynapticProfile(NeuronInt neuronId, NeuronInt spineID) const {
+  return this->morphology.at(neuronId)->GetIndividualSynapticProfile(spineID);
+}
+
+std::vector<double> NeuronPop::GetOverallSynapticProfile(NeuronInt neuronId) const {
+  return this->morphology.at(neuronId)->GetOverallSynapticProfile();
+}
+
+std::vector<std::pair<std::string, double>> NeuronPop::GetSteadyStateData() const {
+  return morphology.at(0)->GetSteadyStateData();
+}
+
 void NeuronPop::PostConnectSetUp() {
-  std::lock_guard<std::mutex> _guardedMutexLock(_morphologyMutex);
+  std::lock_guard<std::mutex> _guardedMutexLock(_connectMutex);
   if (!morphology.empty()) {
     std::for_each(morphology.begin(), morphology.end(),
-                  [](std::unique_ptr<Morphology>& singleMorphology) { singleMorphology->PostConnectSetUp(); });
+                  [](std::unique_ptr<Morphology> &singleMorphology) { singleMorphology->PostConnectSetUp(); });
+
   }
 }
