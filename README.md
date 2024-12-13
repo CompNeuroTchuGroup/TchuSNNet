@@ -66,4 +66,7 @@ To get familiar with the Spiking Network Simulation code, a few tests are provid
 See [here](README_OutputFiles.md) for more detailed information.
 
 ## Model explanations
-To see the explanation of the implementation of some of the available classes, go to the [Models](Models.md) file.
+To see the explanation of the implementation of some of the available classes, go to the [Models](README_Models.md) file.
+
+## Contributing to the code-base
+To see the current best practices, see [here](README_Workflow.md).
