@@ -48,6 +48,7 @@ public:
 
   void SaveParameters(std::ofstream &wParameterStream) const override;
   void LoadParameters(const std::vector<FileEntry> &parameters) override;
+
 };
 
 #endif /* SpatialGaussianStimulus_hpp */

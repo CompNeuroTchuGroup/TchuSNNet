@@ -56,6 +56,7 @@ public:
   void LoadParameters(const std::vector<FileEntry> &neuronParameters);
   void LoadNeuronPop(std::string neuronPopType, PopInt popID, std::vector<FileEntry> neuronParameters);
   void SaveParameters(std::ofstream &wParameterStream) const;
+
 };
 
 #endif /* NeuronPopSample_hpp */

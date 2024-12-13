@@ -1,9 +1,8 @@
 #ifndef _STIMULUS_BASE_CLASS_HPP
 #define _STIMULUS_BASE_CLASS_HPP
 
-#include "../GlobalFunctions.hpp"
-#include "../NeuronPopSample.hpp"
 #include <algorithm>
+
 #include <iostream>
 #include <random>
 #include <ranges>
@@ -15,6 +14,7 @@ struct StepStruct {
   TStepInt            startTimeStep{};
   TStepInt            endTimeStep{LONG_MAX};
   std::vector<double> parameterValues;
+
 };
 /* class Stimulus is a virtual base class for injecting a determined
  * current into each neuron during each time step.
@@ -53,3 +53,4 @@ public:
   double GetSignalMatrixPoint(PopInt neuronPop, NeuronInt neuron) const { return signalMatrix.at(neuronPop).at(neuron); }
 };
 #endif // Stimulus_HPP
+

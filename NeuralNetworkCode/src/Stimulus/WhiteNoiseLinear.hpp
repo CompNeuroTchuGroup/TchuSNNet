@@ -49,6 +49,7 @@ public:
 
   void SaveParameters(std::ofstream &wParameterStream) const override;
   void LoadParameters(const std::vector<FileEntry> &stimulusParameters) override;
+
 };
 
 #endif /* WhiteNoiseLinear_hpp */

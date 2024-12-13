@@ -100,6 +100,7 @@ void DictatNeuronPop::GenerateRegularSpikersFromInstructions() {
   //                 spiker.push_back(neuronId);
   //                 if (instruction.endTimeStep>=infoGlobal->timeStep){
   //                 instruction.off=true;
+
   //             }
   //             break;
   //             }
@@ -120,6 +121,7 @@ void DictatNeuronPop::GenerateRegularSpikersFromInstructions() {
       // if (instruction.off) {
       //   continue;
       // }
+
       if (instruction.startTimeStep < infoGlobal->timeStep) {
         spikerNeurons.push_back(neuronId);
       }
@@ -139,6 +141,7 @@ void DictatNeuronPop::GeneratePoissonSpikersFromInstructions() {
     if (uniformDistribution(generator) <
         instruction.firingProbability) { // Here because there is no modulus, there is no need for checking the instruction.off condition
       if (instruction.off) {
+
         continue;
       }
       if (instruction.startTimeStep < infoGlobal->timeStep) {
@@ -161,6 +164,7 @@ void DictatNeuronPop::ReadSpikersFromFile() {
     if (line[0] == '>') {
       FileEntry s_entry{SplitStringToEntry(std::move(static_cast<std::string>(line)))};
       long      timeStep{std::lround(std::stod(s_entry.parameterValues.at(0)) / infoGlobal->dtTimestep)};
+
       if (timeStep != infoGlobal->timeStep) {
         throw "There was a reading alignment error";
       } else {
@@ -188,4 +192,5 @@ void DictatNeuronPop::Advect(const std::vector<double> &synaptic_dV) {
     throw "Logical error in DictatNeuronPop";
   }
   this->AdvectPlasticityModel();
+
 }

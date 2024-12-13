@@ -2,6 +2,7 @@
 #include "NeuronPop.hpp"
 
 NeuronPop::NeuronPop(GlobalSimInfo *globalInfo, PopInt inputID): infoGlobal { globalInfo }, identifier { inputID } {
+
   std::uniform_int_distribution<int> distribution(0, INT_MAX);
   seed = distribution(infoGlobal->globalGenerator);
   // seedInitialPreviousSpike  = distribution(infoGlobal->globalGenerator);
@@ -13,6 +14,7 @@ SynInt NeuronPop::GetNoSynapses() const {
   return std::reduce(morphology.begin(), morphology.end(), static_cast<SynInt>(0),
                      [](SynInt accumulator, const std::unique_ptr<Morphology> &morpho) { return accumulator + morpho->GetNoSynapses(); });
 }
+
 
 void NeuronPop::SetNeurons() {
   // std::mt19937 generatorPreviousSpikes(seedInitialPreviousSpike);
@@ -85,6 +87,7 @@ void NeuronPop::ClearSpikerVector() {
   std::swap(spikerNeurons, spikerNeuronsPrevdt);
   spikerNeurons.clear();
   std::transform(PAR_UNSEQ, previousSpikeDistance.begin(), previousSpikeDistance.end(), previousSpikeDistance.begin(),
+
                  std::bind(std::plus<TStepInt>(), std::placeholders::_1, 1));
 }
 
@@ -93,6 +96,7 @@ void NeuronPop::AdvectPlasticityModel() {
     std::for_each(PAR_UNSEQ, spikerNeurons.begin(), spikerNeurons.end(), [this](NeuronInt spiker) { RecordPostSpike(spiker); });
     std::for_each(PAR_UNSEQ, morphology.begin(), morphology.end(),
                   [](std::unique_ptr<Morphology> &singleMorphology) { singleMorphology->Advect(); });
+
   }
 }
 
@@ -103,6 +107,7 @@ void NeuronPop::AdvectPlasticityModel() {
 
 void NeuronPop::LoadParameters(const std::vector<FileEntry> &neuronParameters) {
   for (auto &[parameterName, parameterValues] : neuronParameters) {
+
     // This is what is called a "structured binding", it assigns the first value to the first variable, etc for the whole container.
     /*if(parameterName.find("Ni") != std::string::npos){
         totalPopulations = (int)parameterValues.size();
@@ -191,6 +196,7 @@ void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry> &morphologyPara
             this->hasPlasticity = true;
             this->isBranched    = true;
             this->morphology.back()->LoadParameters(morphologyParameters);
+
           }
         } else {
           throw "Unespecified morphology type";
@@ -201,6 +207,7 @@ void NeuronPop::LoadPlasticityModel(const std::vector<FileEntry> &morphologyPara
     morphology.back()->CheckParameters(morphologyParameters);
   }
   if (!hasPlasticity) {  // This should never happen logically
+
     throw "Error, cannot use PModelSynapse without a plasticity model";
   }
 }
@@ -259,12 +266,14 @@ bool NeuronPop::ignoreJcoupling() const {
 #else
   return morphology.at(0)->IgnoreJcoupling();
 #endif
+
 }
 
 // From here on
 
 BaseSpinePtr NeuronPop::AllocateNewSynapse(NeuronInt neuronId, BranchTargeting &branchTarget) {
   std::lock_guard<std::mutex> _guardedMutexLock(_connectMutex);
+
   return morphology.at(neuronId)->AllocateNewSynapse(branchTarget);
 }
 
@@ -293,5 +302,6 @@ void NeuronPop::PostConnectSetUp() {
   if (!morphology.empty()) {
     std::for_each(morphology.begin(), morphology.end(),
                   [](std::unique_ptr<Morphology> &singleMorphology) { singleMorphology->PostConnectSetUp(); });
+
   }
 }

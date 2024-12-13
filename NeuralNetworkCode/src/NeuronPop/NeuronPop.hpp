@@ -3,6 +3,7 @@
 #define _NEURONPOP_BASE_CLASS_HPP
 // Include order is important to avoid circular dependency problems
 #include <execution>
+
 #include <iostream>
 #include <memory>
 #include <random>
@@ -25,6 +26,7 @@ class NeuronPop {
     double    membraneExpDecay { 0.002 };
     double    resetV {};
     double    thresholdV { 1.0 };
+
     // double targetRate;
     double prevMinFrequency { 0.333 };
     bool   definedPrevMeanFreq { false };
@@ -123,6 +125,7 @@ class NeuronPop {
     std::vector<double> GetOverallSynapticProfile(NeuronInt neuronId) const;
 
     std::vector<std::pair<std::string, double>> GetSteadyStateData() const;
+
 
     void PostConnectSetUp();  // This function cannot be called without throwing first};
 };
