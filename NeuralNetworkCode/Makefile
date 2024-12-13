@@ -6,7 +6,6 @@ BUILD_PATH = build
 BIN_PATH = $(BUILD_PATH)/bin
 #FIND_PATH ?= /C/msys64/usr/bin/find.exe
 # executable #
-BIN_NAME = main
 
 # Default value for FIND
 FIND ?= find
@@ -15,12 +14,15 @@ FIND ?= find
 ifeq ($(OS),Windows_NT)
     #If you are using windows, replace this path with the path of your installed GNU find    
     FIND := /C/msys64/usr/bin/find.exe
+    ENDING := .exe
 else
     # If the OS environment variable is set, assume it's not a Windows system and use the default value for FIND
     FIND := find
+    ENDING := 
 endif
 
 # extensions #
+BIN_NAME = main$(ENDING)
 SRC_EXT = cpp
 
 # code lists #
