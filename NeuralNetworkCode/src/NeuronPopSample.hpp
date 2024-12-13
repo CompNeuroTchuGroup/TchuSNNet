@@ -8,47 +8,50 @@
 #ifndef NeuronPopSample_hpp
 #define NeuronPopSample_hpp
 
-#include "GlobalFunctions.hpp"
-#include "NeuronPop/NeuronPop.hpp"
-#include "NeuronPop/FundamentalNeuronPop/LIFNeuronPop.hpp"
-#include "NeuronPop/FundamentalNeuronPop/EIFNeuronPop.hpp"
-#include "NeuronPop/FundamentalNeuronPop/QIFNeuronPop.hpp"
-#include "NeuronPop/FundamentalNeuronPop/PoissonNeuronPop.hpp"
 #include "./NeuronPop/FundamentalNeuronPop/DictatNeuronPop.hpp"
+#include "GlobalFunctions.hpp"
+#include "NeuronPop/FundamentalNeuronPop/EIFNeuronPop.hpp"
+#include "NeuronPop/FundamentalNeuronPop/LIFNeuronPop.hpp"
+#include "NeuronPop/FundamentalNeuronPop/PoissonNeuronPop.hpp"
+#include "NeuronPop/FundamentalNeuronPop/QIFNeuronPop.hpp"
+#include "NeuronPop/NeuronPop.hpp"
 
+#include <cstring>
+#include <execution>
+#include <fstream>
 #include <iostream>
-#include <vector>
 #include <random>
 #include <typeinfo>
-#include <cstring>
-#include <fstream>
-#include <execution>
+#include <vector>
 
 class NeuronPopSample {
-protected:
-
+  protected:
     GlobalSimInfo* infoGlobal;
 
-    PopInt noPopulations{};
+    PopInt              noPopulations {};
     std::vector<PopPtr> neuronPops;
 
-public:
+  public:
     NeuronPopSample(std::vector<FileEntry> neuronParameters, GlobalSimInfo* infoGlobal);
 
     //*******************
-    //Get-Functions
+    // Get-Functions
     //*******************
-    NeuronInt GetTotalNeurons() const { return infoGlobal->totalNeurons; }
-    PopInt  GetTotalPopulations() const { return this->noPopulations; }
-    NeuronInt GetNeuronsPop(PopInt popId) const { return neuronPops.at(popId)->GetNoNeurons(); }
-    PopPtr GetPop(PopInt popId) const { return neuronPops.at(popId); }
-    const std::vector<NeuronInt>& GetSpikers(PopInt neuronPop) const { return neuronPops.at(neuronPop)->GetSpikers();}//This function is called in RecordRasterplot()
-    const std::vector<NeuronInt>& GetSpikersPrevDt(PopInt neuronPop) const { return neuronPops.at(neuronPop)->GetSpikersPrevDt();}
-	double GetXPosition(PopInt neuronPop, NeuronInt neuron) const { return neuronPops.at(neuronPop)->GetXPosition(neuron); }
-	double GetYPosition(PopInt neuronPop, NeuronInt neuron) const { return neuronPops.at(neuronPop)->GetYPosition(neuron); }
-	double GetPotential(PopInt neuronPop, NeuronInt neuron) const { return neuronPops.at(neuronPop)->GetPotential(neuron); }
+    NeuronInt                     GetTotalNeurons() const { return infoGlobal->totalNeurons; }
+    PopInt                        GetTotalPopulations() const { return this->noPopulations; }
+    NeuronInt                     GetNeuronsPop(PopInt popId) const { return neuronPops.at(popId)->GetNoNeurons(); }
+    PopPtr                        GetPop(PopInt popId) const { return neuronPops.at(popId); }
+    const std::vector<NeuronInt>& GetSpikers(PopInt neuronPop) const {
+      return neuronPops.at(neuronPop)->GetSpikers();
+    }  // This function is called in RecordRasterplot()
+    const std::vector<NeuronInt>& GetSpikersPrevDt(PopInt neuronPop) const {
+      return neuronPops.at(neuronPop)->GetSpikersPrevDt();
+    }  // This function is necessary to have the spikers of the actual timestep and not one delayed
+    double GetXPosition(PopInt neuronPop, NeuronInt neuron) const { return neuronPops.at(neuronPop)->GetXPosition(neuron); }
+    double GetYPosition(PopInt neuronPop, NeuronInt neuron) const { return neuronPops.at(neuronPop)->GetYPosition(neuron); }
+    double GetPotential(PopInt neuronPop, NeuronInt neuron) const { return neuronPops.at(neuronPop)->GetPotential(neuron); }
     //*******************
-    //Set-Functions
+    // Set-Functions
     //*******************
     void Advect(std::vector<std::vector<double>>& synaptic_dV);
     void LoadParameters(const std::vector<FileEntry>& neuronParameters);

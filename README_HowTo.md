@@ -14,13 +14,12 @@ In ```Makefile```, change in the second line the compiler to ```CC = clang++``` 
 
 ### On Windows
 Using the Visual Studio IDE, start a new project and include all the .hpp and .cpp files into it. Then make sure to be in "Release" mode, and use "Build" to compile the code. Once the code is compiled, go in the folder where the project was created and look into the "Release" folder for an executable file. This is the compiled simulator.
-Newer versions of MS-compiler can fail to compile because of safety warnings. To alleviate this issue, you can add a new line "_CRT_SECURE_NO_WARNINGS" into Preprocessor Definitions; under Projects>Properties>C/C++>Preprocessor>Preprocessor Definitions.
 
-Alternatively, the compilation can also be done without using an IDE, by downloading a gcc compiler and calling it in command line.
+Alternatively, the compilation can also be done without using an IDE, by downloading a gcc compiler and calling it in command line. The easiest way to do so is to install [msys2](https://www.msys2.org/), choose a partition (any will do), install mingw32-make and gcc in that partition (using pacman -S and the partition specific package names), and add the bin path of that partition to the Path Environment Variable. To test that it works run `gcc.exe --version` and `mingw32-make.exe --version` in your preferred terminal. After that, running `mingw32-make.exe` will work as `make` in Linux. There may be issues with the find command if your msys2 installation is not in `C:/msys64/`.
 
 ### On Linux
 Along with the hpp and cpp files, the NeuralNetworkCode folder contains the Makefile to compile.
-From the location of the code, type "make" in a command line.
+From the location of the code, type `make` in a command line.
 ```
 >make 
 ```
