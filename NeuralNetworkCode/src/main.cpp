@@ -10,14 +10,14 @@
  *
  */
 
+#include <iostream>
 #include "./DatafileParser.hpp"
 #include "./GlobalFunctions.hpp"
 #include "NeuralNetwork.hpp"
-#include <iostream>
 // All files have been refactored by Antoni Bertolin. If something goes wrong, contact bertolin@uni-bonn.de.
 
 int main(int argc, char *argv[]) {
-  std::string argvString(argv[0]);
+  // std::string argvString(argv[0]);
   std::string base;
   std::string inputFileAddress;
   bool        Windows         = false;
@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
     // prefix = readStringLine.substr(0, 9);
 
     // if the entry in the parameter file is prefixed with iterate_1 or iterate_2, push them on iterateX_entries vector
-    if (line.find("iterate_1") != std::string::npos) { //(prefix.compare("iterate_1") == 0) {
+    if (line.find("iterate_1") != std::string::npos) {  //(prefix.compare("iterate_1") == 0) {
       iterate1Entries.push_back(SplitStringToIterableEntry(line));
     } else if (line.find("iterate_2") != std::string::npos) {
       iterate2Entries.push_back(SplitStringToIterableEntry(line));
@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
   // parameterEntries.push_back(SplitStringToEntry("nonIterateTitle  " + pathToInputFile));
   // Check for consistency Iterate 1: do all entries have the same lenght?
   if (iterate1Entries.empty()) {
-    iterate1Entries.push_back(IterableFileEntry("iterate_1", "placeholder", {""}));
+    iterate1Entries.push_back(IterableFileEntry("iterate_1", "placeholder", { "" }));
   }
   // else {
   //     CheckConsistencyOfIterationParameters(iterate1Entries);
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
 
   // Check for consistency Iterate 2: do all entries have the same lenght?
   if (iterate2Entries.empty()) {
-    iterate2Entries.push_back(IterableFileEntry("iterate_2", "placeholder", {""}));
+    iterate2Entries.push_back(IterableFileEntry("iterate_2", "placeholder", { "" }));
   }
   // else {
   //     CheckConsistencyOfIterationParameters(iterate2Entries);
@@ -118,57 +118,60 @@ int main(int argc, char *argv[]) {
   // #pragma omp parallel for collapse(2)
   for (signed int iterate1Index : std::ranges::views::iota(0, MinIterateParameterSize(iterate1Entries))) {
     for (signed int iterate2Index : std::ranges::views::iota(0, MinIterateParameterSize(iterate2Entries))) {
-
-      std::vector<FileEntry> parameterEntriesCopy = parameterEntries; // Why is this copy created?
+      std::vector<FileEntry> parameterEntriesCopy = parameterEntries;  // Why is this copy created?
       std::cout << "******************************************" << std::endl;
       std::cout << "iterate1 = " << iterate1Index + 1 << " , iterate2 = " << iterate2Index + 1 << std::endl;
       for (FileEntry &parEntry : parameterEntriesCopy) {
         // Set parameters for Iterate 1
         for (IterableFileEntry &parameterEntry1 : iterate1Entries) {
           if (parEntry.parameterName.compare(parameterEntry1.parameterName) == 0) {
-            // This loop will allocate the parameters as long as the iterate parameter is consistent with the actual parameter (this requires the
-            // parameter be introduced in the params file properly).
-            size_t indexMultiplier{IsIterateParamConsistent(parEntry, parameterEntry1)};
+            // This loop will allocate the parameters as long as the iterate parameter is consistent with the actual parameter (this
+            // requires the parameter be introduced in the params file properly).
+            size_t indexMultiplier { IsIterateParamConsistent(parEntry, parameterEntry1) };
             for (size_t index : std::ranges::views::iota(0ull, parEntry.parameterValues.size())) {
               parEntry.parameterValues.at(index) = parameterEntry1.parameterValues.at(indexMultiplier * iterate1Index + index);
             }
-            std::cout << " " << parameterEntry1.parameterName << " = " << (parameterEntry1.parameterValues.at(iterate1Index * indexMultiplier))
-                      << std::endl;
+            std::cout << " " << parameterEntry1.parameterName << " = "
+                      << (parameterEntry1.parameterValues.at(iterate1Index * indexMultiplier)) << std::endl;
             break;
           }
         }
         // Set parameters for Iterate 2
         for (IterableFileEntry &parameterEntry2 : iterate2Entries) {
           if (parEntry.parameterName.compare(parameterEntry2.parameterName) == 0) {
-            // This loop will allocate the parameters as long as the iterate parameter is consistent with the actual parameter (this requires the
-            // parameter be introduced in the params file properly).
-            size_t indexMultiplier{IsIterateParamConsistent(parEntry, parameterEntry2)};
+            // This loop will allocate the parameters as long as the iterate parameter is consistent with the actual parameter (this
+            // requires the parameter be introduced in the params file properly).
+            size_t indexMultiplier { IsIterateParamConsistent(parEntry, parameterEntry2) };
             for (size_t index : std::ranges::views::iota(0ull, parEntry.parameterValues.size())) {
               parEntry.parameterValues.at(index) = parameterEntry2.parameterValues.at(indexMultiplier * iterate2Index + index);
             }
             // parEntry.parameterValues.at(0) = parameterEntry2.parameterValues.at(iterate2Index);
-            std::cout << " " << parameterEntry2.parameterName << " = " << (parameterEntry2.parameterValues.at(iterate2Index * indexMultiplier))
-                      << std::endl;
+            std::cout << " " << parameterEntry2.parameterName << " = "
+                      << (parameterEntry2.parameterValues.at(iterate2Index * indexMultiplier)) << std::endl;
             break;
           }
         }
 
         if ((parEntry.parameterName.compare("Title") == 0)) {
           parEntry.parameterValues.push_back(parEntry.parameterValues.at(0));
-          if (!(iterate1Entries.at(0).parameterName.find("placeholder") != std::string::npos))
+          if (!(iterate1Entries.at(0).parameterName.find("placeholder") != std::string::npos)) {
             parEntry.parameterValues.at(0)
-                .append("_it1_" + std::to_string(iterate1Index + 1) + "_")
-                .append(iterate1Entries.at(0).parameterName,
-                        iterate1Entries.at(0).parameterName.length() - std::min(static_cast<int>(iterate1Entries.at(0).parameterName.length()), 10),
-                        std::min(iterate1Entries.at(0).parameterName.length(), static_cast<size_t>(10)))
-                .append("_" + iterate1Entries.at(0).parameterValues.at(iterate1Index));
-          if (!(iterate2Entries.at(0).parameterName.find("placeholder") != std::string::npos))
+              .append("_it1_" + std::to_string(iterate1Index + 1) + "_")
+              .append(
+                iterate1Entries.at(0).parameterName,
+                iterate1Entries.at(0).parameterName.length() - std::min(static_cast<int>(iterate1Entries.at(0).parameterName.length()), 10),
+                std::min(iterate1Entries.at(0).parameterName.length(), static_cast<size_t>(10)))
+              .append("_" + iterate1Entries.at(0).parameterValues.at(iterate1Index));
+          }
+          if (!(iterate2Entries.at(0).parameterName.find("placeholder") != std::string::npos)) {
             parEntry.parameterValues.at(0)
-                .append("_it2_" + std::to_string(iterate2Index + 1) + "_")
-                .append(iterate2Entries.at(0).parameterName,
-                        iterate2Entries.at(0).parameterName.length() - std::min(static_cast<int>(iterate2Entries.at(0).parameterName.length()), 10),
-                        std::min(iterate2Entries.at(0).parameterName.length(), static_cast<size_t>(10)))
-                .append("_" + iterate2Entries.at(0).parameterValues.at(iterate2Index));
+              .append("_it2_" + std::to_string(iterate2Index + 1) + "_")
+              .append(
+                iterate2Entries.at(0).parameterName,
+                iterate2Entries.at(0).parameterName.length() - std::min(static_cast<int>(iterate2Entries.at(0).parameterName.length()), 10),
+                std::min(iterate2Entries.at(0).parameterName.length(), static_cast<size_t>(10)))
+              .append("_" + iterate2Entries.at(0).parameterValues.at(iterate2Index));
+          }
         }
       }
       std::cout << "******************************************" << std::endl;
