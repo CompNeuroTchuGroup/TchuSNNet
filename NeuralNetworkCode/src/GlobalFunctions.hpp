@@ -65,6 +65,10 @@ namespace threadsafe {
   // tm* localtime(const time_t* timer);
   void put_time(time_t timeObj, const char *formatString, std::stringstream &outputString);
 }  // namespace threadsafe
+
+const std::string TitleIDString { "Title" };
+const std::string NonIterateTitleIDString { "nonIterateTitle" };
+
 const std::string IDstringAdjacencyMatrixConnectivity { "AdjacencyMatrixConnectivity" };
 const std::string IDstringRandomConnectivity { "RandomConnectivity" };
 const std::string IDstringPoissonConnectivity { "PoissonConnectivity" };
@@ -142,8 +146,8 @@ void SaveTupleOfDoublesFile(std::ofstream &file, std::vector<double>, int precis
 
 bool isDouble(const std::string &readString);
 
-size_t     IsIterateParamConsistent(FileEntry entry, IterableFileEntry iterateEntry);
-signed int MinIterateParameterSize(std::vector<IterableFileEntry> iterateEntries);
+size_t     IsIterateParamConsistent(FileEntry &entry, IterableFileEntry &iterateEntry);
+signed int MinIterateParameterSize(std::vector<IterableFileEntry> &iterateEntries);
 
 // void CheckConsistencyOfIterationParameters(const std::vector<IterableFileEntry>& iterableEntryVector);
 

@@ -157,9 +157,8 @@ IterableFileEntry SplitStringToIterableEntry(std::string fullString) {
 }
 
 void SaveDoubleFile(std::ofstream &file, double value, int precision) {
-  std::stringstream
-    tempStream;  // I think the idea of using a stream is to avoid individual writing on the file to slow down the code.
-                 // As far as I am aware this is already dealt with implicitly in the file stream objects.
+  std::stringstream tempStream;  // I think the idea of using a stream is to avoid individual writing on the file to slow down the code.
+                                 // As far as I am aware this is already dealt with implicitly in the file stream objects.
 
   tempStream << std::fixed << std::setprecision(precision) << value;
   file << tempStream.str() << "\t";
@@ -175,9 +174,8 @@ void SaveDoubleFile(std::ofstream &file, double value, int precision) {
 //     file  << tempStream.str() << "\t";
 // }
 void SaveTupleOfDoublesFile(std::ofstream &file, std::vector<double> vector, int precision) {
-  std::stringstream
-    tempStream;  // I think the idea of using a stream is to avoid individual writing on the file to slow down the code.
-                 // As far as I am aware this is already dealt with implicitly in the file stream objects.
+  std::stringstream tempStream;  // I think the idea of using a stream is to avoid individual writing on the file to slow down the code.
+                                 // As far as I am aware this is already dealt with implicitly in the file stream objects.
   size_t dataEntry;
   tempStream << "{" << std::fixed << std::setprecision(precision);
   for (dataEntry = 0; dataEntry < vector.size() - 1; ++dataEntry) {
@@ -194,7 +192,7 @@ bool isDouble(const std::string &readString) {
   return convertedStringStream >> castDouble && !(convertedStringStream >> castChar);
 }
 
-size_t IsIterateParamConsistent(FileEntry entry, IterableFileEntry iterateEntry) {
+size_t IsIterateParamConsistent(FileEntry &entry, IterableFileEntry &iterateEntry) {
   if (iterateEntry.parameterValues.size() % entry.parameterValues.size() != 0) {
     throw "The iterate parameter is not consistent with the introduced parameter.";
   } else {
@@ -202,13 +200,11 @@ size_t IsIterateParamConsistent(FileEntry entry, IterableFileEntry iterateEntry)
   }
 }
 
-signed int MinIterateParameterSize(std::vector<IterableFileEntry> iterateEntries) {
-  return static_cast<signed int>(std::min_element(iterateEntries.begin(), iterateEntries.end(),
-                                                  [](const IterableFileEntry &entry1, const IterableFileEntry &entry2) {
-                                                    return entry1.parameterValues.size() <
-                                                           entry2.parameterValues.size();
-                                                  })
-                                   ->parameterValues.size());
+signed int MinIterateParameterSize(std::vector<IterableFileEntry> &iterateEntries) {
+  return static_cast<signed int>(
+    std::min_element(iterateEntries.begin(), iterateEntries.end(), [](const IterableFileEntry &entry1, const IterableFileEntry &entry2) {
+      return entry1.parameterValues.size() < entry2.parameterValues.size();
+    })->parameterValues.size());
 }
 
 /*template <typename T>
