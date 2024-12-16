@@ -1,8 +1,11 @@
 #ifndef _STIMULUS_BASE_CLASS_HPP
 #define _STIMULUS_BASE_CLASS_HPP
 
-#include <algorithm>
 
+#include "../GlobalFunctions.hpp"
+#include "../NeuronPopSample.hpp"
+
+#include <algorithm>
 #include <iostream>
 #include <random>
 #include <ranges>
