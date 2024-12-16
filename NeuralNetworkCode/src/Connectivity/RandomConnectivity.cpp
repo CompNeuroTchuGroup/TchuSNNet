@@ -1,17 +1,16 @@
 #include "RandomConnectivity.hpp"
 #include "../Synapse/Synapse.hpp"
 
-RandomConnectivity::RandomConnectivity(Synapse *synapse, GlobalSimInfo *infoGlobal) : Connectivity(synapse, infoGlobal) {
-}
+RandomConnectivity::RandomConnectivity(Synapse *synapse, GlobalSimInfo *infoGlobal): Connectivity(synapse, infoGlobal) { }
 
 void RandomConnectivity::SaveParameters(std::ofstream &wParameterStream, std::string idString) const {
   Connectivity::SaveParameters(wParameterStream, idString);
   //*stream << idString << "connectivity_noSourceNeurons " << std::to_string(this->noSourceNeurons) << "\n";
   wParameterStream << idString << "connectivity_ConnectionProba\t\t\t" << std::to_string(this->GetConnectionProbability()) << "\n";
   //*stream << "#" << idString << "connectivity_noSourceNeurons " << std::to_string(this->noSourceNeurons) << "\n";
-  wParameterStream
-      << "#\t\t" << IDstringRandomConnectivity
-      << ": Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).\n";
+  wParameterStream << "#\t\t" << IDstringRandomConnectivity
+                   << ": Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p "
+                      "(as used by [Brunel (2000)]).\n";
 }
 
 void RandomConnectivity::LoadParameters(const std::vector<FileEntry> &connectivityParameters) {
@@ -59,38 +58,48 @@ double RandomConnectivity::GetConnectionProbability() const {
 }
 
 void RandomConnectivity::ConnectNeurons() {
-
-  NeuronInt sourceNeuron, countedSourceNeurons;
+  NeuronInt sourceNeuron {};
+  int       countedSourceNeurons {}, recurrentIndex {};
   NeuronInt noTargetNeurons = synapse->GetNoTargetNeurons();
 
   NeuronInt outputInterval = noTargetNeurons / 10;
   if (outputInterval == 0) {
     outputInterval = 1;
   }
-  std::uniform_int_distribution<NeuronInt> distribution(0, synapse->GetNoSourceNeurons() - 1);
-
+  // std::uniform_int_distribution<NeuronInt> distribution(0, synapse->GetNoSourceNeurons() - 1);
+  std::vector<int> sourceNeuronsIDs(synapse->GetNoSourceNeurons());
+  std::iota(sourceNeuronsIDs.begin(), sourceNeuronsIDs.end(), 0);
   // every target neuron has a fixed number of sourceNeuron neurons
-
+  // int total {};
   // Iterate through all target neurons
   for (NeuronInt targetNeuron : std::ranges::views::iota(0, noTargetNeurons)) {
-    countedSourceNeurons = 0;
+    countedSourceNeurons = 0, recurrentIndex = 0;
+    std::shuffle(sourceNeuronsIDs.begin(), sourceNeuronsIDs.end(), generator);
     // assign for each target neuron 'noSourceNeurons' sourceNeuron neurons
     while (countedSourceNeurons < noSourceNeurons) {
-      sourceNeuron = distribution(generator);
+      sourceNeuron = sourceNeuronsIDs.at(countedSourceNeurons + recurrentIndex);
       // Check if sourceNeuron and target neurons are equal
       if ((synapse->IsRecurrent()) && (sourceNeuron == targetNeuron)) {
+        recurrentIndex++;
         continue;
       }
-      // Check if target was assigned to the same sourceNeuron already
+      // Check if target was assigned to the same sourceNeuron already (now it should not be possible anymore)
       if (!synapse->IsSourceVectorEmpty(sourceNeuron) && synapse->IsTargetLastInVector(targetNeuron, sourceNeuron)) {
         continue;
       }
       synapse->AllocateSynapse(targetNeuron, sourceNeuron);
       countedSourceNeurons++;
+      // total++;
     }
     // if((targetNeuron)%outputInterval == 0){
     //     std::cout << 100*(targetNeuron)/noTargetNeurons << "%\n";
     // }
   }
+  // int    b {};
+  // double c { static_cast<double>(noSourceNeurons) / synapse->GetNoSourceNeurons() };
+  // for (int target = 0; target < noTargetNeurons; target++) {
+  //   b += synapse->GetNoSourceNeurons();
+  // }
+  // std::cout << "Rate of connection: " << static_cast<double>(total) / b << " Intended: " << c << "\n";
   // std::cout << "100%\n";
 }
