@@ -1,12 +1,11 @@
 
 #include "Recorder.hpp"
 // extern char const *const GIT_COMMIT;
-Recorder::Recorder(const std::shared_ptr<NeuronPopSample> neurons, const std::shared_ptr<SynapseSample> synapses,
-                   const std::shared_ptr<Stimulus> stimulus, std::string baseDirectory, std::vector<FileEntry> inputParameters,
-                   std::string titleString, std::string nonIterateTitle, GlobalSimInfo *infoGlobal)
-    : infoGlobal{infoGlobal}, simulationTitle{titleString}, nonIterateTitle{nonIterateTitle}, directoryPath{baseDirectory}, neurons{neurons},
-      synapses{synapses}, stimulus{stimulus} {
-
+Recorder::Recorder(std::shared_ptr<const NeuronPopSample> neurons, std::shared_ptr<const SynapseSample> synapses,
+                   std::shared_ptr<const Stimulus> stimulus, std::string baseDirectory, std::vector<FileEntry> inputParameters,
+                   std::string titleString, std::string nonIterateTitle, GlobalSimInfo *infoGlobal):
+    infoGlobal { infoGlobal }, simulationTitle { titleString }, nonIterateTitle { nonIterateTitle }, directoryPath { baseDirectory },
+    neurons { neurons }, synapses { synapses }, stimulus { stimulus } {
   PopInt totalNeuronPops = neurons->GetTotalPopulations();
 
   noRasterPlotNeurons.resize(totalNeuronPops, 0);
@@ -37,19 +36,19 @@ Recorder::Recorder(const std::shared_ptr<NeuronPopSample> neurons, const std::sh
     densimap.resize(totalNeuronPops);
     currentBin.heatmap.resize(totalNeuronPops);
     for (PopInt neuronPop : std::ranges::views::iota(0, totalNeuronPops)) {
-      size_t heatmapDimensions{static_cast<size_t>(pow(recordedHeatmap, infoGlobal->dimensions))};
+      size_t heatmapDimensions { static_cast<size_t>(pow(recordedHeatmap, infoGlobal->dimensions)) };
       currentBin.heatmap.at(neuronPop).resize(heatmapDimensions, 0.0);
       densimap.at(neuronPop).resize(heatmapDimensions, 0.0);
       if (infoGlobal->dimensions == 2) {
         for (NeuronInt neuron : std::ranges::views::iota(0, neurons->GetNeuronsPop(neuronPop))) {
-          densimap.at(neuronPop).at(
-              static_cast<size_t>(recordedHeatmap * (floor(neurons->GetYPosition(neuronPop, neuron) * recordedHeatmap / infoGlobal->yAxisLength)) +
-                                  floor(neurons->GetXPosition(neuronPop, neuron) * recordedHeatmap / infoGlobal->xAxisLength))) += 1;
+          densimap.at(neuronPop).at(static_cast<size_t>(
+            recordedHeatmap * (floor(neurons->GetYPosition(neuronPop, neuron) * recordedHeatmap / infoGlobal->yAxisLength)) +
+            floor(neurons->GetXPosition(neuronPop, neuron) * recordedHeatmap / infoGlobal->xAxisLength))) += 1;
         }
       } else if (infoGlobal->dimensions == 1) {
         for (NeuronInt neuron : std::ranges::views::iota(0, neurons->GetNeuronsPop(neuronPop))) {
           densimap.at(neuronPop).at(
-              static_cast<size_t>(floor(neurons->GetXPosition(neuronPop, neuron) * recordedHeatmap / infoGlobal->xAxisLength))) += 1;
+            static_cast<size_t>(floor(neurons->GetXPosition(neuronPop, neuron) * recordedHeatmap / infoGlobal->xAxisLength))) += 1;
         }
       }
     }
@@ -86,13 +85,14 @@ void Recorder::SetFilenameDate() {
   threadsafe::put_time(timeInType, "%Y_%m_%d_%H-%M-%S", outputString);
   dateTime = outputString.str();
 
-  if (Windows)
+  if (Windows) {
     directoryPath += simulationTitle + "_" + dateTime + "\\";
-  else
+  } else {
     directoryPath += simulationTitle + "_" + dateTime + "/";
+  }
 
 #ifdef _WIN32
-  _mkdir(directoryPath.c_str()); // 0744
+  _mkdir(directoryPath.c_str());  // 0744
 #elif __APPLE__
   mkdir(directoryPath.c_str(), 0744);
 #elif __linux__
@@ -114,12 +114,12 @@ void Recorder::WriteDistributionJ() const {
 
 void Recorder::WriteSteadyStates() const {
   std::ofstream ssStream(GetSteadyStatesFilename(), std::ofstream::out | std::ofstream::trunc);
-  int           counter{1};
+  int           counter { 1 };
 
   // Models in neuronPop classes
   // Models inside NeuronPop of the Morphology framework
   for (PopInt popIndex = 0; popIndex < neurons->GetTotalPopulations(); popIndex++) {
-    cPopPtr pop{neurons->GetcPopPtr(popIndex)};
+    cPopPtr pop { neurons->GetcPopPtr(popIndex) };
     if (pop->HasSteadyState()) {
       ssStream << "#Steady state no. " << std::to_string(counter++) << '\n';
       ssStream << "#Neuron pop. " << pop->GetId() << " with model " << pop->GetMorphologyType() << '\n';
@@ -152,15 +152,15 @@ void Recorder::SaveParameters(std::ofstream &wParameterStream) const {
     wParameterStream << std::to_string(noRasterPlotNeurons.at(neuronPop)) << " ";
   }
   wParameterStream << "\t" << std::to_string((static_cast<double>(startRecordingTime)) * infoGlobal->dtTimestep);
-  wParameterStream
-      << "\t\t#Record spike times of x neurons for (i-th column is x for the i-th population). The i+1-th column sets the initial recording time. If negative, records all neurons of neuronPop\n";
+  wParameterStream << "\t\t#Record spike times of x neurons for (i-th column is x for the i-th population). The i+1-th column sets the "
+                      "initial recording time. If negative, records all neurons of neuronPop\n";
 
   wParameterStream << "recorder_notrackNeuronProfiles\t\t";
   for (PopInt neuronPop : std::ranges::views::iota(0, static_cast<PopInt>(neuronPotentialsToRecord.size()))) {
     wParameterStream << std::to_string(neuronPotentialsToRecord.at(neuronPop)) << " ";
   }
-  wParameterStream
-      << "\t\t\t#Record currents and potentials at all time steps of the first x_p neurons, totalNeuronPops = population index. [column 1: track #neurons in pop1, column 2: track #neurons in pop2, .. ]\n";
+  wParameterStream << "\t\t\t#Record currents and potentials at all time steps of the first x_p neurons, totalNeuronPops = population "
+                      "index. [column 1: track #neurons in pop1, column 2: track #neurons in pop2, .. ]\n";
 
   wParameterStream << "recorder_CurrentContributions\t\t";
 
@@ -168,8 +168,8 @@ void Recorder::SaveParameters(std::ofstream &wParameterStream) const {
     wParameterStream << std::to_string(currentContributionsToRecord.at(neuronPop)) << " ";
   }
   wParameterStream << "\t" << std::to_string((static_cast<double>(initialCurrent)) * infoGlobal->dtTimestep);
-  wParameterStream
-      << "\t#Record the sources of input current to x neurons. (i-th column is x for the i-th population). The i+1-th column sets the initial recording time\n";
+  wParameterStream << "\t#Record the sources of input current to x neurons. (i-th column is x for the i-th population). The i+1-th column "
+                      "sets the initial recording time\n";
 
   wParameterStream << "recorder_trackSynapses\t\t\t" << std::to_string(trackSynapses)
                    << "\t\t\t#Set = 1 to track averaged data from synapes, Set = 0 to ignore.\n";
@@ -178,11 +178,12 @@ void Recorder::SaveParameters(std::ofstream &wParameterStream) const {
 
   wParameterStream << "recorder_notrackHeteroSynapticProfiles\t";
   for (PopInt neuronPop : std::ranges::views::iota(0, static_cast<PopInt>(heteroSynTracker.size()))) {
-    wParameterStream << std::to_string(heteroSynTracker.at(neuronPop).first) << " " << std::to_string(heteroSynTracker.at(neuronPop).second) << "  ";
+    wParameterStream << std::to_string(heteroSynTracker.at(neuronPop).first) << " " << std::to_string(heteroSynTracker.at(neuronPop).second)
+                     << "  ";
   }
-  wParameterStream
-      << std::to_string(heteroRecordPerSteps)
-      << "\t#Col1: number of neurons to track in pop 0, col2: number of synapses to track in pop0, ... Col2P: number of synapses to track in popP, Col2P+1: record every N steps (default 10)\n";
+  wParameterStream << std::to_string(heteroRecordPerSteps)
+                   << "\t#Col1: number of neurons to track in pop 0, col2: number of synapses to track in pop0, ... Col2P: number of "
+                      "synapses to track in popP, Col2P+1: record every N steps (default 10)\n";
 
   wParameterStream << "recorder_parsing\t\t\t";
   if (parserEnabled) {
@@ -194,9 +195,7 @@ void Recorder::SaveParameters(std::ofstream &wParameterStream) const {
 }
 
 void Recorder::LoadParameters(const std::vector<FileEntry> &recorderParameters) {
-
   for (auto &[parameterName, parameterValues] : recorderParameters) {
-
     if (parameterName.find("recorder_noNeuronsConnectivity") != std::string::npos) {
       noNeuronsConnectivity = std::stoi(parameterValues.at(0));
     } else if (parameterName.find("recorder_noNeuronsDelay") != std::string::npos) {
@@ -250,7 +249,8 @@ void Recorder::SetAveragingSteps(double secondsPerBin) {
 }
 
 void Recorder::BindNoHeteroSynapsesPerPop(PopInt neuronPop) {
-  if ((heteroSynTracker.at(neuronPop).second > neurons->GetcPopPtr(neuronPop)->GetNoSynapses()) || (heteroSynTracker.at(neuronPop).second < 0)) {
+  if ((heteroSynTracker.at(neuronPop).second > neurons->GetcPopPtr(neuronPop)->GetNoSynapses()) ||
+      (heteroSynTracker.at(neuronPop).second < 0)) {
     heteroSynTracker.at(neuronPop).second = neurons->GetcPopPtr(neuronPop)->GetNoSynapses();
   }
 }
@@ -266,7 +266,7 @@ void Recorder::AllocateAndAssignStreamBuffer(std::ofstream &outputStream) {
     std::cerr << "Failed to allocate memory for stream buffer: " << e.what() << std::endl;
     // Optionally, perform any cleanup or error handling here
     // For example, close the output stream or throw the exception again
-    throw; // Rethrow the exception to propagate it to the caller
+    throw;  // Rethrow the exception to propagate it to the caller
   }
 }
 
@@ -287,13 +287,13 @@ void Recorder::MakeInputCopies(const std::string &inputFileAddress) const {
   for (PopInt neuronPop : std::ranges::views::iota(0, neurons->GetTotalPopulations())) {
     std::shared_ptr<const DictatNeuronPop> dictatPtr = std::dynamic_pointer_cast<const DictatNeuronPop>(neurons->GetcPopPtr(neuronPop));
     if (dictatPtr != nullptr) {
-      // Here I am possibly introducing an overhead. The input stream from the pop is not closed, and as such could consume extra resources but that
-      // is all.
-      // It _should_ not be a bug
+      // Here I am possibly introducing an overhead. The input stream from the pop is not closed, and as such could consume extra resources
+      // but that is all. It _should_ not be a bug
       //  dictatPtr->CloseInputStream();
       std::ifstream sourceFile(dictatPtr->GetInputFileAddress(), std::ios::binary);
-      std::ofstream copiedFile(this->directoryPath + nonIterateTitle + "_DictatNeuronPop_" + std::to_string(dictatPtr->GetId()) + "_spikers.txt",
-                               std::ios::binary);
+      std::ofstream copiedFile(
+        this->directoryPath + nonIterateTitle + "_DictatNeuronPop_" + std::to_string(dictatPtr->GetId()) + "_spikers.txt",
+        std::ios::binary);
       copiedFile << sourceFile.rdbuf();
       copiedFile.close();
       sourceFile.close();
@@ -307,7 +307,8 @@ void Recorder::SetNoRecordedNeuronPotentials(const std::vector<std::string> &par
   PopInt totalNeuronPops = neurons->GetTotalPopulations();
   for (PopInt recordedPop : std::ranges::views::iota(0, std::min(totalNeuronPops, static_cast<PopInt>(parameterValues.size())))) {
     neuronPotentialsToRecord.at(recordedPop) = std::stol(parameterValues.at(recordedPop));
-    if ((neuronPotentialsToRecord.at(recordedPop) >= neurons->GetNeuronsPop(recordedPop)) || (neuronPotentialsToRecord.at(recordedPop) < 0)) {
+    if ((neuronPotentialsToRecord.at(recordedPop) >= neurons->GetNeuronsPop(recordedPop)) ||
+        (neuronPotentialsToRecord.at(recordedPop) < 0)) {
       std::cout << "Potentials: Tracking all neurons of population " << recordedPop << "\n";
       neuronPotentialsToRecord.at(recordedPop) = neurons->GetNeuronsPop(recordedPop);
     }
@@ -324,8 +325,9 @@ void Recorder::SetNoCurrentContribution(const std::vector<std::string> &paramete
     }
   }
   if (static_cast<PopInt>(parameterValues.size()) > totalNeuronPops) {
-    if (parameterValues.at(totalNeuronPops)[0] != '#') // The comments in the code are not meant to be read upon execution
+    if (parameterValues.at(totalNeuronPops)[0] != '#') {  // The comments in the code are not meant to be read upon execution
       initialCurrent = static_cast<int>(std::round(std::stod(parameterValues.at(totalNeuronPops)) / infoGlobal->dtTimestep));
+    }
   }
 }
 
@@ -339,32 +341,35 @@ void Recorder::SetNoRasterplotNeurons(const std::vector<std::string> &parameterV
     }
   }
   if (static_cast<PopInt>(parameterValues.size()) > totalNeuronPops) {
-    if (parameterValues.at(totalNeuronPops)[0] != '#')
+    if (parameterValues.at(totalNeuronPops)[0] != '#') {
       startRecordingTime = static_cast<int>(std::round(std::stod(parameterValues.at(totalNeuronPops)) / infoGlobal->dtTimestep));
+    }
   }
 }
 
 void Recorder::SetNoRecordedHeteroSynapticProfilesPerTrackedNeuronPerPop(const std::vector<std::string> &parameterValues) {
   PopInt totalNeuronPops = neurons->GetTotalPopulations();
-  for (PopInt neuronPop : std::ranges::views::iota(0, totalNeuronPops)) { // min() only makes sense if you remove the hash
+  for (PopInt neuronPop : std::ranges::views::iota(0, totalNeuronPops)) {  // min() only makes sense if you remove the hash
     heteroSynTracker.at(neuronPop).first  = std::stol(parameterValues.at(2 * neuronPop));
     heteroSynTracker.at(neuronPop).second = std::stol(parameterValues.at(2 * neuronPop + 1));
-    // if((heteroSynTracker.at(neuronPop).second  > neurons->GetPop(neuronPop)->GetNoSynapses()) || (heteroSynTracker.at(neuronPop).second < 0)){
+    // if((heteroSynTracker.at(neuronPop).second  > neurons->GetPop(neuronPop)->GetNoSynapses()) || (heteroSynTracker.at(neuronPop).second <
+    // 0)){
     //     heteroSynTracker.at(neuronPop).second=neurons->GetPop(neuronPop)->GetNoSynapses();
     // }
     if ((heteroSynTracker.at(neuronPop).first > neurons->GetNeuronsPop(neuronPop)) || (heteroSynTracker.at(neuronPop).first < 0)) {
       heteroSynTracker.at(neuronPop).first = neurons->GetNeuronsPop(neuronPop);
     }
   }
-  if (parameterValues.size() > (2 * static_cast<size_t>(totalNeuronPops))) { // This requires an extra number to record
+  if (parameterValues.size() > (2 * static_cast<size_t>(totalNeuronPops))) {  // This requires an extra number to record
     // std::cout << parameterValues.size() << "_" << 2 * static_cast<size_t>(totalNeuronPops);
     this->heteroRecordPerSteps = std::stol(parameterValues.at(2 * static_cast<size_t>(totalNeuronPops)));
-  } // else heteroRecordingPerSteps is 1
+  }  // else heteroRecordingPerSteps is 1
 }
 
 void Recorder::WriteDataHeaderHeatmap() {
-  if (recordedHeatmap == 0)
+  if (recordedHeatmap == 0) {
     return;
+  }
   PopInt totalNeuronPops = this->neurons->GetTotalPopulations();
   int    dim             = infoGlobal->dimensions;
   if (dim != 1 && dim != 2) {
@@ -385,37 +390,36 @@ void Recorder::WriteDataHeaderHeatmap() {
     if (dim == 1) {
       fileStreams.heatmapStreamVector.back() << "# column 1 : t (secs.) \n";
       fileStreams.heatmapStreamVector.back() << "# columnn n+1: r_" + std::to_string(neuronPop) + "(Hz) for neurons in position:\n";
-      fileStreams.heatmapStreamVector.back() << "#\t\t (n-1) * " + std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "  <  x  <  n * " +
-                                                    std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "\n";
+      fileStreams.heatmapStreamVector.back() << "#\t\t (n-1) * " + std::to_string(infoGlobal->xAxisLength / recordedHeatmap) +
+                                                  "  <  x  <  n * " + std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "\n";
     } else {
       fileStreams.heatmapStreamVector.back() << "# column 1 : t (secs.) \n";
       fileStreams.heatmapStreamVector.back() << "# columnn n+1: r_" + std::to_string(neuronPop) + "(Hz) for neurons in position:\n";
       fileStreams.heatmapStreamVector.back() << "#\t\t (n-1)%" + std::to_string(recordedHeatmap) + " * " +
-                                                    std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "  <  x  <  n%" +
-                                                    std::to_string(recordedHeatmap) + " * " +
-                                                    std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "\n";
+                                                  std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "  <  x  <  n%" +
+                                                  std::to_string(recordedHeatmap) + " * " +
+                                                  std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "\n";
       fileStreams.heatmapStreamVector.back() << "#\t\t (n-1)//" + std::to_string(recordedHeatmap) + " * " +
-                                                    std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "  <  y  <  n//" +
-                                                    std::to_string(recordedHeatmap) + " * " +
-                                                    std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "\n";
+                                                  std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "  <  y  <  n//" +
+                                                  std::to_string(recordedHeatmap) + " * " +
+                                                  std::to_string(infoGlobal->xAxisLength / recordedHeatmap) + "\n";
     }
     // legend header
     if (dim == 1) {
       fileStreams.heatmapStreamVector.back() << "t\t";
       for (int xPosition : std::ranges::views::iota(0, recordedHeatmap)) {
         fileStreams.heatmapStreamVector.back() << "["
-                                               << static_cast<double>(xPosition) / static_cast<double>(recordedHeatmap) * infoGlobal->xAxisLength
+                                               << static_cast<double>(xPosition) / static_cast<double>(recordedHeatmap) *
+                                                    infoGlobal->xAxisLength
                                                << "]\t";
       }
     } else if (dim == 2) {
       fileStreams.heatmapStreamVector.back() << "t\t";
       for (int xPosition : std::ranges::views::iota(0, recordedHeatmap)) {
         for (int yPosition : std::ranges::views::iota(0, recordedHeatmap)) {
-          fileStreams.heatmapStreamVector.back() << "["
-                                                 << static_cast<double>(xPosition) / static_cast<double>(recordedHeatmap) * infoGlobal->xAxisLength
-                                                 << ","
-                                                 << static_cast<double>(yPosition) / static_cast<double>(recordedHeatmap) * infoGlobal->xAxisLength
-                                                 << "]\t";
+          fileStreams.heatmapStreamVector.back()
+            << "[" << static_cast<double>(xPosition) / static_cast<double>(recordedHeatmap) * infoGlobal->xAxisLength << ","
+            << static_cast<double>(yPosition) / static_cast<double>(recordedHeatmap) * infoGlobal->xAxisLength << "]\t";
         }
       }
     }
@@ -428,7 +432,6 @@ void Recorder::WriteDataHeaderHeatmap() {
 }
 
 void Recorder::WriteDataHeaderAverages() {
-
   PopInt totalNeuronPops = this->neurons->GetTotalPopulations();
   int    columnTotal     = 1;
 
@@ -473,8 +476,9 @@ void Recorder::WriteDataHeaderAverages() {
   }
 
   for (PopInt neuronPop : std::ranges::views::iota(0, totalNeuronPops)) {
-    this->fileStreams.averagesFileStream << "#" + std::to_string(columnTotal) + " Temporal fluctuations of mu_" << neuronPop
-                                         << "/tau_m*sqrt(dt) (dmV/sqrt(sec)) = sqrt(dt)*sqrt(PopAver(TempAver(mu_i^2) - TempAver(mu_i)^2))\n";
+    this->fileStreams.averagesFileStream
+      << "#" + std::to_string(columnTotal) + " Temporal fluctuations of mu_" << neuronPop
+      << "/tau_m*sqrt(dt) (dmV/sqrt(sec)) = sqrt(dt)*sqrt(PopAver(TempAver(mu_i^2) - TempAver(mu_i)^2))\n";
     columnTotal++;
   }
 
@@ -511,7 +515,6 @@ void Recorder::WriteDataHeaderAverages() {
 }
 
 void Recorder::WriteDataHeaderRasterplot() {
-
   if (!recordRasterPlot) {
     return;
   }
@@ -519,14 +522,13 @@ void Recorder::WriteDataHeaderRasterplot() {
   this->fileStreams.rasterplotFileStream.open(GetRasterplotFilename(), std::ofstream::out | std::ofstream::trunc);
   WriteHeader(this->fileStreams.rasterplotFileStream);
   this->fileStreams.rasterplotFileStream << "#1 t (secs.) \t #2 neuron_id \t #3 neuron_pop_id \t\n";
-  this->fileStreams.rasterplotFileStream
-      << "# Note that the recorded neurons are equidistant within the population. Therefore, neuron_id are not necessarily successive numbers\n";
+  this->fileStreams.rasterplotFileStream << "# Note that the recorded neurons are equidistant within the population. Therefore, neuron_id "
+                                            "are not necessarily successive numbers\n";
   this->fileStreams.rasterplotFileStream << "Spike_t\tNeuron_id\tPop_id\n";
   this->fileStreams.rasterplotFileStream << "#************************************" << std::endl;
 }
 
 void Recorder::WriteDataHeaderPotential() {
-
   if (!recordNeuronPotentials) {
     return;
   }
@@ -536,7 +538,8 @@ void Recorder::WriteDataHeaderPotential() {
   this->fileStreams.potentialFileStream.open(GetPotentialFilename(), std::ofstream::out | std::ofstream::trunc);
 
   WriteHeader(this->fileStreams.potentialFileStream);
-  this->fileStreams.potentialFileStream << "#1 t (secs.)\t 2-" << 1 + std::reduce(neuronPotentialsToRecord.begin(), neuronPotentialsToRecord.end())
+  this->fileStreams.potentialFileStream << "#1 t (secs.)\t 2-"
+                                        << 1 + std::reduce(neuronPotentialsToRecord.begin(), neuronPotentialsToRecord.end())
                                         << " V_pop_id (mV) \n";
 
   this->fileStreams.potentialFileStream << "t\t";
@@ -558,7 +561,8 @@ void Recorder::WriteDataHeaderCurrents() {
   this->fileStreams.currentsFileStream.open(GetCurrentsFilename(), std::ofstream::out | std::ofstream::trunc);
 
   WriteHeader(this->fileStreams.currentsFileStream);
-  this->fileStreams.currentsFileStream << "#1 t (sec)\t 2-" << 1 + std::reduce(neuronPotentialsToRecord.begin(), neuronPotentialsToRecord.end())
+  this->fileStreams.currentsFileStream << "#1 t (sec)\t 2-"
+                                       << 1 + std::reduce(neuronPotentialsToRecord.begin(), neuronPotentialsToRecord.end())
                                        << " mu_pop_id / tau_m(dmV / sec)\n";
 
   this->fileStreams.currentsFileStream << "t\t";
@@ -576,8 +580,8 @@ void Recorder::WriteDataHeaderCurrentsContribution() {
     return;
   }
   PopInt    totalNeuronPops = neurons->GetTotalPopulations();
-  long      HeaderIndex{};
-  NeuronInt neuronNumber{};
+  long      HeaderIndex {};
+  NeuronInt neuronNumber {};
   AllocateAndAssignStreamBuffer(this->fileStreams.cCurrentsFileStream);
   this->fileStreams.cCurrentsFileStream.open(GetCurrentCrontributionFilename(), std::ofstream::out | std::ofstream::trunc);
 
@@ -588,17 +592,17 @@ void Recorder::WriteDataHeaderCurrentsContribution() {
     neuronNumber = currentContributionsToRecord.at(targetPop);
     if (neuronNumber > 0) {
       for (PopInt sourcePop : std::ranges::views::iota(0, totalNeuronPops)) {
-        this->fileStreams.cCurrentsFileStream << "# " << HeaderIndex << "-" << HeaderIndex + neuronNumber - 1 << " Irecurrent_pop" << targetPop
-                                              << "<-neuronPop" << sourcePop << "_neuronid / tau_m (mV/s)\n";
+        this->fileStreams.cCurrentsFileStream << "# " << HeaderIndex << "-" << HeaderIndex + neuronNumber - 1 << " Irecurrent_pop"
+                                              << targetPop << "<-neuronPop" << sourcePop << "_neuronid / tau_m (mV/s)\n";
         HeaderIndex = HeaderIndex + neuronNumber;
       }
-      this->fileStreams.cCurrentsFileStream << "# " << HeaderIndex << "-" << HeaderIndex + neuronNumber - 1 << " Ifeedforward_pop" << targetPop
-                                            << "_id / tau_m (mV/s)\n";
+      this->fileStreams.cCurrentsFileStream << "# " << HeaderIndex << "-" << HeaderIndex + neuronNumber - 1 << " Ifeedforward_pop"
+                                            << targetPop << "_id / tau_m (mV/s)\n";
       HeaderIndex = HeaderIndex + neuronNumber;
     }
   }
-  this->fileStreams.cCurrentsFileStream
-      << "# Note that the recorded neurons are equidistant within the population. Therefore, neuron_id are not necessarily successive numbers\n";
+  this->fileStreams.cCurrentsFileStream << "# Note that the recorded neurons are equidistant within the population. Therefore, neuron_id "
+                                           "are not necessarily successive numbers\n";
 
   this->fileStreams.cCurrentsFileStream << "t\t";
   for (PopInt targetPop : std::ranges::views::iota(0, totalNeuronPops)) {
@@ -606,14 +610,16 @@ void Recorder::WriteDataHeaderCurrentsContribution() {
       for (NeuronInt recordedNeuron : std::ranges::views::iota(0, currentContributionsToRecord.at(targetPop))) {
         // This is an integer type division, it does not need floor()
         this->fileStreams.cCurrentsFileStream << "IRec" << targetPop << "_" << sourcePop << "_"
-                                              << recordedNeuron * neurons->GetNeuronsPop(targetPop) / currentContributionsToRecord.at(targetPop)
+                                              << recordedNeuron * neurons->GetNeuronsPop(targetPop) /
+                                                   currentContributionsToRecord.at(targetPop)
                                               << "\t";
       }
     }
     for (NeuronInt recordedNeuron : std::ranges::views::iota(0, currentContributionsToRecord.at(targetPop))) {
       // This is an integer type division, it does not need floor()
       this->fileStreams.cCurrentsFileStream << "Iffd" << targetPop << "_"
-                                            << recordedNeuron * neurons->GetNeuronsPop(targetPop) / currentContributionsToRecord.at(targetPop)
+                                            << recordedNeuron * neurons->GetNeuronsPop(targetPop) /
+                                                 currentContributionsToRecord.at(targetPop)
                                             << "\t";
     }
   }
@@ -633,12 +639,12 @@ void Recorder::WriteDataHeaderSynapseStates() {
   this->fileStreams.synStatesFileStream << synapses->GetDataHeader(2);
   this->fileStreams.synStatesFileStream << "t\t" << synapses->GetUnhashedDataHeader() << "\n";
   this->fileStreams.synStatesFileStream
-      << "# Attention, Synaptic state data is spike-induced : at each time step, only synapses from which the presynaptic neuron has spiked are measured. Data only tested for CurrentSynapse and MongilloSynapse\n";
+    << "# Attention, Synaptic state data is spike-induced : at each time step, only synapses from which the presynaptic neuron has spiked "
+       "are measured. Data only tested for CurrentSynapse and MongilloSynapse\n";
   this->fileStreams.synStatesFileStream << "#************************************" << std::endl;
 }
 
 void Recorder::WriteDataHeaderHeteroSynapses() {
-
   if (!recordHeteroSynapses) {
     return;
   }
@@ -681,7 +687,6 @@ void Recorder::WriteDataHeaderHeteroSynapses() {
 }
 
 void Recorder::WriteDataHeaderHeteroSynapsesOverall() {
-
   if (!recordHeteroSynapses) {
     return;
   }
@@ -752,7 +757,8 @@ void Recorder::ResetStatistics() {
     for (PopInt sourcePop : std::ranges::views::iota(0, totalNeuronPops)) {
       // currentBin.noRecordedSynapses.at(neuronPop)[neuronPop2] = 0;
       // currentBin.synapticState.at(neuronPop).at(sourcePop)       = 0.0;
-      std::fill(currentBin.synapticState.at(neuronPop).at(sourcePop).begin(), currentBin.synapticState.at(neuronPop).at(sourcePop).end(), 0.0);
+      std::fill(currentBin.synapticState.at(neuronPop).at(sourcePop).begin(), currentBin.synapticState.at(neuronPop).at(sourcePop).end(),
+                0.0);
     }
     if (recordedHeatmap != 0) {
       std::fill(currentBin.heatmap.at(neuronPop).begin(), currentBin.heatmap.at(neuronPop).end(), 0.0);
@@ -761,15 +767,14 @@ void Recorder::ResetStatistics() {
 }
 
 void Recorder::RecordRasterplot() {
-
   if (!recordRasterPlot || infoGlobal->timeStep < startRecordingTime) {
     return;
   }
 
   double dtTimestep = infoGlobal->dtTimestep;
   // int				first_id;
-  NeuronInt neuronsToRecord; // number of neurons to record
-  NeuronInt totalNeurons;    // number of neurons in population
+  NeuronInt neuronsToRecord;  // number of neurons to record
+  NeuronInt totalNeurons;     // number of neurons in population
 
   for (PopInt neuronPop : std::ranges::views::iota(0, neurons->GetTotalPopulations())) {
     neuronsToRecord = noRasterPlotNeurons.at(neuronPop);
@@ -781,16 +786,15 @@ void Recorder::RecordRasterplot() {
 
     for (const NeuronInt spikerID : spikerVector) {
       if (spikerID == std::lround((static_cast<double>(totalNeurons) / neuronsToRecord) *
-                                  std::lround(static_cast<double>(neuronsToRecord * spikerID) / totalNeurons))) { // WTH is this
-        this->fileStreams.rasterplotFileStream << static_cast<double>(infoGlobal->timeStep) * dtTimestep << "\t" << spikerID << "\t" << neuronPop
-                                               << "\n";
+                                  std::lround(static_cast<double>(neuronsToRecord * spikerID) / totalNeurons))) {  // WTH is this
+        this->fileStreams.rasterplotFileStream << static_cast<double>(infoGlobal->timeStep) * dtTimestep << "\t" << spikerID << "\t"
+                                               << neuronPop << "\n";
       }
     }
   }
 }
 
 void Recorder::RecordCurrents(const std::vector<std::vector<double>> &synaptic_dV) {
-
   if (!recordNeuronPotentials) {
     return;
   }
@@ -809,7 +813,6 @@ void Recorder::RecordCurrents(const std::vector<std::vector<double>> &synaptic_d
 }
 
 void Recorder::RecordPotential() {
-
   if (!recordNeuronPotentials) {
     return;
   }
@@ -828,27 +831,26 @@ void Recorder::RecordPotential() {
 }
 
 void Recorder::RecordCurrentContributions(const std::vector<std::vector<double>> &synaptic_dV) {
-
   if (!recordCurrentContributions || infoGlobal->timeStep < initialCurrent) {
     return;
   }
 
   PopInt    totalNeuronPops = neurons->GetTotalPopulations();
-  NeuronInt indexMemory{};
+  NeuronInt indexMemory {};
 
   for (PopInt targetPop : std::ranges::views::iota(0, totalNeuronPops)) {
     for (PopInt sourcePop : std::ranges::views::iota(0, totalNeuronPops)) {
       for (NeuronInt recordedNeuron : std::ranges::views::iota(0, currentContributionsToRecord.at(targetPop))) {
         if (synapses->GetConnectedState(targetPop, sourcePop)) {
           currentContrBin.at(static_cast<size_t>(recordedNeuron) + static_cast<size_t>(indexMemory)) += synapses->GetRecurrentInput(
-              targetPop, sourcePop, (recordedNeuron * neurons->GetNeuronsPop(targetPop) / currentContributionsToRecord.at(targetPop)));
+            targetPop, sourcePop, (recordedNeuron * neurons->GetNeuronsPop(targetPop) / currentContributionsToRecord.at(targetPop)));
         }
       }
       indexMemory += currentContributionsToRecord.at(targetPop);
     }
     for (NeuronInt recordedNeuron : std::ranges::views::iota(0, currentContributionsToRecord.at(targetPop))) {
       currentContrBin.at(static_cast<size_t>(recordedNeuron) + static_cast<size_t>(indexMemory)) += stimulus->GetSignalMatrixPoint(
-          targetPop, (recordedNeuron * neurons->GetNeuronsPop(targetPop) / currentContributionsToRecord.at(targetPop)));
+        targetPop, (recordedNeuron * neurons->GetNeuronsPop(targetPop) / currentContributionsToRecord.at(targetPop)));
     }
     indexMemory += currentContributionsToRecord.at(targetPop);
   }
@@ -864,8 +866,7 @@ void Recorder::RecordCurrentContributions(const std::vector<std::vector<double>>
 }
 
 void Recorder::RecordSynapseStates() {
-
-  PopInt totalNeuronPops{neurons->GetTotalPopulations()};
+  PopInt totalNeuronPops { neurons->GetTotalPopulations() };
 
   if (!trackSynapses) {
     return;
@@ -882,7 +883,8 @@ void Recorder::RecordSynapseStates() {
                            recordedValue / static_cast<double>(currentBin.noRecordedSynapses.at(targetPop).at(sourcePop)), 6);
           }
         } else {
-          for (signed dataLength : std::ranges::views::iota(0, static_cast<signed>(currentBin.synapticState.at(targetPop).at(sourcePop).size()))) {
+          for (signed dataLength :
+               std::ranges::views::iota(0, static_cast<signed>(currentBin.synapticState.at(targetPop).at(sourcePop).size()))) {
             (void)dataLength;
             SaveDoubleFile(this->fileStreams.synStatesFileStream, NAN, 6);
             // SaveDoubleFile(this->fileStreams.synStatesFileStream,0,6);
@@ -895,10 +897,9 @@ void Recorder::RecordSynapseStates() {
 }
 
 void Recorder::RecordAverages() {
-
   PopInt noTotalPopulations = neurons->GetTotalPopulations();
-  double timeBinSize{static_cast<double>(this->timeStepsPerBin) * infoGlobal->dtTimestep};
-  double binSizeInSteps{static_cast<double>(timeStepsPerBin)};
+  double timeBinSize { static_cast<double>(this->timeStepsPerBin) * infoGlobal->dtTimestep };
+  double binSizeInSteps { static_cast<double>(timeStepsPerBin) };
   double noNeurons;
 
   std::vector<double> means(noTotalPopulations, 0.0);
@@ -909,7 +910,7 @@ void Recorder::RecordAverages() {
     for (NeuronInt neuron : std::ranges::views::iota(0, neurons->GetNeuronsPop(neuronPop))) {
       means.at(neuronPop) += currentBin.neuronTotalCurrentMean.at(neuronPop).at(neuron) / (noNeurons * binSizeInSteps);
       popAveraged_SquaredMeanTime.at(neuronPop) += pow(currentBin.neuronTotalCurrentMean.at(neuronPop).at(neuron) / binSizeInSteps, 2) /
-                                                   noNeurons; // population average over square of temporal average [(I_alpha^i)^2]
+                                                   noNeurons;  // population average over square of temporal average [(I_alpha^i)^2]
     }
   }
 
@@ -947,14 +948,15 @@ void Recorder::RecordAverages() {
 
     // Quenched fluctuations (due to varying input over population)
     for (PopInt neuronPop : std::ranges::views::iota(0, noTotalPopulations)) {
-      SaveDoubleFile(this->fileStreams.averagesFileStream, sqrt(popAveraged_SquaredMeanTime.at(neuronPop) - pow(means.at(neuronPop), 2)), 3);
+      SaveDoubleFile(this->fileStreams.averagesFileStream, sqrt(popAveraged_SquaredMeanTime.at(neuronPop) - pow(means.at(neuronPop), 2)),
+                     3);
     }
 
     // Temporal fluctuations
     for (PopInt neuronPop : std::ranges::views::iota(0, noTotalPopulations)) {
       SaveDoubleFile(this->fileStreams.averagesFileStream,
                      sqrt(currentBin.totalCurrentSquared_mean.at(neuronPop) / binSizeInSteps - popAveraged_SquaredMeanTime.at(neuronPop)) *
-                         infoGlobal->dtSqrt,
+                       infoGlobal->dtSqrt,
                      3);
     }
 
@@ -964,7 +966,6 @@ void Recorder::RecordAverages() {
 }
 //
 void Recorder::RecordHeatmap() {
-
   if (recordedHeatmap == 0) {
     return;
   }
@@ -987,7 +988,6 @@ void Recorder::RecordHeatmap() {
 }
 
 void Recorder::RecordHeteroSynapses() {
-
   if (!recordHeteroSynapses) {
     return;
   }
@@ -1022,7 +1022,8 @@ void Recorder::RecordHeteroSynapsesOverall() {
       continue;
     }
     for (NeuronInt neuron : std::ranges::views::iota(0, heteroSynTracker.at(neuronPop).first)) {
-      SaveTupleOfDoublesFile(this->fileStreams.hSOverallFileStream, this->neurons->GetcPopPtr(neuronPop)->GetOverallSynapticProfile(neuron), 5);
+      SaveTupleOfDoublesFile(this->fileStreams.hSOverallFileStream, this->neurons->GetcPopPtr(neuronPop)->GetOverallSynapticProfile(neuron),
+                             5);
       // Here is selecting only the average weight per neuron, with precision 5 digits.
     }
   }
@@ -1038,22 +1039,25 @@ void Recorder::Record(const std::vector<std::vector<double>> &synaptic_dV) {
     for (NeuronInt neuron : std::ranges::views::iota(0, neurons->GetNeuronsPop(neuronPop))) {
       noNeurons = static_cast<double>(this->neurons->GetNeuronsPop(neuronPop));
       currentBin.potential.at(neuronPop) += this->neurons->GetPotential(neuronPop, neuron) / noNeurons;
-      currentBin.externalCurrent.at(neuronPop) += this->stimulus->GetSignalMatrixPoint(neuronPop, neuron) / (noNeurons * infoGlobal->dtTimestep);
-      currentBin.totalCurrentSquared_mean.at(neuronPop) += pow(synaptic_dV.at(neuronPop).at(neuron) / infoGlobal->dtTimestep, 2.0) / noNeurons;
+      currentBin.externalCurrent.at(neuronPop) +=
+        this->stimulus->GetSignalMatrixPoint(neuronPop, neuron) / (noNeurons * infoGlobal->dtTimestep);
+      currentBin.totalCurrentSquared_mean.at(neuronPop) +=
+        pow(synaptic_dV.at(neuronPop).at(neuron) / infoGlobal->dtTimestep, 2.0) / noNeurons;
       // record per neuron
       currentBin.neuronTotalCurrentMean.at(neuronPop).at(neuron) += synaptic_dV.at(neuronPop).at(neuron) / infoGlobal->dtTimestep;
     }
   }
   for (PopInt sourcePop : std::ranges::views::iota(0, totalNeuronPops)) {
     const std::vector<NeuronInt> &spikers = this->neurons->GetSpikersPrevDt(sourcePop);
-    currentBin.spikerRatio.at(sourcePop) += static_cast<double>(spikers.size()) / static_cast<double>(this->neurons->GetNeuronsPop(sourcePop));
+    currentBin.spikerRatio.at(sourcePop) +=
+      static_cast<double>(spikers.size()) / static_cast<double>(this->neurons->GetNeuronsPop(sourcePop));
     if (recordedHeatmap != 0) {
       if (infoGlobal->dimensions == 2) {
         std::for_each(PAR_UNSEQ, spikers.begin(), spikers.end(), [this, sourcePop](double spiker) {
           double Xbin = static_cast<int>(neurons->GetXPosition(sourcePop, spiker) * recordedHeatmap / infoGlobal->xAxisLength);
           double Ybin = static_cast<int>(neurons->GetYPosition(sourcePop, spiker) * recordedHeatmap / infoGlobal->yAxisLength);
           currentBin.heatmap.at(sourcePop).at(static_cast<size_t>(recordedHeatmap) * Ybin + Xbin) +=
-              1 / static_cast<double>(densimap.at(sourcePop).at(static_cast<size_t>(recordedHeatmap) * Ybin + Xbin));
+            1 / static_cast<double>(densimap.at(sourcePop).at(static_cast<size_t>(recordedHeatmap) * Ybin + Xbin));
         });
         // for (NeuronInt spiker : spikers) {
         // 	Xbin = static_cast<int>(neurons->GetXPosition(sourcePop, spiker) * recordedHeatmap / infoGlobal->xAxisLength);
@@ -1075,8 +1079,8 @@ void Recorder::Record(const std::vector<std::vector<double>> &synaptic_dV) {
     for (PopInt targetPop : std::ranges::views::iota(0, totalNeuronPops)) {
       if (synapses->GetConnectedState(targetPop, sourcePop)) {
         currentBin.synapticCurrents.at(targetPop).at(sourcePop) +=
-            (this->synapses->GetCumulatedDV(targetPop, sourcePop) / static_cast<double>(this->neurons->GetNeuronsPop(targetPop))) /
-            infoGlobal->dtTimestep;
+          (this->synapses->GetCumulatedDV(targetPop, sourcePop) / static_cast<double>(this->neurons->GetNeuronsPop(targetPop))) /
+          infoGlobal->dtTimestep;
       }
     }
     if (!trackSynapses) {
@@ -1085,12 +1089,12 @@ void Recorder::Record(const std::vector<std::vector<double>> &synaptic_dV) {
     for (NeuronInt spiker : spikers) {
       for (PopInt targetPop : std::ranges::views::iota(0, totalNeuronPops)) {
         if (synapses->GetConnectedState(targetPop, sourcePop)) {
-          std::vector<double> synapticState{this->synapses->GetSynapticState(targetPop, sourcePop, spiker)};
+          std::vector<double> synapticState { this->synapses->GetSynapticState(targetPop, sourcePop, spiker) };
           std::transform(PAR_UNSEQ, currentBin.synapticState.at(targetPop).at(sourcePop).begin(),
                          currentBin.synapticState.at(targetPop).at(sourcePop).end(), synapticState.begin(),
                          currentBin.synapticState.at(targetPop).at(sourcePop).begin(), std::plus<double>());
-          // currentBin.synapticState.at(targetPop).at(sourcePop) += this->synapses->GetSynapticState(targetPop, sourcePop, spiker);//not valid with
-          // vectors
+          // currentBin.synapticState.at(targetPop).at(sourcePop) += this->synapses->GetSynapticState(targetPop, sourcePop, spiker);//not
+          // valid with vectors
           currentBin.noRecordedSynapses.at(targetPop).at(sourcePop) += this->synapses->GetNoTargetedNeurons(targetPop, sourcePop, spiker);
         }
         // std::cout << "Synapse " << std::to_string(prePop) << " to " << std::to_string(post_population) << " at time " <<
@@ -1099,7 +1103,8 @@ void Recorder::Record(const std::vector<std::vector<double>> &synaptic_dV) {
         // for(signed int i_data = 0; i_data<currentBin.synapticState[post_population][prePop].size(); i_data++){
         // //std::cout << std::to_string(currentBin.synapticState[post_population][prePop][i_data]) << " ";
         // //std::cout <<
-        // std::to_string(currentBin.synapticState[post_population][prePop][i_data]/currentBin.noRecordedSynapses[post_population][prePop]) << "\n";
+        // std::to_string(currentBin.synapticState[post_population][prePop][i_data]/currentBin.noRecordedSynapses[post_population][prePop])
+        // << "\n";
         // }
       }
     }

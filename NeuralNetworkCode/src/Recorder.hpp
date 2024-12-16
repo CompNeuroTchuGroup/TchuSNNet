@@ -2,13 +2,13 @@
 #define Recorder_HPP
 
 // #define _CRT_SECURE_NO_WARNINGS
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
 #include "./GlobalFunctions.hpp"
 #include "NeuronPopSample.hpp"
 #include "Stimulus/Stimulus.hpp"
 #include "SynapseSample.hpp"
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <time.h>
 #ifdef _WIN32
 #include <direct.h>
 // #elif __APPLE__
@@ -20,134 +20,133 @@
 
 #include <chrono>
 
-
 class Recorder {
-  friend class DatafileParser;
+    friend class DatafileParser;
 
-protected:
-  static constexpr size_t recordBufferSize{131072}; // Do not change, optimal buffer size for data recording
+  protected:
+    static constexpr size_t recordBufferSize { 131072 };  // Do not change, optimal buffer size for data recording
 
-  GlobalSimInfo *infoGlobal;
+    GlobalSimInfo *infoGlobal;
 
-  std::string simulationTitle;
-  std::string nonIterateTitle;
-  std::string directoryPath;
-  std::string dateTime;
+    std::string simulationTitle;
+    std::string nonIterateTitle;
+    std::string directoryPath;
+    std::string dateTime;
 
-  std::shared_ptr<const NeuronPopSample> neurons;
-  std::shared_ptr<const SynapseSample>   synapses;
-  std::shared_ptr<const Stimulus>        stimulus;
+    std::shared_ptr<const NeuronPopSample> neurons;
+    std::shared_ptr<const SynapseSample>   synapses;
+    std::shared_ptr<const Stimulus>        stimulus;
 
-  int       timeStepsPerBin{};
-  NeuronInt noNeuronsConnectivity{};
-  NeuronInt noNeuronsDelay{};
-  NeuronInt noNeuronsJPot{};
-  // AdvRecorder parameters
-  bool parserEnabled{false};
-  bool trackSynapses{false}; //, writeHistogram;
-  int  recordedHeatmap{0};
-  int  initialCurrent{0};
-  int  startRecordingTime{0};
+    int       timeStepsPerBin {};
+    NeuronInt noNeuronsConnectivity {};
+    NeuronInt noNeuronsDelay {};
+    NeuronInt noNeuronsJPot {};
+    // AdvRecorder parameters
+    bool parserEnabled { false };
+    bool trackSynapses { false };  //, writeHistogram;
+    int  recordedHeatmap { 0 };
+    int  initialCurrent { 0 };
+    int  startRecordingTime { 0 };
 
-  std::vector<NeuronInt>           neuronPotentialsToRecord;
-  bool                             recordNeuronPotentials{false};
-  std::vector<NeuronInt>           noRasterPlotNeurons;
-  bool                             recordRasterPlot{false};
-  std::vector<NeuronInt>           currentContributionsToRecord;
-  bool                             recordCurrentContributions{false};
-  std::vector<std::vector<double>> densimap; // Number of neurons [of population i][in each pixel] //Is densimap necessary?
-  std::vector<double>              currentContrBin;
-  // statistics per time step
-  binData currentBin;
+    std::vector<NeuronInt>           neuronPotentialsToRecord;
+    bool                             recordNeuronPotentials { false };
+    std::vector<NeuronInt>           noRasterPlotNeurons;
+    bool                             recordRasterPlot { false };
+    std::vector<NeuronInt>           currentContributionsToRecord;
+    bool                             recordCurrentContributions { false };
+    std::vector<std::vector<double>> densimap;  // Number of neurons [of population i][in each pixel] //Is densimap necessary?
+    std::vector<double>              currentContrBin;
+    // statistics per time step
+    binData currentBin;
 
-  std::vector<std::pair<NeuronInt, signed long>> heteroSynTracker; //
-  bool                                           recordHeteroSynapses{false};
-  RecorderOpenStreams                            fileStreams;
+    std::vector<std::pair<NeuronInt, signed long>> heteroSynTracker;  //
+    bool                                           recordHeteroSynapses { false };
+    RecorderOpenStreams                            fileStreams;
 
-  TStepInt heteroRecordPerSteps{10};
+    TStepInt heteroRecordPerSteps { 10 };
 
-  void ResetStatistics(); // Resets all containers.
+    void ResetStatistics();  // Resets all containers.
 
-  // Record functions
-  void RecordPotential();
-  void RecordRasterplot();
-  void RecordCurrents(const std::vector<std::vector<double>> &synaptic_dV);
-  void RecordAverages();
-  void RecordSynapseStates();
-  void RecordHeatmap();
-  void RecordCurrentContributions(const std::vector<std::vector<double>> &synaptic_dV);
-  void RecordHeteroSynapses();
-  void RecordHeteroSynapsesOverall();
+    // Record functions
+    void RecordPotential();
+    void RecordRasterplot();
+    void RecordCurrents(const std::vector<std::vector<double>> &synaptic_dV);
+    void RecordAverages();
+    void RecordSynapseStates();
+    void RecordHeatmap();
+    void RecordCurrentContributions(const std::vector<std::vector<double>> &synaptic_dV);
+    void RecordHeteroSynapses();
+    void RecordHeteroSynapsesOverall();
 
-  // WriteDataHeader functions
-  void WriteDataHeaderCurrents();
-  void WriteDataHeaderRasterplot();
-  void WriteDataHeaderAverages();
-  void WriteDataHeaderSynapseStates();
-  void WriteDataHeaderPotential();
-  void WriteDataHeaderHeatmap();
-  void WriteDataHeaderCurrentsContribution();
-  void WriteDataHeaderHeteroSynapses();
-  void WriteDataHeaderHeteroSynapsesOverall();
+    // WriteDataHeader functions
+    void WriteDataHeaderCurrents();
+    void WriteDataHeaderRasterplot();
+    void WriteDataHeaderAverages();
+    void WriteDataHeaderSynapseStates();
+    void WriteDataHeaderPotential();
+    void WriteDataHeaderHeatmap();
+    void WriteDataHeaderCurrentsContribution();
+    void WriteDataHeaderHeteroSynapses();
+    void WriteDataHeaderHeteroSynapsesOverall();
 
-  void SetNoRasterplotNeurons(const std::vector<std::string> &parameterValues);
-  void SetNoRecordedNeuronPotentials(const std::vector<std::string> &parameterValues);
-  void SetNoCurrentContribution(const std::vector<std::string> &parameterValues);
-  void SetNoRecordedHeteroSynapticProfilesPerTrackedNeuronPerPop(const std::vector<std::string> &parameterValues);
+    void SetNoRasterplotNeurons(const std::vector<std::string> &parameterValues);
+    void SetNoRecordedNeuronPotentials(const std::vector<std::string> &parameterValues);
+    void SetNoCurrentContribution(const std::vector<std::string> &parameterValues);
+    void SetNoRecordedHeteroSynapticProfilesPerTrackedNeuronPerPop(const std::vector<std::string> &parameterValues);
 
-  void SetAveragingSteps(double secondsPerBin);
-  void BindNoHeteroSynapsesPerPop(PopInt neuronPop);
+    void SetAveragingSteps(double secondsPerBin);
+    void BindNoHeteroSynapsesPerPop(PopInt neuronPop);
 
-  void AllocateAndAssignStreamBuffer(std::ofstream &outputStream);
+    void AllocateAndAssignStreamBuffer(std::ofstream &outputStream);
 
-public:
-  Recorder(const std::shared_ptr<NeuronPopSample> neurons, const std::shared_ptr<SynapseSample> synapses, const std::shared_ptr<Stimulus> stimulus,
-           std::string baseDirectory, std::vector<FileEntry> inputParameters, std::string titleString, std::string nonIterateTitle,
-           GlobalSimInfo *infoGlobal);
-  ~Recorder() = default;
+  public:
+    Recorder(std::shared_ptr<const NeuronPopSample> neurons, std::shared_ptr<const SynapseSample> synapses,
+             std::shared_ptr<const Stimulus> stimulus, std::string baseDirectory, std::vector<FileEntry> inputParameters,
+             std::string titleString, std::string nonIterateTitle, GlobalSimInfo *infoGlobal);
+    ~Recorder() = default;
 
-  void WriteDataHeader();
-  void WriteFinalDataFile(std::chrono::seconds setupTime, std::chrono::seconds simulationTime);
-  void Record(const std::vector<std::vector<double>> &synapticInput);
+    void WriteDataHeader();
+    void WriteFinalDataFile(std::chrono::seconds setupTime, std::chrono::seconds simulationTime);
+    void Record(const std::vector<std::vector<double>> &synapticInput);
 
-  //***** Set-Functions *****
+    //***** Set-Functions *****
 
-  void SetFilenameDate();
+    void SetFilenameDate();
 
-  //**** Get-Functions *****
-  int         GetAveragingSteps() const { return timeStepsPerBin; }
-  std::string GetDirectoryPath() const { return this->directoryPath + simulationTitle; }
-  std::string GetDataFilename() const { return this->directoryPath + simulationTitle + "_Data.dat"; }
-  std::string GetParametersFilename() const { return this->directoryPath + simulationTitle + "_Parameters.txt"; }
-  std::string GetParameterOptionsFilename() const { return this->directoryPath + "ParameterOptions.txt"; }
-  std::string GetConnectivityFilename() const { return this->directoryPath + simulationTitle + "_Connectivity_Matrix"; }
-  std::string GetDelayFilename() const { return this->directoryPath + simulationTitle + "_DelayConnectivity_Matrix"; }
-  std::string GetJPotFilename() const { return this->directoryPath + simulationTitle + "_JPotConnectivity_Matrix"; }
-  std::string GetHeatmapFilename() const { return this->directoryPath + simulationTitle + "_HeatmapRate_Pop"; }
-  std::string GetTitle() const { return simulationTitle; }
-  // Legacy advanced recorder: get functions
-  std::string GetRasterplotFilename() const { return this->directoryPath + simulationTitle + "_Rasterplot.dat"; }
-  std::string GetCurrentsFilename() const { return this->directoryPath + simulationTitle + "_Currents.dat"; }
-  std::string GetPotentialFilename() const { return this->directoryPath + simulationTitle + "_Potential.dat"; }
-  std::string GetSynapseStateFilename() const { return this->directoryPath + simulationTitle + "_Synapses.dat"; }
-  std::string GetCurrentCrontributionFilename() const { return this->directoryPath + simulationTitle + "_CurrentContribution.dat"; }
-  std::string GetHeteroSynapseStateFilename() const { return this->directoryPath + simulationTitle + "_HeteroSynapses.dat"; }
-  std::string GetOverallHeteroSynapseStateFilename() const { return this->directoryPath + simulationTitle + "_OverallHS.dat"; }
-  // std::string GetHeteroBranchedSynapseStateFilename() const { return this->directoryPath + simulationTitle + "_BranchedHS.dat"; }
-  std::string GetSteadyStatesFilename() const { return this->directoryPath + simulationTitle + "_steadyStates.dat"; }
+    //**** Get-Functions *****
+    int         GetAveragingSteps() const { return timeStepsPerBin; }
+    std::string GetDirectoryPath() const { return this->directoryPath + simulationTitle; }
+    std::string GetDataFilename() const { return this->directoryPath + simulationTitle + "_Data.dat"; }
+    std::string GetParametersFilename() const { return this->directoryPath + simulationTitle + "_Parameters.txt"; }
+    std::string GetParameterOptionsFilename() const { return this->directoryPath + "ParameterOptions.txt"; }
+    std::string GetConnectivityFilename() const { return this->directoryPath + simulationTitle + "_Connectivity_Matrix"; }
+    std::string GetDelayFilename() const { return this->directoryPath + simulationTitle + "_DelayConnectivity_Matrix"; }
+    std::string GetJPotFilename() const { return this->directoryPath + simulationTitle + "_JPotConnectivity_Matrix"; }
+    std::string GetHeatmapFilename() const { return this->directoryPath + simulationTitle + "_HeatmapRate_Pop"; }
+    std::string GetTitle() const { return simulationTitle; }
+    // Legacy advanced recorder: get functions
+    std::string GetRasterplotFilename() const { return this->directoryPath + simulationTitle + "_Rasterplot.dat"; }
+    std::string GetCurrentsFilename() const { return this->directoryPath + simulationTitle + "_Currents.dat"; }
+    std::string GetPotentialFilename() const { return this->directoryPath + simulationTitle + "_Potential.dat"; }
+    std::string GetSynapseStateFilename() const { return this->directoryPath + simulationTitle + "_Synapses.dat"; }
+    std::string GetCurrentCrontributionFilename() const { return this->directoryPath + simulationTitle + "_CurrentContribution.dat"; }
+    std::string GetHeteroSynapseStateFilename() const { return this->directoryPath + simulationTitle + "_HeteroSynapses.dat"; }
+    std::string GetOverallHeteroSynapseStateFilename() const { return this->directoryPath + simulationTitle + "_OverallHS.dat"; }
+    // std::string GetHeteroBranchedSynapseStateFilename() const { return this->directoryPath + simulationTitle + "_BranchedHS.dat"; }
+    std::string GetSteadyStatesFilename() const { return this->directoryPath + simulationTitle + "_steadyStates.dat"; }
 
-  void LoadParameters(const std::vector<FileEntry> &input);
-  void SaveParameters(std::ofstream &stream) const;
+    void LoadParameters(const std::vector<FileEntry> &input);
+    void SaveParameters(std::ofstream &stream) const;
 
-  void CloseStreams();
+    void CloseStreams();
 
-  void WriteHeader(std::ofstream &fileStream) const;
-  void WriteConnectivity() const;
-  void WriteDistributionD() const;
-  void WriteDistributionJ() const;
-  void WriteSteadyStates() const;
+    void WriteHeader(std::ofstream &fileStream) const;
+    void WriteConnectivity() const;
+    void WriteDistributionD() const;
+    void WriteDistributionJ() const;
+    void WriteSteadyStates() const;
 
-  void MakeInputCopies(const std::string &filename) const;
+    void MakeInputCopies(const std::string &filename) const;
 };
 
 #endif /* Recorder_HPP */
