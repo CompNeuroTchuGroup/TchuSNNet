@@ -1,7 +1,7 @@
 #*****************************************************************
-# Time and Title: 2020_10_14_12-16-54 -- BrunelFigD
+# Time and Title: 2020_10_14_12-16-54 -- Test2
 #*****************************************************************
-Title                       Test2
+Title                       Test2 			# Acts as prefix for the iterate title parameter sets
 #*****************************************************************
 simulationTime              1.200000 		#seconds
 dt_timestep                          0.000100 		#seconds
@@ -129,7 +129,7 @@ synapses_1_1_connectivity_type				RandomConnectivity
 synapses_1_1_connectivity_ConnectionProba	0.100000
 synapses_1_1_connectivity_seed				0
 #		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
-iterate_1 Title Test2_BrunelFigA Test2_BrunelFigB Test2_BrunelFigC Test2_BrunelFigD
+iterate_1 Title BrunelFigA BrunelFigB BrunelFigC BrunelFigD
 iterate_1 simulationTime 0.600000 1.200000 1.200000 1.200000
 iterate_1 stimulus_step_1 10.000000 20.000000 10.000000 40.000000 10.000000 20.000000 10.000000 9.000000
 iterate_1 stimulus_step_2 0.000000 20.00000 0.000000 40.000000 0.000000 20.000000 0.000000 9.000000
