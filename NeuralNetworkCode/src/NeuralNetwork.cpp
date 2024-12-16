@@ -12,7 +12,6 @@ NeuralNetwork::NeuralNetwork(std::string baseDirectory, std::vector<FileEntry> p
 }
 
 void NeuralNetwork::SaveParameters() const {
-
   // if this test file does not appear in the target directory: stop the
   // simulation and check the directoryPath.
 
@@ -40,14 +39,15 @@ void NeuralNetwork::SaveParameters() const {
   wParameterStream << "#*****************************************************************\n";
   wParameterStream << "scalingSynapticStrength     " << std::to_string(infoGlobal.networkScaling_synStrength)
                    << "\t\t#Scaling exponent. Set = 0 if no scaling needed, otherwise typical exponent is -0.5.\n";
+  wParameterStream << "scaling_C_N                 " << std::to_string(infoGlobal.networkScaling_mode)
+                   << "\t\t\t\t# Set = 0 to scale with number of presynaptic neurons C. Set = 1 to scale with total number of neurons N. "
+                      "(details below) \n";
+  wParameterStream << "#\t\tscaling_C_N=0    scales internal synaptic strengths and UncorrelatedStimulus with C^s    and    "
+                      "WhiteNoiseStimulus and SpatialGaussianStimulus with 1 \n";
+  wParameterStream << "#\t\tscaling_C_N=1    scales internal synaptic strengths and UncorrelatedStimulus with N^s    and    "
+                      "WhiteNoiseRescaled and SpatialGaussianStimulus with N^(-s) \n";
   wParameterStream
-      << "scaling_C_N                 " << std::to_string(infoGlobal.networkScaling_mode)
-      << "\t\t\t\t# Set = 0 to scale with number of presynaptic neurons C. Set = 1 to scale with total number of neurons N. (details below) \n";
-  wParameterStream
-      << "#\t\tscaling_C_N=0    scales internal synaptic strengths and UncorrelatedStimulus with C^s    and    WhiteNoiseStimulus and SpatialGaussianStimulus with 1 \n";
-  wParameterStream
-      << "#\t\tscaling_C_N=1    scales internal synaptic strengths and UncorrelatedStimulus with N^s    and    WhiteNoiseRescaled and SpatialGaussianStimulus with N^(-s) \n";
-  wParameterStream << "#\t\tscalingSynapticStrength = s, N = number of neurons from all populations, C = average number of presynaptic neurons.\n";
+    << "#\t\tscalingSynapticStrength = s, N = number of neurons from all populations, C = average number of presynaptic neurons.\n";
 
   this->neurons->SaveParameters(wParameterStream);
   this->stimulus->SaveParameters(wParameterStream);
@@ -58,7 +58,8 @@ void NeuralNetwork::SaveParameters() const {
   wParameterStream.close();
 }
 
-void NeuralNetwork::SaveParameterOptions() const { // This function should have stuff moved to the heap (and deleted at the end of the function)
+void NeuralNetwork::SaveParameterOptions()
+  const {  // This function should have stuff moved to the heap (and deleted at the end of the function)
   // return;//SaveParameteroptions is disabled
   std::cout << recorder->GetParameterOptionsFilename() << std::endl;
   std::ofstream streamPOptions(recorder->GetParameterOptionsFilename());
@@ -67,7 +68,7 @@ void NeuralNetwork::SaveParameterOptions() const { // This function should have 
   mockInfo.isMock             = true;
   GlobalSimInfo *mockInfo_ptr = &mockInfo;
   mockInfo_ptr->globalSeed =
-      1; // because many of the classes do not allow a negative seed, the ParameterOptions file is generated with an adapted globalInfo
+    1;  // because many of the classes do not allow a negative seed, the ParameterOptions file is generated with an adapted globalInfo
 
   streamPOptions << "#************************************************************************************************\n";
   streamPOptions << "#*************  Stimulus options     ************************************************************\n";
@@ -91,8 +92,8 @@ void NeuralNetwork::SaveParameterOptions() const { // This function should have 
   std::unique_ptr<WhiteNoiseStimulus> whiteNoiseStimulus = std::make_unique<WhiteNoiseStimulus>(neurons, stimulusString, mockInfo_ptr);
   whiteNoiseStimulus->SaveParameters(streamPOptions);
 
-  // std::unique_ptr<WhiteNoiseRescaled> whiteNoiseRescaledStimulus = std::make_unique<WhiteNoiseRescaled>(neurons, stimulusString,mockInfo_ptr);
-  // whiteNoiseRescaledStimulus->SaveParameters(streamPOptions);
+  // std::unique_ptr<WhiteNoiseRescaled> whiteNoiseRescaledStimulus = std::make_unique<WhiteNoiseRescaled>(neurons,
+  // stimulusString,mockInfo_ptr); whiteNoiseRescaledStimulus->SaveParameters(streamPOptions);
 
   placeholderString = "UncorrelatedStimulus_stimulus_J_X ";
   for (PopInt neuronPop : std::ranges::views::iota(0, neurons->GetTotalPopulations())) {
@@ -100,9 +101,10 @@ void NeuralNetwork::SaveParameterOptions() const { // This function should have 
     placeholderString += std::to_string((static_cast<double>(neurons->GetTotalPopulations()) + 1) / 10) + " ";
   }
   stimulusString.push_back(SplitStringToEntry(placeholderString));
-  stimulusString.push_back(SplitStringToEntry("UncorrelatedStimulus_stimulus_step " + std::to_string(infoGlobal.simulationTime) + " 5.00000"));
+  stimulusString.push_back(
+    SplitStringToEntry("UncorrelatedStimulus_stimulus_step " + std::to_string(infoGlobal.simulationTime) + " 5.00000"));
   std::unique_ptr<UncorrelatedPoissonLikeStimulus> uncorrelatedPoissonStimulus =
-      std::make_unique<UncorrelatedPoissonLikeStimulus>(neurons, stimulusString, mockInfo_ptr);
+    std::make_unique<UncorrelatedPoissonLikeStimulus>(neurons, stimulusString, mockInfo_ptr);
   uncorrelatedPoissonStimulus->SaveParameters(streamPOptions);
 
   std::vector<FileEntry> whiteNoiseLinearStrings;
@@ -126,7 +128,8 @@ void NeuralNetwork::SaveParameterOptions() const { // This function should have 
     placeholderString += "1.0 ";
   }
   whiteNoiseLinearStrings.push_back(SplitStringToEntry(placeholderString + "0.0 " + std::to_string(infoGlobal.simulationTime)));
-  std::unique_ptr<WhiteNoiseLinear> whiteNoiseLinearStimulus = std::make_unique<WhiteNoiseLinear>(neurons, whiteNoiseLinearStrings, mockInfo_ptr);
+  std::unique_ptr<WhiteNoiseLinear> whiteNoiseLinearStimulus =
+    std::make_unique<WhiteNoiseLinear>(neurons, whiteNoiseLinearStrings, mockInfo_ptr);
   whiteNoiseLinearStimulus->SaveParameters(streamPOptions);
 
   std::vector<FileEntry> spatialGaussianStimulusStrings;
@@ -149,7 +152,8 @@ void NeuralNetwork::SaveParameterOptions() const { // This function should have 
     placeholderString += "0.01 ";
   }
   spatialGaussianStimulusStrings.push_back(SplitStringToEntry(placeholderString + std::to_string(infoGlobal.simulationTime)));
-  spatialGaussianStimulusStrings.push_back(SplitStringToEntry("stimulus_sigmaCurrent_x_1          1.0 " + std::to_string(infoGlobal.simulationTime)));
+  spatialGaussianStimulusStrings.push_back(
+    SplitStringToEntry("stimulus_sigmaCurrent_x_1          1.0 " + std::to_string(infoGlobal.simulationTime)));
   placeholderString = "stimulus_maxCurrent_2 ";
   for (PopInt neuronPop : std::ranges::views::iota(0, neurons->GetTotalPopulations())) {
     (void)neuronPop;
@@ -162,7 +166,8 @@ void NeuralNetwork::SaveParameterOptions() const { // This function should have 
     placeholderString += "0.01 ";
   }
   spatialGaussianStimulusStrings.push_back(SplitStringToEntry(placeholderString + std::to_string(infoGlobal.simulationTime)));
-  spatialGaussianStimulusStrings.push_back(SplitStringToEntry("stimulus_sigmaCurrent_x_2          1.0 " + std::to_string(infoGlobal.simulationTime)));
+  spatialGaussianStimulusStrings.push_back(
+    SplitStringToEntry("stimulus_sigmaCurrent_x_2          1.0 " + std::to_string(infoGlobal.simulationTime)));
   placeholderString = "stimulus_Background_Noise ";
   for (PopInt neuronPop : std::ranges::views::iota(0, neurons->GetTotalPopulations())) {
     (void)neuronPop;
@@ -170,7 +175,7 @@ void NeuralNetwork::SaveParameterOptions() const { // This function should have 
   }
   spatialGaussianStimulusStrings.push_back(SplitStringToEntry(placeholderString + std::to_string(infoGlobal.simulationTime)));
   std::unique_ptr<SpatialGaussianStimulus> SpatialGaussianStim =
-      std::make_unique<SpatialGaussianStimulus>(neurons, spatialGaussianStimulusStrings, mockInfo_ptr);
+    std::make_unique<SpatialGaussianStimulus>(neurons, spatialGaussianStimulusStrings, mockInfo_ptr);
   SpatialGaussianStim->SaveParameters(streamPOptions);
 
   stimulusString.push_back(SplitStringToEntry("stimulus_noExternalNeurons   1"));
@@ -192,7 +197,8 @@ void NeuralNetwork::SaveParameterOptions() const { // This function should have 
     placeholderString = placeholderString + std::to_string((static_cast<double>(neuronPop) + 1) / 10) + " ";
   }
   stimulusString.push_back(SplitStringToEntry(placeholderString));
-  std::unique_ptr<SpatialPoissonStimulus> spatialPoissonStimulus = std::make_unique<SpatialPoissonStimulus>(neurons, stimulusString, mockInfo_ptr);
+  std::unique_ptr<SpatialPoissonStimulus> spatialPoissonStimulus =
+    std::make_unique<SpatialPoissonStimulus>(neurons, stimulusString, mockInfo_ptr);
   spatialPoissonStimulus->SaveParameters(streamPOptions);
 
   streamPOptions << "#************************************************************************************************\n";
@@ -223,21 +229,21 @@ void NeuralNetwork::SaveParameterOptions() const { // This function should have 
   std::shared_ptr<CurrentSynapse> synapse_current = std::make_shared<CurrentSynapse>(neuronLIF, neuronLIF, mockInfo_ptr);
 
   std::unique_ptr<RandomConnectivity> geometryRandomConnectivity =
-      std::make_unique<RandomConnectivity>(static_cast<Synapse *>(synapse_current.get()), mockInfo_ptr);
+    std::make_unique<RandomConnectivity>(static_cast<Synapse *>(synapse_current.get()), mockInfo_ptr);
   geometryRandomConnectivity->SaveParameters(streamPOptions, synapseString);
 
   streamPOptions << "#************************************************\n";
   std::unique_ptr<AdjacencyMatrixConnectivity> geometryAdjacencyMatrix =
-      std::make_unique<AdjacencyMatrixConnectivity>(static_cast<Synapse *>(synapse_current.get()), mockInfo_ptr);
+    std::make_unique<AdjacencyMatrixConnectivity>(static_cast<Synapse *>(synapse_current.get()), mockInfo_ptr);
   geometryAdjacencyMatrix->SaveParameters(streamPOptions, synapseString);
 
   streamPOptions << "#************************************************\n";
   std::unique_ptr<PoissonConnectivity> geometryPoissonConnectivity =
-      std::make_unique<PoissonConnectivity>(static_cast<Synapse *>(synapse_current.get()), mockInfo_ptr);
+    std::make_unique<PoissonConnectivity>(static_cast<Synapse *>(synapse_current.get()), mockInfo_ptr);
   geometryPoissonConnectivity->SaveParameters(streamPOptions, synapseString);
   streamPOptions << "#************************************************\n";
   std::unique_ptr<DistanceConnectivity> geometryDistanceConnectivity =
-      std::make_unique<DistanceConnectivity>(static_cast<Synapse *>(synapse_current.get()), mockInfo_ptr);
+    std::make_unique<DistanceConnectivity>(static_cast<Synapse *>(synapse_current.get()), mockInfo_ptr);
   geometryDistanceConnectivity->SaveParameters(streamPOptions, synapseString);
 
   streamPOptions << "#************************************************************************************************\n";
@@ -251,7 +257,7 @@ void NeuralNetwork::SaveParameterOptions() const { // This function should have 
   mongilloSynapse->SaveParameters(streamPOptions, synapseString);
   streamPOptions << "#************************************************\n";
   std::unique_ptr<MongilloSynapseContinuous> mongilloSynapseContinuous =
-      std::make_unique<MongilloSynapseContinuous>(neuronLIF, neuronLIF, mockInfo_ptr);
+    std::make_unique<MongilloSynapseContinuous>(neuronLIF, neuronLIF, mockInfo_ptr);
   mongilloSynapseContinuous->SaveParameters(streamPOptions, synapseString);
   streamPOptions << "#************************************************\n";
   std::unique_ptr<PRGSynapseContinuous> PRGSContinuous = std::make_unique<PRGSynapseContinuous>(neuronLIF, neuronLIF, mockInfo_ptr);
@@ -261,7 +267,7 @@ void NeuralNetwork::SaveParameterOptions() const { // This function should have 
   powerLawSynapse->SaveParameters(streamPOptions, synapseString);
   streamPOptions << "#************************************************\n";
   std::unique_ptr<ExponentialCurrentSynapse> exponentialCurrentSynapse =
-      std::make_unique<ExponentialCurrentSynapse>(neuronLIF, neuronLIF, mockInfo_ptr);
+    std::make_unique<ExponentialCurrentSynapse>(neuronLIF, neuronLIF, mockInfo_ptr);
   exponentialCurrentSynapse->SaveParameters(streamPOptions, synapseString);
   streamPOptions << "#************************************************\n";
   streamPOptions << "#************************************************************************************************\n";
@@ -282,23 +288,22 @@ void NeuralNetwork::SaveParameterOptions() const { // This function should have 
 }
 
 void NeuralNetwork::LoadParameters(std::string baseDirectory, std::vector<FileEntry> &parameterEntries) {
-
   // std::vector<std::string>        parameterEntry.parameterValues;
   // std::vector<std::string>        full_strs,neur_strs,syn_strs,stimulusString,rec_strs;
-  std::string stimulusType; //,neurons_type;
+  std::string stimulusType;  //,neurons_type;
   std::string simulationTitle = "", nonIterateTitle;
-  bool        timestepBool{false};
+  bool        timestepBool { false };
 
   for (FileEntry &parameterEntry : parameterEntries) {
-    parameterEntry.RemoveCommentsInValues();
-    // After this for loop, there is no need to check on # or other comments, they were forcefully removed in parameters
-    if (parameterEntry.parameterName.find("Title") != std::string::npos) {
-      if (parameterEntry.parameterValues.empty()) {
+    // parameterEntry.RemoveCommentsInValues();
+    //  After this for loop, there is no need to check on # or other comments, they were forcefully removed in parameters
+    if (parameterEntry.parameterName.compare(TitleIDString) == 0) {
+      if (parameterEntry.parameterValues.empty()) {  // Should never happen
         simulationTitle = "default";
-        nonIterateTitle = "default";
+        // nonIterateTitle = "default";
       } else {
         simulationTitle = parameterEntry.parameterValues.at(0);
-        nonIterateTitle = parameterEntry.parameterValues.at(1);
+        // nonIterateTitle = parameterEntry.parameterValues.at(1);
       }
     } else if ((parameterEntry.parameterName.find("dt_timestep") != std::string::npos ||
                 parameterEntry.parameterName.find("dt") != std::string::npos) &&
@@ -332,14 +337,16 @@ void NeuralNetwork::LoadParameters(std::string baseDirectory, std::vector<FileEn
       } else {
         infoGlobal.pathToInputFile = parameterEntry.parameterValues.at(0);
       }
+    } else if (parameterEntry.parameterName.find(NonIterateTitleIDString) != std::string::npos) {
+      nonIterateTitle = parameterEntry.parameterValues.at(0);
     }
   }
   infoGlobal.pathToInputFile = infoGlobal.pathToInputFile + nonIterateTitle + "_";
 
-  std::vector<FileEntry> neuronParameters{FilterStringEntries(parameterEntries, "neurons_")};
-  std::vector<FileEntry> synapseParameters{FilterStringEntries(parameterEntries, "synapses_")};
-  std::vector<FileEntry> stimulusParameters{FilterStringEntries(parameterEntries, "stimulus_")};
-  std::vector<FileEntry> recorderParameters{FilterStringEntries(parameterEntries, "recorder_")};
+  std::vector<FileEntry> neuronParameters { FilterStringEntries(parameterEntries, "neurons_") };
+  std::vector<FileEntry> synapseParameters { FilterStringEntries(parameterEntries, "synapses_") };
+  std::vector<FileEntry> stimulusParameters { FilterStringEntries(parameterEntries, "stimulus_") };
+  std::vector<FileEntry> recorderParameters { FilterStringEntries(parameterEntries, "recorder_") };
 
   // assemble vector of lines for classes that are not yet adapted to ParameterEntry structs
   //  for (auto & parEntry : *parEntries) {
@@ -370,28 +377,28 @@ void NeuralNetwork::LoadParameters(std::string baseDirectory, std::vector<FileEn
   synapses = std::make_shared<SynapseSample>(neurons, synapseParameters, &infoGlobal);
 
   if (stimulusType == IDstringUncorrelatedStimulus) {
-    this->stimulus = std::make_shared<UncorrelatedPoissonLikeStimulus>(neurons, stimulusParameters, &infoGlobal); //
+    this->stimulus = std::make_shared<UncorrelatedPoissonLikeStimulus>(neurons, stimulusParameters, &infoGlobal);  //
   } else if (stimulusType == IDstringWhitenoiseStimulus) {
     this->stimulus = std::make_shared<WhiteNoiseStimulus>(neurons, stimulusParameters, &infoGlobal);
   } else if (stimulusType == IDstringWhitenoiseRescaled) {
-    this->stimulus = std::make_shared<WhiteNoiseStimulus>(neurons, stimulusParameters, &infoGlobal); //
+    this->stimulus = std::make_shared<WhiteNoiseStimulus>(neurons, stimulusParameters, &infoGlobal);  //
     if (this->infoGlobal.networkScaling_mode == 0) {
       throw "WhiteNoiseRescaled (legacy) cannot have scaling_C_N = 0";
     }
   } else if (stimulusType == IDstringWhiteNoiseLinear) {
-    this->stimulus = std::make_shared<WhiteNoiseLinear>(neurons, stimulusParameters, &infoGlobal); //
+    this->stimulus = std::make_shared<WhiteNoiseLinear>(neurons, stimulusParameters, &infoGlobal);  //
   } else if (stimulusType == IDstringSpatialGaussianStimulus) {
-    this->stimulus = std::make_shared<SpatialGaussianStimulus>(neurons, stimulusParameters, &infoGlobal); //
+    this->stimulus = std::make_shared<SpatialGaussianStimulus>(neurons, stimulusParameters, &infoGlobal);  //
   } else if (stimulusType == IDstringSpatialPoissonStimulus) {
-    this->stimulus = std::make_shared<SpatialPoissonStimulus>(neurons, stimulusParameters, &infoGlobal); //
-  } else if (stimulusType== "" || stimulusType==IDstringNoStimulus) {
+    this->stimulus = std::make_shared<SpatialPoissonStimulus>(neurons, stimulusParameters, &infoGlobal);  //
+  } else if (stimulusType == "" || stimulusType == IDstringNoStimulus) {
     this->stimulus = std::make_shared<NoStimulus>(neurons, &infoGlobal);
   } else {
     throw "Stimulus type was not properly defined.";
   }
 
-  this->recorder =
-      std::make_shared<Recorder>(neurons, synapses, stimulus, baseDirectory, recorderParameters, simulationTitle, nonIterateTitle, &infoGlobal);
+  this->recorder = std::make_unique<Recorder>(neurons, synapses, stimulus, baseDirectory, recorderParameters, simulationTitle,
+                                              nonIterateTitle, &infoGlobal);
 }
 
 bool NeuralNetwork::WellDefined() const {
@@ -406,16 +413,17 @@ void NeuralNetwork::Simulate() {
   //******************************
   // Declarations & Initialization
   //******************************
-  double                                 timestepProgressRatio{0.0};
+  double                                 timestepProgressRatio { 0.0 };
   std::chrono::seconds                   computationTime;
-  PopInt                                 totalNeuronPops{neurons->GetTotalPopulations()};
+  PopInt                                 totalNeuronPops { neurons->GetTotalPopulations() };
   std::uniform_real_distribution<double> uniformDistribution(0.0, 1.0);
-  TStepInt simSteps{static_cast<TStepInt>(infoGlobal.simulationTime / infoGlobal.dtTimestep)}; // number of simulation time steps
+  TStepInt simSteps { static_cast<TStepInt>(infoGlobal.simulationTime / infoGlobal.dtTimestep) };  // number of simulation time steps
   // int      global_D_max = this->synapses->GetMaxD();          // get maximum delay across all synapses: size of waiting matrix DEPRECATED
 
   std::vector<std::vector<double>> synaptic_dV(totalNeuronPops);
-  for (PopInt neuronPop : std::ranges::views::iota(0, totalNeuronPops))
+  for (PopInt neuronPop : std::ranges::views::iota(0, totalNeuronPops)) {
     synaptic_dV.at(neuronPop).resize(neurons->GetNeuronsPop(neuronPop));
+  }
 
   this->recorder->SetFilenameDate();
   SaveParameters();
@@ -424,8 +432,8 @@ void NeuralNetwork::Simulate() {
   //*****************************************************
   infoGlobal.timeStep = 0;
   // infoGlobal.waitingIndex = 0;
-  auto setupStart{std::chrono::high_resolution_clock::now()};
-  auto intermediateTime{setupStart};
+  auto setupStart { std::chrono::high_resolution_clock::now() };
+  auto intermediateTime { setupStart };
   // Setup
   this->synapses->ConnectNeurons();
   this->recorder->WriteConnectivity();
@@ -450,7 +458,7 @@ void NeuralNetwork::Simulate() {
     // auto t3 = std::chrono::high_resolution_clock::now();
     this->stimulus->Update(synaptic_dV);
     // auto t4 = std::chrono::high_resolution_clock::now();
-    this->neurons->Advect(synaptic_dV); // spikers renewed
+    this->neurons->Advect(synaptic_dV);  // spikers renewed
     // auto t5 = std::chrono::high_resolution_clock::now();
     this->recorder->Record(synaptic_dV);
     // auto t6 = std::chrono::high_resolution_clock::now();
@@ -468,8 +476,8 @@ void NeuralNetwork::Simulate() {
     // std::cout<< "Recorder Record:" << duration.count()<<std::endl;
     /*        double accumulator{};
     for (std::vector<double>& popSynaptic_dV : synaptic_dV) {
-        accumulator = std::accumulate(popSynaptic_dV.begin(), popSynaptic_dV.end(), accumulator, [](double accumulator, double value) {return
-    accumulator + value; });
+        accumulator = std::accumulate(popSynaptic_dV.begin(), popSynaptic_dV.end(), accumulator, [](double accumulator, double value)
+    {return accumulator + value; });
     }
     std::cout << "accumulated syndv: "<<accumulator <<"\n";*/
 
@@ -477,8 +485,8 @@ void NeuralNetwork::Simulate() {
       intermediateTime      = std::chrono::high_resolution_clock::now();
       timestepProgressRatio = (static_cast<double>(infoGlobal.timeStep) / static_cast<double>(simSteps));
       computationTime       = duration_cast<std::chrono::seconds>(intermediateTime - setupStart);
-      std::cout << std::fixed << std::setprecision(1) << timestepProgressRatio * 100 << "%  -- Comp. time: " << computationTime.count() << "/"
-                << static_cast<int>(computationTime.count() / timestepProgressRatio) << " sec. -- " << std::endl;
+      std::cout << std::fixed << std::setprecision(1) << timestepProgressRatio * 100 << "%  -- Comp. time: " << computationTime.count()
+                << "/" << static_cast<int>(computationTime.count() / timestepProgressRatio) << " sec. -- " << std::endl;
     }
 
     infoGlobal.timeStep++;
