@@ -94,7 +94,16 @@ int main(int argc, char *argv[]) {
 
   // Get path to input parameters file and save it in the parameterEntries
   parameterEntries.push_back(SplitStringToEntry("pathToInputFile  " + pathToInputFile));
-  std::for_each(parameterEntries.begin(), parameterEntries.end(), [](FileEntry &entry) { entry.RemoveCommentsInValues(); });
+  // std::for_each(parameterEntries.begin(), parameterEntries.end(), [](FileEntry &entry) { entry.RemoveCommentsInValues(); });
+  for (FileEntry &entry : parameterEntries) {
+    entry.RemoveCommentsInValues();
+  }
+  for (IterableFileEntry &entry : iterate1Entries) {
+    entry.RemoveCommentsInValues();
+  }
+  for (IterableFileEntry &entry : iterate2Entries) {
+    entry.RemoveCommentsInValues();
+  }
   // parameterEntries.push_back(SplitStringToEntry("nonIterateTitle  " + pathToInputFile));
   // Check for consistency Iterate 1: do all entries have the same lenght?
   if (iterate1Entries.empty()) {
@@ -117,19 +126,32 @@ int main(int argc, char *argv[]) {
   //******************************************
   // #pragma omp parallel for collapse(2)
   for (signed int iterate1Index : std::ranges::views::iota(0, MinIterateParameterSize(iterate1Entries))) {
+    // Problem: MinIterableParameterSize assumes that iterate_1 and 2 will contain at least one parameter that has single values (the
+    // Title). For that reason
     for (signed int iterate2Index : std::ranges::views::iota(0, MinIterateParameterSize(iterate2Entries))) {
       std::vector<FileEntry> parameterEntriesCopy = parameterEntries;  // Why is this copy created?
+      std::string            nonIterateTitle;
       std::cout << "******************************************" << std::endl;
       std::cout << "iterate1 = " << iterate1Index + 1 << " , iterate2 = " << iterate2Index + 1 << std::endl;
       for (FileEntry &parEntry : parameterEntriesCopy) {
+        bool titleSet1 { false }, titleSet2 { false };
         // Set parameters for Iterate 1
         for (IterableFileEntry &parameterEntry1 : iterate1Entries) {
           if (parEntry.parameterName.compare(parameterEntry1.parameterName) == 0) {
+            if (parEntry.parameterName.compare(TitleIDString) == 0) {
+              titleSet1       = true;
+              nonIterateTitle = parEntry.parameterValues.at(0);
+            }
             // This loop will allocate the parameters as long as the iterate parameter is consistent with the actual parameter (this
             // requires the parameter be introduced in the params file properly).
             size_t indexMultiplier { IsIterateParamConsistent(parEntry, parameterEntry1) };
             for (size_t index : std::ranges::views::iota(0ull, parEntry.parameterValues.size())) {
-              parEntry.parameterValues.at(index) = parameterEntry1.parameterValues.at(indexMultiplier * iterate1Index + index);
+              if (parEntry.parameterName.compare(TitleIDString) == 0) {
+                parEntry.parameterValues.at(index).append(parameterEntry1.parameterValues.at(indexMultiplier * iterate1Index + index));
+                parameterEntry1.parameterValues.at(indexMultiplier * iterate1Index + index) = parEntry.parameterValues.at(index);
+              } else {
+                parEntry.parameterValues.at(index) = parameterEntry1.parameterValues.at(indexMultiplier * iterate1Index + index);
+              }
             }
             std::cout << " " << parameterEntry1.parameterName << " = "
                       << (parameterEntry1.parameterValues.at(iterate1Index * indexMultiplier)) << std::endl;
@@ -139,11 +161,22 @@ int main(int argc, char *argv[]) {
         // Set parameters for Iterate 2
         for (IterableFileEntry &parameterEntry2 : iterate2Entries) {
           if (parEntry.parameterName.compare(parameterEntry2.parameterName) == 0) {
+            if (parEntry.parameterName.compare(TitleIDString) == 0) {
+              titleSet2 = true;
+              if (!titleSet1) {
+                nonIterateTitle = parEntry.parameterValues.at(0);
+              }
+            }
             // This loop will allocate the parameters as long as the iterate parameter is consistent with the actual parameter (this
             // requires the parameter be introduced in the params file properly).
             size_t indexMultiplier { IsIterateParamConsistent(parEntry, parameterEntry2) };
             for (size_t index : std::ranges::views::iota(0ull, parEntry.parameterValues.size())) {
-              parEntry.parameterValues.at(index) = parameterEntry2.parameterValues.at(indexMultiplier * iterate2Index + index);
+              if (parEntry.parameterName.compare(TitleIDString) == 0) {
+                parEntry.parameterValues.at(index).append(parameterEntry2.parameterValues.at(indexMultiplier * iterate2Index + index));
+                parameterEntry2.parameterValues.at(indexMultiplier * iterate2Index + index) = parEntry.parameterValues.at(index);
+              } else {
+                parEntry.parameterValues.at(index) = parameterEntry2.parameterValues.at(indexMultiplier * iterate2Index + index);
+              }
             }
             // parEntry.parameterValues.at(0) = parameterEntry2.parameterValues.at(iterate2Index);
             std::cout << " " << parameterEntry2.parameterName << " = "
@@ -152,8 +185,16 @@ int main(int argc, char *argv[]) {
           }
         }
 
-        if ((parEntry.parameterName.compare("Title") == 0)) {
-          parEntry.parameterValues.push_back(parEntry.parameterValues.at(0));
+        if ((parEntry.parameterName.compare(TitleIDString) == 0)) {
+          if (titleSet1 && titleSet2) {
+            // If the title has been set iteratively
+            continue;
+          } else if (titleSet1 && iterate2Entries.at(0).parameterName.find("placeholder") != std::string::npos ||
+                     titleSet2 && iterate1Entries.at(0).parameterName.find("placeholder") != std::string::npos) {
+            // If the title has been set iteratively and the other iterate set is empty
+            continue;
+          }
+          nonIterateTitle = parEntry.parameterValues.at(0);
           if (!(iterate1Entries.at(0).parameterName.find("placeholder") != std::string::npos)) {
             parEntry.parameterValues.at(0)
               .append("_it1_" + std::to_string(iterate1Index + 1) + "_")
@@ -174,13 +215,14 @@ int main(int argc, char *argv[]) {
           }
         }
       }
+      parameterEntriesCopy.emplace_back(NonIterateTitleIDString, std::vector<std::string>(1, nonIterateTitle));
       std::cout << "******************************************" << std::endl;
       try {
         NeuralNetwork neuralNetwork(base, parameterEntriesCopy);
         neuralNetwork.Simulate();
         neuralNetwork.MakeInputCopies(inputFileAddress);
         DatafileParser parser(neuralNetwork.GetRecorderReference());
-        // neuralNetwork.~NeuralNetwork(); //This line is doing shennanigans I think
+        // neuralNetwork.~NeuralNetwork();  // This line is doing shennanigans I think, TEST AGAIN
         parser.parse();
       } catch (const char *message) {
         std::cout << message << std::endl;
