@@ -1,8 +1,8 @@
 #*****************************************************************
 Title                       Test1
 #*****************************************************************
-simulationTime              2.000000 		seconds
-dt_timestep                          0.000100 		seconds
+simulationTime              2.000000 		#seconds
+dt_timestep                          0.000100 		#seconds
 globalSeed                  5102020 				#overrides all other seeds if unequal -1
 #*****************************************************************
 #****************        Spatial parameters        ***************
@@ -184,6 +184,7 @@ synapses_2_2_connectivity_type				RandomConnectivity
 synapses_2_2_connectivity_seed				2068992024
 synapses_2_2_connectivity_ConnectionProba	0.000000
 #		RandomConnectivity: Each neuron receives C = connectionProbability*N_p randomly chosen connections from the presynaptic population p (as used by [Brunel (2000)]).
+
 #*****************************************************************
 #Comp. finalized: Mon Nov 14 15:48:34 2022
 #Comp. time: 3.49033 secs.

@@ -1,8 +1,8 @@
 #*****************************************************************
 Title                       Test1
 #*****************************************************************
-simulationTime              2.000000 		seconds
-dt_timestep                          0.000100 		seconds
+simulationTime              2.000000 		#seconds
+dt_timestep                          0.000100 		#seconds
 globalSeed                  5102020 				#overrides all other seeds if unequal -1
 #*****************************************************************
 #****************        Spatial parameters        ***************

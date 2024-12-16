@@ -193,26 +193,33 @@ int main(int argc, char *argv[]) {
                      titleSet2 && iterate1Entries.at(0).parameterName.find("placeholder") != std::string::npos) {
             // If the title has been set iteratively and the other iterate set is empty
             continue;
+          } else {
+            nonIterateTitle = parEntry.parameterValues.at(0);
+            if (iterate2Entries.at(0).parameterName.find("placeholder") == std::string::npos ||
+                iterate1Entries.at(0).parameterName.find("placeholder") == std::string::npos) {
+              std::cout << "ERROR: Using iterate parameter sets without setting a respective Title iterative parameter for each set is not "
+                           "allowed.";
+              return 1;
+            }
           }
-          nonIterateTitle = parEntry.parameterValues.at(0);
-          if (!(iterate1Entries.at(0).parameterName.find("placeholder") != std::string::npos)) {
-            parEntry.parameterValues.at(0)
-              .append("_it1_" + std::to_string(iterate1Index + 1) + "_")
-              .append(
-                iterate1Entries.at(0).parameterName,
-                iterate1Entries.at(0).parameterName.length() - std::min(static_cast<int>(iterate1Entries.at(0).parameterName.length()), 10),
-                std::min(iterate1Entries.at(0).parameterName.length(), static_cast<size_t>(10)))
-              .append("_" + iterate1Entries.at(0).parameterValues.at(iterate1Index));
-          }
-          if (!(iterate2Entries.at(0).parameterName.find("placeholder") != std::string::npos)) {
-            parEntry.parameterValues.at(0)
-              .append("_it2_" + std::to_string(iterate2Index + 1) + "_")
-              .append(
-                iterate2Entries.at(0).parameterName,
-                iterate2Entries.at(0).parameterName.length() - std::min(static_cast<int>(iterate2Entries.at(0).parameterName.length()), 10),
-                std::min(iterate2Entries.at(0).parameterName.length(), static_cast<size_t>(10)))
-              .append("_" + iterate2Entries.at(0).parameterValues.at(iterate2Index));
-          }
+          // if (!(iterate1Entries.at(0).parameterName.find("placeholder") != std::string::npos)) {
+          //   parEntry.parameterValues.at(0)
+          //     .append("_it1_" + std::to_string(iterate1Index + 1) + "_")
+          //     .append(
+          //       iterate1Entries.at(0).parameterName,
+          //       iterate1Entries.at(0).parameterName.length() - std::min(static_cast<int>(iterate1Entries.at(0).parameterName.length()),
+          //       10), std::min(iterate1Entries.at(0).parameterName.length(), static_cast<size_t>(10)))
+          //     .append("_" + iterate1Entries.at(0).parameterValues.at(iterate1Index));
+          // }
+          // if (!(iterate2Entries.at(0).parameterName.find("placeholder") != std::string::npos)) {
+          //   parEntry.parameterValues.at(0)
+          //     .append("_it2_" + std::to_string(iterate2Index + 1) + "_")
+          //     .append(
+          //       iterate2Entries.at(0).parameterName,
+          //       iterate2Entries.at(0).parameterName.length() - std::min(static_cast<int>(iterate2Entries.at(0).parameterName.length()),
+          //       10), std::min(iterate2Entries.at(0).parameterName.length(), static_cast<size_t>(10)))
+          //     .append("_" + iterate2Entries.at(0).parameterValues.at(iterate2Index));
+          // }
         }
       }
       parameterEntriesCopy.emplace_back(NonIterateTitleIDString, std::vector<std::string>(1, nonIterateTitle));
