@@ -9,6 +9,16 @@ void FileEntry::RemoveCommentsInValues(char commentCharacter) {
   std::vector<std::string> uncommentedValues;
   for (std::string& storedValue : parameterValues) {
     if (storedValue.find(commentCharacter) != std::string::npos) {
+      std::string uncommentedValue;
+      for (char character : storedValue) {
+        if (character == commentCharacter) {
+          break;
+        }
+        uncommentedValue.push_back(character);
+      }
+      if (!uncommentedValue.empty()) {
+        uncommentedValues.push_back(uncommentedValue);
+      }
       break;
     } else {
       uncommentedValues.push_back(storedValue);
