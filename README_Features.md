@@ -13,11 +13,11 @@
 
 ## v3.2
 (In development)
-- Appending suffixes in title when using iterate parameters will be available for the user.
-- Random number selection improved in speed for RandomConnectivity.
-- Now if you write `#` next to a parameter value without a space to separate them, that parameter value will still be read.
-- (Still unsolved) A bug in the code made it so that unitary traversal of iterate parameters in Parameter.txt with all iterate parameter sets being composed of non-unitary parameters (parameters with more than 1 number to substitute), it would duplicate simulations, possibly crashing when going above the intended number of simulations due to overflowing the array.
-  - Possible fix: Forcing title if there are iterate parameter sets, which is a unitary parameter.
+- (Fixed) Appending suffixes in title when using iterate parameters will be available for the user.
+- (Fixed) Random number selection improved in speed for RandomConnectivity.
+- (Fixed) Now if you write `#` next to a parameter value without a space to separate them, that parameter value will still be read.
+- (Fixed) A bug in the code made it so that unitary traversal of iterate parameters in Parameter.txt with all iterate parameter sets being composed of non-unitary parameters (parameters with more than 1 number to substitute), it would duplicate simulations, possibly crashing when going above the intended number of simulations due to overflowing the array.
+  - Fix: Forcing title if there are iterate parameter sets, which is a unitary parameter.
 
 - Other small improvements (string constants added, avoiding unnecessary copies).
 
