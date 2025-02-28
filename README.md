@@ -12,6 +12,7 @@ Contributors:
 - Ekelmans, Pierre
 - Konrad, Sara
 - Kovalevskaya, Elizaveta (Group of Algorithm Engineering)
+- Narantsasralt, Ulzii-Utas
 - Nold, Andreas 
 - Penschuck, Manuel (Group of Algorithm Engineering)
 
