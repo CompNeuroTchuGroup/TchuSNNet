@@ -15,6 +15,7 @@ Contributors:
 - Nold, Andreas 
 - Penschuck, Manuel (Group of Algorithm Engineering)
 
+Affiliations:
 - Theory of neural dynamics, Max-Planck-Institut for Brain Research, Frankfurt
 - Theory of neural dynamics, Institute of experimental epileptology and cognition research, University Hospital Bonn
 - Theory of neural dynamics, Institute of Physiology, Johannes Gutenberg University Mainz
