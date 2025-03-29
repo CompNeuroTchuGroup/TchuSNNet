@@ -1,2 +1,2 @@
-*.html linguist-detectable=false
-*.pdf linguist-detectable=false
+*.html linguist-vendored=true
+*.pdf linguist-vendored=true
