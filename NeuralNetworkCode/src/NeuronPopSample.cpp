@@ -8,16 +8,13 @@
 
 #include "NeuronPopSample.hpp"
 
-NeuronPopSample::NeuronPopSample(std::vector<FileEntry> neuronParameters, GlobalSimInfo *infoGlobal) : infoGlobal{infoGlobal} {
-
+NeuronPopSample::NeuronPopSample(std::vector<FileEntry> neuronParameters, GlobalSimInfo *infoGlobal): infoGlobal { infoGlobal } {
   LoadParameters(neuronParameters);
 }
 
 void NeuronPopSample::LoadParameters(const std::vector<FileEntry> &neuronParameters) {
-
   // Get number of populations
   for (auto &[parameterName, parameterValues] : neuronParameters) {
-
     if (parameterName.find("noPopulations") != std::string::npos) {
       noPopulations = static_cast<PopInt>(std::stoi(parameterValues.at(0)));
     }
@@ -34,9 +31,10 @@ void NeuronPopSample::LoadParameters(const std::vector<FileEntry> &neuronParamet
 
   // iterate through populations
   for (PopInt population : std::ranges::views::iota(0, noPopulations)) {
-    // It could be argued that the previous implementation was somewhat safer to misallocation of neuronPop ids, but the single-point of failure (the
-    // population signed int in the for loop statement), is exactly the same. The id that shows in neurons_id is the end-all-be-all of the position
-    // (which follows ascending order always). std::cout << "number of population: " << std::to_string(p) << "\n";
+    // It could be argued that the previous implementation was somewhat safer to misallocation of neuronPop ids, but the single-point of
+    // failure (the population signed int in the for loop statement), is exactly the same. The id that shows in neurons_id is the
+    // end-all-be-all of the position (which follows ascending order always). std::cout << "number of population: " << std::to_string(p) <<
+    // "\n";
     std::string neuronType;
     // filter population parameters
     std::string filterStr = "neurons_" + std::to_string(population);
@@ -51,7 +49,8 @@ void NeuronPopSample::LoadParameters(const std::vector<FileEntry> &neuronParamet
       }
     }
   }
-  std::for_each(neuronPops.begin(), neuronPops.end(), [this](const PopPtr &neuronPop) { infoGlobal->totalNeurons += neuronPop->GetNoNeurons(); });
+  std::for_each(neuronPops.begin(), neuronPops.end(),
+                [this](const PopPtr &neuronPop) { infoGlobal->totalNeurons += neuronPop->GetNoNeurons(); });
   // for(PopPtr neuronPopPtr : neuronPops) {
   //     infoGlobal->totalNeurons  += neuronPop->GetNoNeurons();
   // }
@@ -68,7 +67,6 @@ void NeuronPopSample::LoadParameters(const std::vector<FileEntry> &neuronParamet
 }
 
 void NeuronPopSample::LoadNeuronPop(std::string neuronPopType, PopInt popID, std::vector<FileEntry> neuronParameters) {
-
   if (neuronPopType == IDstringLIFNeuron || neuronPopType == IDstringHeteroLIFNeuron) {
     neuronPops.push_back(std::make_shared<LIFNeuronPop>(infoGlobal, popID));
   } else if (neuronPopType == IDstringEIFNeuron) {
@@ -97,6 +95,7 @@ void NeuronPopSample::Advect(std::vector<std::vector<double>> &synaptic_dV) {
   // });
   std::for_each(PAR, neuronPops.begin(), neuronPops.end(),
                 [synaptic_dV](PopPtr neuronPopPtr) { neuronPopPtr->Advect(synaptic_dV.at(neuronPopPtr->GetId())); });
+  //  NOTE: The reason mutex is not needed because here the synaptic_dV is only read, so it can be just consted.
   // Test9 debugging
   //  std::cout << "spikers:";
   //  for (double spiker : neuronPops.at(0)->GetSpikers()) {
@@ -111,7 +110,6 @@ void NeuronPopSample::Advect(std::vector<std::vector<double>> &synaptic_dV) {
 }
 
 void NeuronPopSample::SaveParameters(std::ofstream &wParameterStream) const {
-
   wParameterStream << "#***********************************************\n";
   wParameterStream << "#************** Neuron Parameters **************\n";
   wParameterStream << "#***********************************************\n";

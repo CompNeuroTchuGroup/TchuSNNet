@@ -199,7 +199,8 @@ void Synapse::Advect(std::vector<double> &synaptic_dV, std::mutex &_syndVMutex) 
   std::for_each(spikersUsed.begin(), spikersUsed.end(), [this](NeuronInt spiker) {
     FillWaitingMatrix(spiker,
                       AdvectSpikers(spiker));  // Here target list is used again OPTIMIZATION
-  });
+  });  // NOTE: The code here is not parallelized because the matrix has to be written on the same index multiple times. Mutexing it would
+       // not increase efficiency
   // for(NeuronInt spiker: spikersUsed){
 
   //     FillWaitingMatrix(spiker, AdvectSpikers(spiker));//Here target list

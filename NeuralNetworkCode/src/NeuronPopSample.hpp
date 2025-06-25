@@ -41,7 +41,7 @@ class NeuronPopSample {
     NeuronInt                     GetTotalNeurons() const { return infoGlobal->totalNeurons; }
     PopInt                        GetTotalPopulations() const { return this->noPopulations; }
     NeuronInt                     GetNeuronsPop(PopInt popId) const { return neuronPops.at(popId)->GetNoNeurons(); }
-    PopPtr                        GetPop(PopInt popId) const { return neuronPops.at(popId); }
+    PopPtr                        GetPopPtr(PopInt popId) const { return neuronPops.at(popId); }
     const std::vector<NeuronInt>& GetSpikers(PopInt neuronPop) const {
       return neuronPops.at(neuronPop)->GetSpikers();
     }  // This function is called in RecordRasterplot()

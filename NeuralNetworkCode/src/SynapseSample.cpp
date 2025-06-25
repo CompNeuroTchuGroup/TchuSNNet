@@ -1,12 +1,12 @@
 #include "SynapseSample.hpp"
 
-SynapseSample::SynapseSample(std::shared_ptr<NeuronPopSample> neurons, std::vector<FileEntry> &synapseParameters, GlobalSimInfo *infoGlobal)
-    : infoGlobal{infoGlobal}, neurons{neurons}, totalNeuronPops{neurons->GetTotalPopulations()} {
-
-  synapses      = std::vector<std::vector<SynapsePtr>>(totalNeuronPops);//This not allowed
+SynapseSample::SynapseSample(std::shared_ptr<NeuronPopSample> neurons, std::vector<FileEntry> &synapseParameters,
+                             GlobalSimInfo *infoGlobal):
+    infoGlobal { infoGlobal }, neurons { neurons }, totalNeuronPops { neurons->GetTotalPopulations() } {
+  synapses      = std::vector<std::vector<SynapsePtr>>(totalNeuronPops);  // This not allowed
   synapseStates = std::vector<std::vector<bool>>(totalNeuronPops, std::vector<bool>(totalNeuronPops, false));
   for (std::vector<SynapsePtr> &targetVector : synapses) {
-    targetVector.resize(totalNeuronPops);//Already default initialized to nullptr
+    targetVector.resize(totalNeuronPops);  // Already default initialized to nullptr
     // for (PopInt neuronPop : std::ranges::views::iota(0, totalNeuronPops)) {
     //   targetVector.at(neuronPop) = nullptr;
     // }
@@ -21,19 +21,18 @@ SynapseSample::SynapseSample(std::shared_ptr<NeuronPopSample> neurons, std::vect
 
   // for(PopInt neuronPop : range(0, totalNeuronPops)){
   //     for(int j = 0; j < totalNeuronPops; j++){
-  //         synapses[i][j] = new CurrentSynapse(neurons->GetPop(i),neurons->GetPop(j),infoGlobal);
+  //         synapses[i][j] = new CurrentSynapse(neurons->GetPopPtr(i),neurons->GetPopPtr(j),infoGlobal);
   //     }
   // }
   LoadParameters(synapseParameters);
 }
 
 void SynapseSample::LoadParameters(const std::vector<FileEntry> &synapseParameters) {
-
   for (auto &[parameterName, parameterValues] : synapseParameters) {
     if ((parameterName.find("type") != std::string::npos) && ((parameterName.find("connectivity") == std::string::npos)) &&
         (parameterName.find("pmodel") == std::string::npos)) {
-      // I think this line is incorrect. If what we are looking for is the synapse type, this is not it. If we want to see connectivity type (for init
-      // reasons) then yes
+      // I think this line is incorrect. If what we are looking for is the synapse type, this is not it. If we want to see connectivity type
+      // (for init reasons) then yes
       SaveSynapseType(parameterName, parameterValues.at(0), synapseParameters);
     }
   }
@@ -44,7 +43,6 @@ void SynapseSample::LoadParameters(const std::vector<FileEntry> &synapseParamete
 }
 
 void SynapseSample::SaveSynapseType(std::string parameterName, std::string type, const std::vector<FileEntry> &synapseParameters) {
-
   std::string synapseIdentificator;
   // bool found {false};
 
@@ -64,21 +62,26 @@ void SynapseSample::SaveSynapseType(std::string parameterName, std::string type,
 
 void SynapseSample::SetUpSynapse(PopInt targetPop, PopInt sourcePop, std::string type, std::vector<FileEntry> synapseParameters) {
   if (type == IDstringCurrentSynapse || type == IDstringHeteroSynapse) {
-    synapses.at(targetPop).at(sourcePop) = std::make_unique<CurrentSynapse>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
+    synapses.at(targetPop).at(sourcePop) =
+      std::make_unique<CurrentSynapse>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
   } else if (type == IDstringMongilloSynapse) {
-    synapses.at(targetPop).at(sourcePop) = std::make_unique<MongilloSynapse>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
+    synapses.at(targetPop).at(sourcePop) =
+      std::make_unique<MongilloSynapse>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
   } else if (type == IDstringMongilloSynapseContinuous) {
     synapses.at(targetPop).at(sourcePop) =
-        std::make_unique<MongilloSynapseContinuous>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
+      std::make_unique<MongilloSynapseContinuous>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
   } else if (type == IDstringPRGSynapseContinuous) {
-    synapses.at(targetPop).at(sourcePop) = std::make_unique<PRGSynapseContinuous>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
+    synapses.at(targetPop).at(sourcePop) =
+      std::make_unique<PRGSynapseContinuous>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
   } else if (type == IDstringExponentialCurrentSynapse) {
     synapses.at(targetPop).at(sourcePop) =
-        std::make_unique<ExponentialCurrentSynapse>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
+      std::make_unique<ExponentialCurrentSynapse>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
   } else if (type == IDstringPowerLawSynapse) {
-    synapses.at(targetPop).at(sourcePop) = std::make_unique<PowerLawSynapse>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
+    synapses.at(targetPop).at(sourcePop) =
+      std::make_unique<PowerLawSynapse>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
   } else if (type == IDstringPlasticityModelSynapse) {
-    synapses.at(targetPop).at(sourcePop) = std::make_unique<PModelSynapse>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
+    synapses.at(targetPop).at(sourcePop) =
+      std::make_unique<PModelSynapse>(neurons->GetPopPtr(targetPop), neurons->GetPopPtr(sourcePop), infoGlobal);
   }
   synapses.at(targetPop).at(sourcePop)->LoadParameters(synapseParameters);
 }
@@ -93,8 +96,8 @@ void SynapseSample::CheckSeeds() {
           }
           if ((synapses.at(popIterator1).at(popIterator2)->GetSeed() == synapses.at(popIterator3).at(popIterator4)->GetSeed()) &&
               (popIterator1 > popIterator3 || popIterator2 > popIterator4)) {
-            std::cout << "WARNING! Same Seeds in Connections of Populations " << popIterator1 << "_" << popIterator2 << " and " << popIterator3 << "_"
-                      << popIterator4 << std::endl;
+            std::cout << "WARNING! Same Seeds in Connections of Populations " << popIterator1 << "_" << popIterator2 << " and "
+                      << popIterator3 << "_" << popIterator4 << std::endl;
           }
         }
       }
@@ -107,7 +110,6 @@ void SynapseSample::SetUpMutexes() {
 }
 
 void SynapseSample::SaveParameters(std::ofstream &wParameterStream) const {
-
   std::string synapsePrefix;
 
   wParameterStream << "#*************************************************\n";
@@ -130,17 +132,15 @@ void SynapseSample::SaveParameters(std::ofstream &wParameterStream) const {
 }
 
 void SynapseSample::Advect(std::vector<std::vector<double>> &synaptic_dV) {
-
   // for (Synapse* synapse : connectedSynapses) {
   //             synapse->Advect(synaptic_dV.at(synapse->GetTargetPopID()));
   // }
   std::for_each(PAR, connectedSynapses.begin(), connectedSynapses.end(), [&synaptic_dV, this](Synapse *synapse) {
     synapse->Advect(synaptic_dV.at(synapse->GetTargetPopID()), this->_syndVMutex.at(synapse->GetTargetPopID()));
-  });
+  });  // NOTE: The reason mutex is needed is because more than one synapse targets the same population.
 }
 
 void SynapseSample::Reset() {
-
   std::for_each(connectedSynapses.begin(), connectedSynapses.end(), [](Synapse *synapse) { synapse->ResetWaitingMatrixEntry(); });
 }
 
@@ -149,13 +149,14 @@ void SynapseSample::ConnectNeurons() {
     for (SynapsePtr &synapse : targetVector) {
       if ((synapse != nullptr) &&
           (synapseStates.at(synapse->GetTargetPopID())
-               .at(synapse->GetSourcePopID()))) { // from LP the translated condition should be synapse !=nulltpr, and IsConnected()
+             .at(synapse->GetSourcePopID()))) {  // from LP the translated condition should be synapse !=nulltpr, and IsConnected()
         connectedSynapses.push_back(synapse.get());
       }
     }
   }
   std::for_each(PAR, connectedSynapses.begin(), connectedSynapses.end(), [](Synapse *synapse) {
-    std::cout << "Connecting neuronPop. " << synapse->GetSourcePopID() << " with neuronPop. " << synapse->GetTargetPopID() << "...\n" << std::endl;
+    std::cout << "Connecting neuronPop. " << synapse->GetSourcePopID() << " with neuronPop. " << synapse->GetTargetPopID() << "...\n"
+              << std::endl;
     synapse->ConnectNeurons();
     synapse->SetDistributionD();
     synapse->SetDistributionJ();
@@ -166,21 +167,18 @@ void SynapseSample::ConnectNeurons() {
 }
 
 void SynapseSample::WriteConnectivity(std::string filename, NeuronInt noNeuronsConnectivity) const {
-
   std::for_each(connectedSynapses.begin(), connectedSynapses.end(), [filename, noNeuronsConnectivity](Synapse *const synapse) {
     synapse->WriteConnectivity(filename + '_' + synapse->GetIdStrWithULine(), noNeuronsConnectivity);
   });
 }
 
 void SynapseSample::WriteDistributionD(std::string filename, NeuronInt noNeuronsDelay) const {
-
   std::for_each(connectedSynapses.begin(), connectedSynapses.end(), [filename, noNeuronsDelay](Synapse *const synapse) {
     synapse->WriteDistributionD(filename + '_' + synapse->GetIdStrWithULine(), noNeuronsDelay);
   });
 }
 
 void SynapseSample::WriteDistributionJ(std::string filename, NeuronInt noNeuronsJPot) const {
-
   std::for_each(connectedSynapses.begin(), connectedSynapses.end(), [filename, noNeuronsJPot](Synapse *const synapse) {
     synapse->WriteDistributionJ(filename + '_' + synapse->GetIdStrWithULine(), noNeuronsJPot);
   });
@@ -192,12 +190,13 @@ int SynapseSample::GetNoDataColumns(PopInt targetPop, PopInt sourcePop) const {
 
 std::string SynapseSample::GetDataHeader(int dataColumn) const {
   std::string dataHeader;
-  int         columnCounter{};
+  int         columnCounter {};
 
-  std::for_each(connectedSynapses.begin(), connectedSynapses.end(), [&dataHeader, columnCounter, dataColumn](Synapse *const synapse) mutable {
-    dataHeader += synapse->GetDataHeader(dataColumn + columnCounter);
-    columnCounter += synapse->GetNoDataColumns();
-  });
+  std::for_each(connectedSynapses.begin(), connectedSynapses.end(),
+                [&dataHeader, columnCounter, dataColumn](Synapse *const synapse) mutable {
+                  dataHeader += synapse->GetDataHeader(dataColumn + columnCounter);
+                  columnCounter += synapse->GetNoDataColumns();
+                });
   return dataHeader;
 }
 
